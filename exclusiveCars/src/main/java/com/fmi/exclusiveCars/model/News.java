@@ -2,21 +2,25 @@ package com.fmi.exclusiveCars.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "news", uniqueConstraints = {@UniqueConstraint(columnNames = "title")})
 public class News {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
+    @Size(min = 3, max = 100)
+    @Column(length = 100)
     private String title;
 
     @NotNull
+    @Size(min = 10, max = 10000)
+    @Column(length = 10000)
     private String content;
 
     @NotNull
@@ -37,10 +41,6 @@ public class News {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
