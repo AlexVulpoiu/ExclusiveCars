@@ -1,5 +1,7 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -8,6 +10,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email"),
                                             @UniqueConstraint(columnNames = "username"),
@@ -58,90 +65,11 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SellingAnnouncement> sellingAnnouncements = new ArrayList<>();
 
-    public User() {
-    }
-
     public User(String username, String email, String password, String phone) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.phone = phone;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public List<ServiceAppointment> getServices() {
-        return services;
-    }
-
-    public void setServices(List<ServiceAppointment> serviceAppointments) {
-        this.services = serviceAppointments;
-    }
-
-    public Set<Car> getFavoriteCars() {
-        return favoriteCars;
-    }
-
-    public void setFavoriteCars(Set<Car> favoriteCars) {
-        this.favoriteCars = favoriteCars;
-    }
-
-    public List<RentCar> getCars() {
-        return cars;
-    }
-
-    public void setCars(List<RentCar> rentedCars) {
-        this.cars = rentedCars;
-    }
-
-    public List<SellingAnnouncement> getSellingAnnouncements() {
-        return sellingAnnouncements;
-    }
-
-    public void setSellingAnnouncements(List<SellingAnnouncement> sellingAnnouncements) {
-        this.sellingAnnouncements = sellingAnnouncements;
     }
 
     public void addSellingAnnouncement(SellingAnnouncement sellingAnnouncement) {

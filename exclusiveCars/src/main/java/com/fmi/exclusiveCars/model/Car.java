@@ -1,5 +1,7 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -7,6 +9,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -80,9 +87,6 @@ public class Car {
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST}, mappedBy = "favoriteCars")
     private Set<User> users = new HashSet<>();
 
-    public Car() {
-    }
-
     public Car(String name, String model, Integer price, String color, Integer year, Integer kilometers, Integer engine, Integer power, ETransmission transmission, EFuelType fuelType, Double consumption, Integer seats, ECategory category, Double rating) {
         this.name = name;
         this.model = model;
@@ -98,138 +102,6 @@ public class Car {
         this.seats = seats;
         this.category = category;
         this.rating = rating;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
-    public Integer getKilometers() {
-        return kilometers;
-    }
-
-    public void setKilometers(Integer kilometers) {
-        this.kilometers = kilometers;
-    }
-
-    public Integer getEngine() {
-        return engine;
-    }
-
-    public void setEngine(Integer engine) {
-        this.engine = engine;
-    }
-
-    public Integer getPower() {
-        return power;
-    }
-
-    public void setPower(Integer power) {
-        this.power = power;
-    }
-
-    public ETransmission getTransmission() {
-        return transmission;
-    }
-
-    public void setTransmission(ETransmission transmission) {
-        this.transmission = transmission;
-    }
-
-    public EFuelType getFuelType() {
-        return fuelType;
-    }
-
-    public void setFuelType(EFuelType fuelType) {
-        this.fuelType = fuelType;
-    }
-
-    public Double getConsumption() {
-        return consumption;
-    }
-
-    public void setConsumption(Double consumption) {
-        this.consumption = consumption;
-    }
-
-    public Integer getSeats() {
-        return seats;
-    }
-
-    public void setSeats(Integer seats) {
-        this.seats = seats;
-    }
-
-    public ECategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(ECategory category) {
-        this.category = category;
-    }
-
-    public Double getRating() {
-        return rating;
-    }
-
-    public void setRating(Double rating) {
-        this.rating = rating;
-    }
-
-    public List<RentCar> getRentalClients() {
-        return rentalClients;
-    }
-
-    public void setRentalClients(List<RentCar> rentalClients) {
-        this.rentalClients = rentalClients;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
     }
 
     @Override

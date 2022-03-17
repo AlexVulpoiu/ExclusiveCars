@@ -1,11 +1,18 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "rent_cars")
 public class RentCar {
@@ -28,50 +35,11 @@ public class RentCar {
     @Column(name = "delay_fee")
     private Integer delayFee;
 
-    public RentCar() {
-    }
-
     public RentCar(User user, Car car, LocalDate startDate, LocalDate endDate, Integer delayFee) {
         this.id = new RentCarId(user.getId(), car.getId(), startDate);
         this.user = user;
         this.car = car;
         this.endDate = endDate;
-        this.delayFee = delayFee;
-    }
-
-    public RentCarId getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Car getCar() {
-        return car;
-    }
-
-    public void setCar(Car car) {
-        this.car = car;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public Integer getDelayFee() {
-        return delayFee;
-    }
-
-    public void setDelayFee(Integer delayFee) {
         this.delayFee = delayFee;
     }
 

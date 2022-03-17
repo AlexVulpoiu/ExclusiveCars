@@ -1,5 +1,7 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -8,6 +10,11 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "services", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 public class Service {
@@ -48,73 +55,10 @@ public class Service {
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceAppointment> users = new ArrayList<>();
 
-    public Service() {
-    }
-
     public Service(String name, String city, String address, Integer numberOfStations) {
         this.name = name;
         this.city = city;
         this.address = address;
         this.numberOfStations = numberOfStations;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Integer getNumberOfStations() {
-        return numberOfStations;
-    }
-
-    public void setNumberOfStations(Integer numberOfStations) {
-        this.numberOfStations = numberOfStations;
-    }
-
-    public List<ServiceAppointment> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<ServiceAppointment> serviceAppointments) {
-        this.users = serviceAppointments;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 }

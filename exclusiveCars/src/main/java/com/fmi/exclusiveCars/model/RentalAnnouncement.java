@@ -1,8 +1,15 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.util.Objects;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "rental_announcements")
 public class RentalAnnouncement {
@@ -16,21 +23,6 @@ public class RentalAnnouncement {
     @MapsId
     @JoinColumn(name = "id")
     private Car car;
-
-    public RentalAnnouncement() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public RentalCenter getRentalCenter() {
-        return rentalCenter;
-    }
-
-    public void setRentalCenter(RentalCenter rentalCenter) {
-        this.rentalCenter = rentalCenter;
-    }
 
     @Override
     public boolean equals(Object o) {

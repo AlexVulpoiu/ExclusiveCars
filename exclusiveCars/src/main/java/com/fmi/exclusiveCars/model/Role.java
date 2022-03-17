@@ -1,7 +1,14 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.*;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "roles")
 public class Role {
@@ -12,23 +19,4 @@ public class Role {
     @Enumerated(EnumType.STRING)
     @Column(length = 14)
     private ERole name;
-
-    public Role() {
-    }
-
-    public Role(ERole name) {
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public ERole getName() {
-        return name;
-    }
-
-    public void setName(ERole name) {
-        this.name = name;
-    }
 }

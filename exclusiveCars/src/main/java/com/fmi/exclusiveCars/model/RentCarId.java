@@ -1,11 +1,18 @@
 package com.fmi.exclusiveCars.model;
 
+import lombok.*;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @Embeddable
 public class RentCarId implements Serializable {
     @Column(name = "user_id")
@@ -16,39 +23,6 @@ public class RentCarId implements Serializable {
 
     @Column(name = "start_date")
     private LocalDate startDate;
-
-    public RentCarId() {
-    }
-
-    public RentCarId(Long userId, Long carId, LocalDate date) {
-        this.userId = userId;
-        this.carId = carId;
-        this.startDate = date;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getCarId() {
-        return carId;
-    }
-
-    public void setCarId(Long carId) {
-        this.carId = carId;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
 
     @Override
     public boolean equals(Object o) {
