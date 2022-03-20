@@ -33,6 +33,12 @@ public class UserController {
         return new ResponseEntity<>(userRepository.findAll().stream().filter(user -> !userService.isAdmin(user)).collect(Collectors.toList()), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
+        return userService.getUser(id);
+    }
+
     @PutMapping("/editRole/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editUserRoles(@PathVariable Long id, @RequestBody Collection<Role> roles) {

@@ -21,6 +21,15 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public ResponseEntity<?> getUser(Long id) {
+        Optional<User> currentUser = userRepository.findById(id);
+
+        if(currentUser.isPresent()) {
+            return new ResponseEntity<>(currentUser.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+   }
+
     public Boolean isAdmin(User user) {
         for(Role role: user.getRoles()) {
             if(role.getName().equals(ERole.ROLE_ADMIN)) {

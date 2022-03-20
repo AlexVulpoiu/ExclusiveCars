@@ -22,7 +22,11 @@ public class NewsService {
 
     public ResponseEntity<?> getNews(Long id) {
         Optional<News> pieceOfNews = newsRepository.findById(id);
-        return pieceOfNews.map(news -> new ResponseEntity<>(news, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
+        if(pieceOfNews.isPresent()) {
+            return new ResponseEntity<>(pieceOfNews.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     public Long addNews(News pieceOfNews) {
