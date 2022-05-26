@@ -39,6 +39,11 @@ public class UserController {
         return userService.getUser(id);
     }
 
+    @GetMapping("/myProfile")
+    public ResponseEntity<?> getMyProfile() {
+        return userService.getMyProfile();
+    }
+
     @PutMapping("/editRole/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editUserRoles(@PathVariable Long id, @RequestBody Collection<Role> roles) {
