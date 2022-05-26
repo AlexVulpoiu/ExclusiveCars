@@ -26,7 +26,7 @@ public class ServiceAppointment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("serviceId")
-    private Service service;
+    private AutoService autoService;
 
     @NotNull
     @Size(max = 200)
@@ -40,10 +40,10 @@ public class ServiceAppointment {
     @Column(name = "station_number")
     private Integer stationNumber;
 
-    public ServiceAppointment(User user, Service service, LocalDate date, String problemDescription, LocalTime hour, Integer stationNumber) {
-        this.id = new ServiceAppointmentId(user.getId(), service.getId(), date);
+    public ServiceAppointment(User user, AutoService autoService, LocalDate date, String problemDescription, LocalTime hour, Integer stationNumber) {
+        this.id = new ServiceAppointmentId(user.getId(), autoService.getId(), date);
         this.user = user;
-        this.service = service;
+        this.autoService = autoService;
         this.problemDescription = problemDescription;
         this.hour = hour;
         this.stationNumber = stationNumber;

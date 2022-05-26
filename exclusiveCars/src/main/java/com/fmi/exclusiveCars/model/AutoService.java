@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "services", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
-public class Service {
+public class AutoService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,10 +52,10 @@ public class Service {
     @Column(length = 10)
     private String phone;
 
-    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "autoService", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceAppointment> users = new ArrayList<>();
 
-    public Service(String name, String city, String address, Integer numberOfStations) {
+    public AutoService(String name, String city, String address, Integer numberOfStations) {
         this.name = name;
         this.city = city;
         this.address = address;
