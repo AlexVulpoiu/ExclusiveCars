@@ -9,4 +9,7 @@ import java.util.Optional;
 @Repository
 public interface AutoServiceRepository extends JpaRepository<AutoService, Long> {
     Optional<AutoService> findById(Long id);
+    Optional<AutoService> findByName(String name);
+    Optional<AutoService> findByEmail(String email);
+    Optional<AutoService> findByPhone(String phone);
 }

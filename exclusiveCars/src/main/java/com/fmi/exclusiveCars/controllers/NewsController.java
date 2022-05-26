@@ -1,31 +1,27 @@
 package com.fmi.exclusiveCars.controllers;
 
-import com.fmi.exclusiveCars.model.News;
-import com.fmi.exclusiveCars.repository.NewsRepository;
+import com.fmi.exclusiveCars.dto.NewsDto;
 import com.fmi.exclusiveCars.services.NewsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/news")
 public class NewsController {
-    private final NewsRepository newsRepository;
     private final NewsService newsService;
 
     @Autowired
-    public NewsController(NewsRepository newsRepository, NewsService newsService) {
-        this.newsRepository = newsRepository;
+    public NewsController(NewsService newsService) {
         this.newsService = newsService;
     }
 
     @GetMapping("")
-    public ResponseEntity<List<News>> getAllNews() {
-        return new ResponseEntity<>(newsRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getAllNews() {
+        return newsService.getAllNews();
     }
 
     @GetMapping("/{id}")
@@ -35,19 +31,19 @@ public class NewsController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> addNews(@RequestBody News pieceOfNews) {
-        return new ResponseEntity<>(newsService.addNews(pieceOfNews), HttpStatus.OK);
+    public ResponseEntity<?> addNews(@Valid @RequestBody NewsDto pieceOfNews) {
+        return newsService.addNews(pieceOfNews);
     }
 
     @PutMapping("/edit/{id}")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> editNews(@PathVariable Long id, @RequestBody News news) {
+    public ResponseEntity<?> editNews(@PathVariable Long id, @Valid @RequestBody NewsDto news) {
         return newsService.editNews(id, news);
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> deleteNews(@PathVariable Long id) {
+    public ResponseEntity<?> deleteNews(@PathVariable Long id) {
         return newsService.deleteNews(id);
     }
 }

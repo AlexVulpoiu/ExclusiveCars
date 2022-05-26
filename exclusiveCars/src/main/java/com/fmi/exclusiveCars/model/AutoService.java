@@ -1,12 +1,10 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,29 +14,33 @@ import java.util.List;
 @Setter
 @Builder
 @Entity
-@Table(name = "services", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@Table(name = "services", uniqueConstraints = {@UniqueConstraint(columnNames = "name"),
+                                                @UniqueConstraint(columnNames = "email"),
+                                                @UniqueConstraint(columnNames = "phone")})
 public class AutoService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotBlank
     @Size(min = 3, max = 50)
     @Column(length = 50)
     private String name;
 
-    @NotNull
+    @NotBlank
     @Size(min = 4, max = 50)
     @Column(length = 50)
     private String city;
 
-    @NotNull
+    @NotBlank
     @Size(min = 20, max = 200)
     @Column(length = 200)
     private String address;
 
     @NotNull
+    @Min(0)
     @Column(name = "number_of_stations")
+    @JsonProperty("number_of_stations")
     private Integer numberOfStations;
 
     @NotBlank
@@ -54,11 +56,4 @@ public class AutoService {
 
     @OneToMany(mappedBy = "autoService", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceAppointment> users = new ArrayList<>();
-
-    public AutoService(String name, String city, String address, Integer numberOfStations) {
-        this.name = name;
-        this.city = city;
-        this.address = address;
-        this.numberOfStations = numberOfStations;
-    }
 }

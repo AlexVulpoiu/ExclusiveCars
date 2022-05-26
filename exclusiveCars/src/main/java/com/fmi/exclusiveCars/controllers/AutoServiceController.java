@@ -1,31 +1,27 @@
 package com.fmi.exclusiveCars.controllers;
 
-import com.fmi.exclusiveCars.model.AutoService;
-import com.fmi.exclusiveCars.repository.AutoServiceRepository;
+import com.fmi.exclusiveCars.dto.AutoServiceDto;
 import com.fmi.exclusiveCars.services.AutoServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/autoServices")
 public class AutoServiceController {
-    private final AutoServiceRepository autoServiceRepository;
     private final AutoServiceService autoServiceService;
 
     @Autowired
-    public AutoServiceController(AutoServiceRepository autoServiceRepository, AutoServiceService autoServiceService) {
-        this.autoServiceRepository = autoServiceRepository;
+    public AutoServiceController(AutoServiceService autoServiceService) {
         this.autoServiceService = autoServiceService;
     }
 
     @GetMapping("")
-    public ResponseEntity<List<AutoService>> getAutoServices() {
-        return new ResponseEntity<>(autoServiceRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getAllAutoServices() {
+        return autoServiceService.getAllAutoServices();
     }
 
     @GetMapping("/{id}")
@@ -35,19 +31,19 @@ public class AutoServiceController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> addAutoService(@RequestBody AutoService autoService) {
-        return new ResponseEntity<>(autoServiceService.addAutoService(autoService), HttpStatus.OK);
+    public ResponseEntity<?> addAutoService(@Valid @RequestBody AutoServiceDto autoServiceDto) {
+        return autoServiceService.addAutoService(autoServiceDto);
     }
 
     @PutMapping("/edit/{id}")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> editAutoService(@PathVariable Long id, @RequestBody AutoService autoService) {
-        return autoServiceService.editAutoService(id, autoService);
+    public ResponseEntity<?> editAutoService(@PathVariable Long id, @Valid @RequestBody AutoServiceDto autoServiceDto) {
+        return autoServiceService.editAutoService(id, autoServiceDto);
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> deleteAutoService(@PathVariable Long id) {
+    public ResponseEntity<?> deleteAutoService(@PathVariable Long id) {
         return autoServiceService.deleteAutoService(id);
     }
 }

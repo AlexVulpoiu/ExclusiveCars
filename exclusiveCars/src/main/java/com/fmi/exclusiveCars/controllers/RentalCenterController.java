@@ -1,31 +1,27 @@
 package com.fmi.exclusiveCars.controllers;
 
-import com.fmi.exclusiveCars.model.RentalCenter;
-import com.fmi.exclusiveCars.repository.RentalCenterRepository;
+import com.fmi.exclusiveCars.dto.RentalCenterDto;
 import com.fmi.exclusiveCars.services.RentalCenterService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/rentalCenters")
 public class RentalCenterController {
-    private final RentalCenterRepository rentalCenterRepository;
     private final RentalCenterService rentalCenterService;
 
     @Autowired
-    public RentalCenterController(RentalCenterRepository rentalCenterRepository, RentalCenterService rentalCenterService) {
-        this.rentalCenterRepository = rentalCenterRepository;
+    public RentalCenterController(RentalCenterService rentalCenterService) {
         this.rentalCenterService = rentalCenterService;
     }
 
     @GetMapping("")
-    public ResponseEntity<List<RentalCenter>> getRentalCenters() {
-        return new ResponseEntity<>(rentalCenterRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<?> getRentalCenters() {
+        return rentalCenterService.getAllRentalCenters();
     }
 
     @GetMapping("/{id}")
@@ -35,19 +31,19 @@ public class RentalCenterController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> addRentalCenter(@RequestBody RentalCenter rentalCenter) {
-        return new ResponseEntity<>(rentalCenterService.addRentalCenter(rentalCenter), HttpStatus.OK);
+    public ResponseEntity<?> addRentalCenter(@Valid @RequestBody RentalCenterDto rentalCenterDto) {
+        return rentalCenterService.addRentalCenter(rentalCenterDto);
     }
 
     @PutMapping("/edit/{id}")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<?> editRentalCenter(@PathVariable Long id, @RequestBody RentalCenter rentalCenter) {
-        return rentalCenterService.editRentalCenter(id, rentalCenter);
+    public ResponseEntity<?> editRentalCenter(@PathVariable Long id, @Valid @RequestBody RentalCenterDto rentalCenterDto) {
+        return rentalCenterService.editRentalCenter(id, rentalCenterDto);
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> deleteRentalCenter(@PathVariable Long id) {
+    public ResponseEntity<?> deleteRentalCenter(@PathVariable Long id) {
         return rentalCenterService.deleteRentalCenter(id);
     }
 }

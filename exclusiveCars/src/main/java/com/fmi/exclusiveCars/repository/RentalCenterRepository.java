@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface RentalCenterRepository extends JpaRepository<RentalCenter, Long> {
     Optional<RentalCenter> findById(Long id);
     Optional<RentalCenter> findByName(String name);
+    Optional<RentalCenter> findByEmail(String email);
+    Optional<RentalCenter> findByPhone(String phone);
 }
