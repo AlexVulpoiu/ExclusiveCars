@@ -32,22 +32,14 @@ public class SellingAnnouncement {
     private String description;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "car_id")
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "announcement", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "announcement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
-
-    public SellingAnnouncement(String title, String content, User user, Car car) {
-        this.title = title;
-        this.description = content;
-        this.user = user;
-        this.car = car;
-    }
 
     public void addComment(Comment comment) {
         comments.add(comment);

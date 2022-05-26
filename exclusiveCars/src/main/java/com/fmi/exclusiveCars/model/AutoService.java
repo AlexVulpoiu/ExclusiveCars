@@ -54,6 +54,6 @@ public class AutoService {
     @Column(length = 10)
     private String phone;
 
-    @OneToMany(mappedBy = "autoService", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "autoService", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ServiceAppointment> users = new ArrayList<>();
 }

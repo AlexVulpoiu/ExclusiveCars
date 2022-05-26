@@ -14,14 +14,14 @@ import java.util.Objects;
 @Table(name = "rental_announcements")
 public class RentalAnnouncement {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private RentalCenter rentalCenter;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "car_id")
     private Car car;
 
     @Override

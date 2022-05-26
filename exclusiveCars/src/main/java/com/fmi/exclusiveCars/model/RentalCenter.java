@@ -49,7 +49,7 @@ public class RentalCenter {
     @Column(length = 10)
     private String phone;
 
-    @OneToMany(mappedBy = "rentalCenter", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "rentalCenter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentalAnnouncement> rentalAnnouncements = new ArrayList<>();
 
     public void addRentalAnnouncement(RentalAnnouncement announcement) {

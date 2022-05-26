@@ -40,13 +40,8 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     private SellingAnnouncement announcement;
 
-    public Comment(String username, String content, LocalDate date, LocalTime hour, SellingAnnouncement announcement) {
-        this.username = username;
-        this.content = content;
-        this.date = date;
-        this.hour = hour;
-        this.announcement = announcement;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
 
     @Override
     public boolean equals(Object o) {

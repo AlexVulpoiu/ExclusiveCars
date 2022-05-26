@@ -51,19 +51,22 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ServiceAppointment> services = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "favorites", joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "car_id"))
     private Set<Car> favoriteCars = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentCar> cars = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SellingAnnouncement> sellingAnnouncements = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments = new ArrayList<>();
 
     public User(String username, String email, String password, String phone) {
         this.username = username;
@@ -84,12 +87,10 @@ public class User {
 
     public void addFavoriteCar(Car car) {
         favoriteCars.add(car);
-        car.getUsers().add(this);
     }
 
     public void removeFavoriteCar(Car car) {
         favoriteCars.remove(car);
-        car.getUsers().remove(this);
     }
 
     public void addServiceAppointment(AutoService autoService, LocalDate date, String problem, LocalTime hour, Integer station) {

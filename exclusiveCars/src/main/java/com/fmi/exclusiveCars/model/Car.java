@@ -81,11 +81,8 @@ public class Car {
     @Max(value = 5)
     private Double rating;
 
-    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentCar> rentalClients = new ArrayList<>();
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST}, mappedBy = "favoriteCars")
-    private Set<User> users = new HashSet<>();
 
     public Car(String name, String model, Integer price, String color, Integer year, Integer kilometers, Integer engine, Integer power, ETransmission transmission, EFuelType fuelType, Double consumption, Integer seats, ECategory category, Double rating) {
         this.name = name;
