@@ -92,21 +92,21 @@ public class User {
         car.getUsers().remove(this);
     }
 
-    public void addServiceAppointment(Service service, LocalDate date, String problem, LocalTime hour, Integer station) {
-        ServiceAppointment serviceAppointment = new ServiceAppointment(this, service, date, problem, hour, station);
+    public void addServiceAppointment(AutoService autoService, LocalDate date, String problem, LocalTime hour, Integer station) {
+        ServiceAppointment serviceAppointment = new ServiceAppointment(this, autoService, date, problem, hour, station);
         services.add(serviceAppointment);
-        service.getUsers().add(serviceAppointment);
+        autoService.getUsers().add(serviceAppointment);
     }
 
-    public void removeServiceAppointment(Service service) {
+    public void removeServiceAppointment(AutoService autoService) {
         for(Iterator<ServiceAppointment> iterator = services.iterator(); iterator.hasNext();) {
             ServiceAppointment serviceAppointment = iterator.next();
 
-            if(serviceAppointment.getUser().equals(this) && serviceAppointment.getService().equals(service)) {
+            if(serviceAppointment.getUser().equals(this) && serviceAppointment.getAutoService().equals(autoService)) {
                 iterator.remove();
-                serviceAppointment.getService().getUsers().remove(serviceAppointment);
+                serviceAppointment.getAutoService().getUsers().remove(serviceAppointment);
                 serviceAppointment.setUser(null);
-                serviceAppointment.setService(null);
+                serviceAppointment.setAutoService(null);
             }
         }
     }
