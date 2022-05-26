@@ -6,6 +6,7 @@ import com.fmi.exclusiveCars.services.NewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,16 +34,19 @@ public class NewsController {
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> addNews(@RequestBody News pieceOfNews) {
         return new ResponseEntity<>(newsService.addNews(pieceOfNews), HttpStatus.OK);
     }
 
     @PutMapping("/edit/{id}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> editNews(@PathVariable Long id, @RequestBody News news) {
         return newsService.editNews(id, news);
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteNews(@PathVariable Long id) {
         return newsService.deleteNews(id);
     }
