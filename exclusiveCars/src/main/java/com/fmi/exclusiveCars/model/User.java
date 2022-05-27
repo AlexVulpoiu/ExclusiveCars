@@ -68,6 +68,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "organisation_id")
+    private Organisation organisation;
+
     public User(String username, String email, String password, String phone) {
         this.username = username;
         this.email = email;
