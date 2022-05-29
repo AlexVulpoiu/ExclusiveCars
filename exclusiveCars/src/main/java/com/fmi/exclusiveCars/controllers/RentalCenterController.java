@@ -30,13 +30,13 @@ public class RentalCenterController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> addRentalCenter(@Valid @RequestBody RentalCenterDto rentalCenterDto) {
         return rentalCenterService.addRentalCenter(rentalCenterDto);
     }
 
     @PutMapping("/edit/{id}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> editRentalCenter(@PathVariable Long id, @Valid @RequestBody RentalCenterDto rentalCenterDto) {
         return rentalCenterService.editRentalCenter(id, rentalCenterDto);
     }

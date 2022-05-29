@@ -52,6 +52,9 @@ public class RentalCenter {
     @OneToMany(mappedBy = "rentalCenter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentalAnnouncement> rentalAnnouncements = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Organisation organisation;
+
     public void addRentalAnnouncement(RentalAnnouncement announcement) {
         rentalAnnouncements.add(announcement);
         announcement.setRentalCenter(this);

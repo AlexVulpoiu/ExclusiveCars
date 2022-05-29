@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
@@ -34,9 +35,11 @@ public class Organisation {
     private User owner;
 
     @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<AutoService> autoServices;
 
     @OneToMany(mappedBy = "organisation", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<RentalCenter> rentalCenters;
 
     @Override

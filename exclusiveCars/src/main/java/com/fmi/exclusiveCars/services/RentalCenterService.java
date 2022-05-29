@@ -1,11 +1,16 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.RentalCenterDto;
-import com.fmi.exclusiveCars.model.RentalCenter;
+import com.fmi.exclusiveCars.dto.RentalCenterResponseDto;
+import com.fmi.exclusiveCars.model.*;
+import com.fmi.exclusiveCars.repository.OrganisationRepository;
 import com.fmi.exclusiveCars.repository.RentalCenterRepository;
+import com.fmi.exclusiveCars.repository.UserRepository;
+import com.fmi.exclusiveCars.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,10 +21,14 @@ import java.util.Optional;
 @Service
 public class RentalCenterService {
     private final RentalCenterRepository rentalCenterRepository;
+    private final UserRepository userRepository;
+    private final OrganisationRepository organisationRepository;
 
     @Autowired
-    public RentalCenterService(RentalCenterRepository rentalCenterRepository) {
+    public RentalCenterService(RentalCenterRepository rentalCenterRepository, UserRepository userRepository, OrganisationRepository organisationRepository) {
         this.rentalCenterRepository = rentalCenterRepository;
+        this.userRepository = userRepository;
+        this.organisationRepository = organisationRepository;
     }
 
     public ResponseEntity<?> getAllRentalCenters() {
@@ -29,7 +38,21 @@ public class RentalCenterService {
         }
 
         List<RentalCenter> rentalCenterList = new ArrayList<>(rentalCenters);
-        return new ResponseEntity<>(rentalCenterList, HttpStatus.OK);
+        List<RentalCenterResponseDto> rentalCenterResponseDtoList = new ArrayList<>();
+        for(RentalCenter rentalCenter: rentalCenterList) {
+            RentalCenterResponseDto rentalCenterResponseDto = RentalCenterResponseDto.builder()
+                    .id(rentalCenter.getId())
+                    .name(rentalCenter.getName())
+                    .city(rentalCenter.getCity())
+                    .address(rentalCenter.getAddress())
+                    .email(rentalCenter.getEmail())
+                    .phone(rentalCenter.getPhone())
+                    .organisation(rentalCenter.getOrganisation().getName())
+                    .build();
+            rentalCenterResponseDtoList.add(rentalCenterResponseDto);
+        }
+
+        return new ResponseEntity<>(rentalCenterResponseDtoList, HttpStatus.OK);
     }
 
     public ResponseEntity<?> getRentalCenter(Long id) {
@@ -37,7 +60,16 @@ public class RentalCenterService {
 
         if(rentalCenter.isPresent()) {
             RentalCenter currentRentalCenter = rentalCenter.get();
-            return new ResponseEntity<>(currentRentalCenter, HttpStatus.OK);
+            RentalCenterResponseDto rentalCenterResponseDto = RentalCenterResponseDto.builder()
+                    .id(currentRentalCenter.getId())
+                    .name(currentRentalCenter.getName())
+                    .city(currentRentalCenter.getCity())
+                    .address(currentRentalCenter.getAddress())
+                    .email(currentRentalCenter.getEmail())
+                    .phone(currentRentalCenter.getPhone())
+                    .organisation(currentRentalCenter.getOrganisation().getName())
+                    .build();
+            return new ResponseEntity<>(rentalCenterResponseDto, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("The rental center you asked for doesn't exist!", HttpStatus.NOT_FOUND);
@@ -51,16 +83,35 @@ public class RentalCenterService {
             return new ResponseEntity<>("There is already a rental center with this information!", HttpStatus.BAD_REQUEST);
         }
 
-        RentalCenter rentalCenterToAdd = RentalCenter.builder()
-                .name(rentalCenterDto.getName())
-                .city(rentalCenterDto.getCity())
-                .address(rentalCenterDto.getAddress())
-                .email(rentalCenterDto.getEmail())
-                .phone(rentalCenterDto.getPhone())
-                .build();
-        rentalCenterRepository.save(rentalCenterToAdd);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return new ResponseEntity<>("The rental center was successfully added!", HttpStatus.OK);
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+            }
+
+            Organisation organisation = user.get().getOrganisation();
+
+            RentalCenter rentalCenterToAdd = RentalCenter.builder()
+                    .name(rentalCenterDto.getName())
+                    .city(rentalCenterDto.getCity())
+                    .address(rentalCenterDto.getAddress())
+                    .email(rentalCenterDto.getEmail())
+                    .phone(rentalCenterDto.getPhone())
+                    .organisation(organisation)
+                    .build();
+            rentalCenterRepository.save(rentalCenterToAdd);
+
+            organisation.getRentalCenters().add(rentalCenterToAdd);
+            organisationRepository.save(organisation);
+
+            return new ResponseEntity<>("The rental center was successfully added!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> editRentalCenter(Long id, RentalCenterDto rentalCenterDto) {
@@ -70,25 +121,48 @@ public class RentalCenterService {
         Optional<RentalCenter> rentalCenterByEmail = rentalCenterRepository.findByEmail(rentalCenterDto.getEmail());
         Optional<RentalCenter> rentalCenterByPhone = rentalCenterRepository.findByPhone(rentalCenterDto.getPhone());
 
-        if(actualRentalCenter.isPresent()) {
-            if((rentalCenterByName.isPresent() && rentalCenterByName.get() != actualRentalCenter.get())
-                    || (rentalCenterByEmail.isPresent() && rentalCenterByEmail.get() != actualRentalCenter.get())
-                    || (rentalCenterByPhone.isPresent() && rentalCenterByPhone.get() != actualRentalCenter.get())) {
-                return new ResponseEntity<>("There is already a rental center with this information!", HttpStatus.BAD_REQUEST);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
             }
 
-            RentalCenter currentRentalCenter = actualRentalCenter.get();
-            currentRentalCenter.setName(rentalCenterDto.getName());
-            currentRentalCenter.setCity(rentalCenterDto.getCity());
-            currentRentalCenter.setAddress(rentalCenterDto.getAddress());
-            currentRentalCenter.setEmail(rentalCenterDto.getEmail());
-            currentRentalCenter.setPhone(rentalCenterDto.getPhone());
+            if(actualRentalCenter.isPresent()) {
 
-            rentalCenterRepository.save(currentRentalCenter);
-            return new ResponseEntity<>("The rental center was successfully edited!", HttpStatus.OK);
+                RentalCenter currentRentalCenter = actualRentalCenter.get();
+
+                User currentUser = user.get();
+                Organisation organisation = currentUser.getOrganisation();
+                Organisation rentalCenterOrganisation = currentRentalCenter.getOrganisation();
+                if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
+                        && organisation != rentalCenterOrganisation) {
+                    return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                }
+
+                if((rentalCenterByName.isPresent() && rentalCenterByName.get() != actualRentalCenter.get())
+                        || (rentalCenterByEmail.isPresent() && rentalCenterByEmail.get() != actualRentalCenter.get())
+                        || (rentalCenterByPhone.isPresent() && rentalCenterByPhone.get() != actualRentalCenter.get())) {
+                    return new ResponseEntity<>("There is already a rental center with this information!", HttpStatus.BAD_REQUEST);
+                }
+
+                currentRentalCenter.setName(rentalCenterDto.getName());
+                currentRentalCenter.setCity(rentalCenterDto.getCity());
+                currentRentalCenter.setAddress(rentalCenterDto.getAddress());
+                currentRentalCenter.setEmail(rentalCenterDto.getEmail());
+                currentRentalCenter.setPhone(rentalCenterDto.getPhone());
+
+                rentalCenterRepository.save(currentRentalCenter);
+                return new ResponseEntity<>("The rental center was successfully edited!", HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>("The rental center you have requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>("The rental center you have requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteRentalCenter(Long id) {
@@ -97,7 +171,46 @@ public class RentalCenterService {
         if(rentalCenter.isEmpty()) {
             return new ResponseEntity<>("The rental center you requested to delete doesn't exist!", HttpStatus.NOT_FOUND);
         }
-        rentalCenterRepository.deleteById(id);
-        return new ResponseEntity<>("The rental center was successfully deleted!", HttpStatus.OK);
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+            }
+
+            RentalCenter currentRentalCenter = rentalCenter.get();
+            User currentUser = user.get();
+            Organisation organisation = currentUser.getOrganisation();
+
+            if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
+                    && organisation != currentRentalCenter.getOrganisation()) {
+                return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+            }
+
+            if(currentRentalCenter.getOrganisation() == organisation) {
+                organisation.getRentalCenters().remove(currentRentalCenter);
+            }
+
+            currentRentalCenter.setOrganisation(null);
+            rentalCenterRepository.delete(currentRentalCenter);
+            return new ResponseEntity<>("The rental center was successfully deleted!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+    }
+
+    private boolean userHasRole(User user, ERole role) {
+
+        for(Role r: user.getRoles()) {
+            if(r.getName().equals(role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

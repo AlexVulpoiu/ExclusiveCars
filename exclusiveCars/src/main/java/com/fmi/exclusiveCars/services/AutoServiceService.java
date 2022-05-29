@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.AutoServiceDto;
+import com.fmi.exclusiveCars.dto.AutoServiceResponseDto;
 import com.fmi.exclusiveCars.model.*;
 import com.fmi.exclusiveCars.repository.AutoServiceRepository;
 import com.fmi.exclusiveCars.repository.OrganisationRepository;
@@ -37,7 +38,23 @@ public class AutoServiceService {
         }
 
         List<AutoService> autoServiceList = new ArrayList<>(autoServices);
-        return new ResponseEntity<>(autoServiceList, HttpStatus.OK);
+        List<AutoServiceResponseDto> autoServiceResponseDtoList = new ArrayList<>();
+
+        for(AutoService autoService: autoServiceList) {
+            AutoServiceResponseDto autoServiceResponseDto = AutoServiceResponseDto.builder()
+                    .id(autoService.getId())
+                    .name(autoService.getName())
+                    .city(autoService.getCity())
+                    .address(autoService.getAddress())
+                    .email(autoService.getEmail())
+                    .phone(autoService.getPhone())
+                    .numberOfStations(autoService.getNumberOfStations())
+                    .organisation(autoService.getOrganisation().getName())
+                    .build();
+            autoServiceResponseDtoList.add(autoServiceResponseDto);
+        }
+
+        return new ResponseEntity<>(autoServiceResponseDtoList, HttpStatus.OK);
     }
 
     public ResponseEntity<?> getAutoService(Long id) {
@@ -45,7 +62,19 @@ public class AutoServiceService {
 
         if(autoService.isPresent()) {
             AutoService currentAutoService = autoService.get();
-            return new ResponseEntity<>(currentAutoService, HttpStatus.OK);
+
+            AutoServiceResponseDto autoServiceResponseDto = AutoServiceResponseDto.builder()
+                    .id(currentAutoService.getId())
+                    .name(currentAutoService.getName())
+                    .city(currentAutoService.getCity())
+                    .address(currentAutoService.getAddress())
+                    .email(currentAutoService.getEmail())
+                    .phone(currentAutoService.getPhone())
+                    .numberOfStations(currentAutoService.getNumberOfStations())
+                    .organisation(currentAutoService.getOrganisation().getName())
+                    .build();
+
+            return new ResponseEntity<>(autoServiceResponseDto, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("The service you asked for doesn't exist!", HttpStatus.NOT_FOUND);
