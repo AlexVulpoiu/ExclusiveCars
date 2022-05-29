@@ -30,13 +30,13 @@ public class AutoServiceController {
     }
 
     @PostMapping("/add")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> addAutoService(@Valid @RequestBody AutoServiceDto autoServiceDto) {
         return autoServiceService.addAutoService(autoServiceDto);
     }
 
     @PutMapping("/edit/{id}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> editAutoService(@PathVariable Long id, @Valid @RequestBody AutoServiceDto autoServiceDto) {
         return autoServiceService.editAutoService(id, autoServiceDto);
     }

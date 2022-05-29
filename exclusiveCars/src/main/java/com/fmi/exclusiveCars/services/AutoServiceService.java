@@ -1,11 +1,15 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.AutoServiceDto;
-import com.fmi.exclusiveCars.model.AutoService;
+import com.fmi.exclusiveCars.model.*;
 import com.fmi.exclusiveCars.repository.AutoServiceRepository;
+import com.fmi.exclusiveCars.repository.OrganisationRepository;
+import com.fmi.exclusiveCars.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.fmi.exclusiveCars.security.services.UserDetailsImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,10 +20,14 @@ import java.util.Optional;
 @Service
 public class AutoServiceService {
     private final AutoServiceRepository autoServiceRepository;
+    private final UserRepository userRepository;
+    private final OrganisationRepository organisationRepository;
 
     @Autowired
-    public AutoServiceService(AutoServiceRepository autoServiceRepository) {
+    public AutoServiceService(AutoServiceRepository autoServiceRepository, UserRepository userRepository, OrganisationRepository organisationRepository) {
         this.autoServiceRepository = autoServiceRepository;
+        this.userRepository = userRepository;
+        this.organisationRepository = organisationRepository;
     }
 
     public ResponseEntity<?> getAllAutoServices() {
@@ -51,17 +59,36 @@ public class AutoServiceService {
             return new ResponseEntity<>("There is already an auto service with this information!", HttpStatus.BAD_REQUEST);
         }
 
-        AutoService autoServiceToAdd = AutoService.builder()
-                .name(autoServiceDto.getName())
-                .city(autoServiceDto.getCity())
-                .address(autoServiceDto.getAddress())
-                .numberOfStations(autoServiceDto.getNumberOfStations())
-                .email(autoServiceDto.getEmail())
-                .phone(autoServiceDto.getPhone())
-                .build();
-        autoServiceRepository.save(autoServiceToAdd);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return new ResponseEntity<>("The auto service was added successfully!", HttpStatus.OK);
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+            }
+
+            Organisation organisation = user.get().getOrganisation();
+
+            AutoService autoServiceToAdd = AutoService.builder()
+                    .name(autoServiceDto.getName())
+                    .city(autoServiceDto.getCity())
+                    .address(autoServiceDto.getAddress())
+                    .numberOfStations(autoServiceDto.getNumberOfStations())
+                    .email(autoServiceDto.getEmail())
+                    .phone(autoServiceDto.getPhone())
+                    .organisation(organisation)
+                    .build();
+            autoServiceRepository.save(autoServiceToAdd);
+
+            organisation.getAutoServices().add(autoServiceToAdd);
+            organisationRepository.save(organisation);
+
+            return new ResponseEntity<>("The auto service was added successfully!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> editAutoService(Long id, AutoServiceDto autoServiceDto) {
@@ -71,27 +98,49 @@ public class AutoServiceService {
         Optional<AutoService> autoServiceByEmail = autoServiceRepository.findByEmail(autoServiceDto.getEmail());
         Optional<AutoService> autoServiceByPhone = autoServiceRepository.findByPhone(autoServiceDto.getPhone());
 
-        if(actualAutoService.isPresent()) {
-            if((autoServiceByName.isPresent() && autoServiceByName.get() != actualAutoService.get())
-                    || (autoServiceByEmail.isPresent() && autoServiceByEmail.get() != actualAutoService.get())
-                    || (autoServiceByPhone.isPresent() && autoServiceByPhone.get() != actualAutoService.get())) {
-                return new ResponseEntity<>("There is already an auto service with this information!", HttpStatus.BAD_REQUEST);
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
             }
 
-            AutoService currentAutoService = actualAutoService.get();
+            if (actualAutoService.isPresent()) {
 
-            currentAutoService.setName(autoServiceDto.getName());
-            currentAutoService.setCity(autoServiceDto.getCity());
-            currentAutoService.setAddress(autoServiceDto.getAddress());
-            currentAutoService.setNumberOfStations(autoServiceDto.getNumberOfStations());
-            currentAutoService.setEmail(autoServiceDto.getEmail());
-            currentAutoService.setPhone(autoServiceDto.getPhone());
+                AutoService currentAutoService = actualAutoService.get();
 
-            autoServiceRepository.save(currentAutoService);
-            return new ResponseEntity<>("The auto service was successfully edited!", HttpStatus.OK);
+                User currentUser = user.get();
+                Organisation organisation = currentUser.getOrganisation();
+                Organisation serviceOrganisation = currentAutoService.getOrganisation();
+                if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
+                        && organisation != serviceOrganisation) {
+                    return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                }
+
+                if ((autoServiceByName.isPresent() && autoServiceByName.get() != actualAutoService.get())
+                        || (autoServiceByEmail.isPresent() && autoServiceByEmail.get() != actualAutoService.get())
+                        || (autoServiceByPhone.isPresent() && autoServiceByPhone.get() != actualAutoService.get())) {
+                    return new ResponseEntity<>("There is already an auto service with this information!", HttpStatus.BAD_REQUEST);
+                }
+
+                currentAutoService.setName(autoServiceDto.getName());
+                currentAutoService.setCity(autoServiceDto.getCity());
+                currentAutoService.setAddress(autoServiceDto.getAddress());
+                currentAutoService.setNumberOfStations(autoServiceDto.getNumberOfStations());
+                currentAutoService.setEmail(autoServiceDto.getEmail());
+                currentAutoService.setPhone(autoServiceDto.getPhone());
+
+                autoServiceRepository.save(currentAutoService);
+                return new ResponseEntity<>("The auto service was successfully edited!", HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>("The auto service you requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>("The auto service you requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteAutoService(Long id) {
@@ -100,7 +149,46 @@ public class AutoServiceService {
         if(autoService.isEmpty()) {
             return new ResponseEntity<>("The auto service you requested to delete doesn't exist!", HttpStatus.NOT_FOUND);
         }
-        autoServiceRepository.deleteById(id);
-        return new ResponseEntity<>("The auto service was successfully deleted!", HttpStatus.OK);
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+            }
+
+            AutoService currentAutoService = autoService.get();
+            User currentUser = user.get();
+            Organisation organisation = currentUser.getOrganisation();
+
+            if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
+                    && organisation != currentAutoService.getOrganisation()) {
+                return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+            }
+
+            if(currentAutoService.getOrganisation() == organisation) {
+                organisation.getAutoServices().remove(currentAutoService);
+            }
+
+            currentAutoService.setOrganisation(null);
+            autoServiceRepository.delete(currentAutoService);
+            return new ResponseEntity<>("The auto service was successfully deleted!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+    }
+
+    private boolean userHasRole(User user, ERole role) {
+
+        for(Role r: user.getRoles()) {
+            if(r.getName().equals(role)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

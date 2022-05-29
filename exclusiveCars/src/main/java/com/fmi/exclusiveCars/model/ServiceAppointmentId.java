@@ -18,7 +18,7 @@ public class ServiceAppointmentId implements Serializable {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "service_id")
+    @Column(name = "auto_service_id")
     private Long serviceId;
 
     private LocalDate date;

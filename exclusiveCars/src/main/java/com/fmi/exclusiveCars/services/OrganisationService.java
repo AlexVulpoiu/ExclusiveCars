@@ -8,11 +8,11 @@ import com.fmi.exclusiveCars.model.User;
 import com.fmi.exclusiveCars.repository.OrganisationRepository;
 import com.fmi.exclusiveCars.repository.RoleRepository;
 import com.fmi.exclusiveCars.repository.UserRepository;
+import com.fmi.exclusiveCars.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -51,8 +51,8 @@ public class OrganisationService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails)principal).getUsername();
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl)principal).getUsername();
             Optional<User> user = userRepository.findByUsername(username);
 
             Optional<Organisation> organisation = organisationRepository.findById(id);
@@ -79,8 +79,8 @@ public class OrganisationService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
             Optional<User> user = userRepository.findByUsername(username);
 
             if(user.isEmpty()) {
@@ -115,8 +115,8 @@ public class OrganisationService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
@@ -153,8 +153,8 @@ public class OrganisationService {
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {

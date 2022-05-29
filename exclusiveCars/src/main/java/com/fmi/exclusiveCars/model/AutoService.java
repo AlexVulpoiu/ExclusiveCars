@@ -56,4 +56,7 @@ public class AutoService {
 
     @OneToMany(mappedBy = "autoService", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ServiceAppointment> users = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Organisation organisation;
 }

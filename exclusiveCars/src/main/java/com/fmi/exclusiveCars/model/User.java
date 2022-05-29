@@ -7,7 +7,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 
 @AllArgsConstructor
@@ -97,23 +96,15 @@ public class User {
         favoriteCars.remove(car);
     }
 
-    public void addServiceAppointment(AutoService autoService, LocalDate date, String problem, LocalTime hour, Integer station) {
-        ServiceAppointment serviceAppointment = new ServiceAppointment(this, autoService, date, problem, hour, station);
+    public void addServiceAppointment(AutoService autoService, ServiceAppointment serviceAppointment) {
         services.add(serviceAppointment);
         autoService.getUsers().add(serviceAppointment);
     }
 
-    public void removeServiceAppointment(AutoService autoService) {
-        for(Iterator<ServiceAppointment> iterator = services.iterator(); iterator.hasNext();) {
-            ServiceAppointment serviceAppointment = iterator.next();
-
-            if(serviceAppointment.getUser().equals(this) && serviceAppointment.getAutoService().equals(autoService)) {
-                iterator.remove();
-                serviceAppointment.getAutoService().getUsers().remove(serviceAppointment);
-                serviceAppointment.setUser(null);
-                serviceAppointment.setAutoService(null);
-            }
-        }
+    public void removeServiceAppointment(ServiceAppointment serviceAppointment) {
+        services.remove(serviceAppointment);
+        serviceAppointment.setUser(null);
+        serviceAppointment.setAutoService(null);
     }
 
     public void addRentCar(Car car, LocalDate startDate, LocalDate endDate, Integer fee) {
