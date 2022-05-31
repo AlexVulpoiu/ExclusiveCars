@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.controllers;
 
 import com.fmi.exclusiveCars.dto.CarDto;
+import com.fmi.exclusiveCars.model.Car;
 import com.fmi.exclusiveCars.services.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class CarController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addCar(@Valid @RequestBody CarDto carDto) {
+    public Car addCar(@Valid @RequestBody CarDto carDto) {
         return carService.addCar(carDto);
     }
 

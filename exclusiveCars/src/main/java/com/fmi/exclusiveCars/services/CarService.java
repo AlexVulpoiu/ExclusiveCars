@@ -25,11 +25,11 @@ public class CarService {
         this.carModelRepository = carModelRepository;
     }
 
-    public ResponseEntity<?> addCar(CarDto carDto) {
+    public Car addCar(CarDto carDto) {
 
         Optional<CarModel> carModel = carModelRepository.findById(carDto.getCarModelId());
         if(carModel.isEmpty()) {
-            return new ResponseEntity<>("This car model doesn't exist!", HttpStatus.NOT_FOUND);
+            return null;
         }
 
         CarModel currentCarModel = carModel.get();
@@ -50,9 +50,8 @@ public class CarService {
                 .rating(0.0)
                 .model(currentCarModel)
                 .build();
-        carRepository.save(car);
 
-        return new ResponseEntity<>("The car was added successfully!", HttpStatus.OK);
+        return carRepository.save(car);
     }
 
     public ResponseEntity<?> editCar(Long id, CarDto editCar) {

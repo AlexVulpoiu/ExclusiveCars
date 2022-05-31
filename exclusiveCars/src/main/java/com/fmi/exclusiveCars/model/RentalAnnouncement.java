@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "rental_announcements")
 public class RentalAnnouncement {
     @Id
@@ -18,9 +20,10 @@ public class RentalAnnouncement {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("rentalAnnouncements")
     private RentalCenter rentalCenter;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "car_id")
     private Car car;
 
