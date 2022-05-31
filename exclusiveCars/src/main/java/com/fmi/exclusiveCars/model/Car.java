@@ -22,16 +22,6 @@ public class Car {
     private Long id;
 
     @NotNull
-    @Size(min = 2, max = 30)
-    @Column(length = 30)
-    private String name;
-
-    @NotNull
-    @Size(min = 2, max = 30)
-    @Column(length = 30)
-    private String model;
-
-    @NotNull
     @Min(value = 0)
     private Integer price;
 
@@ -72,34 +62,17 @@ public class Car {
     @Min(value = 2)
     private Integer seats;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 11)
-    private ECategory category;
-
     @NotNull
     @Min(value = 0)
     @Max(value = 5)
     private Double rating;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "car_model_id")
+    private CarModel model;
+
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentCar> rentalClients = new ArrayList<>();
-
-    public Car(String name, String model, Integer price, String color, Integer year, Integer kilometers, Integer engine, Integer power, ETransmission transmission, EFuelType fuelType, Double consumption, Integer seats, ECategory category, Double rating) {
-        this.name = name;
-        this.model = model;
-        this.price = price;
-        this.color = color;
-        this.year = year;
-        this.kilometers = kilometers;
-        this.engine = engine;
-        this.power = power;
-        this.transmission = transmission;
-        this.fuelType = fuelType;
-        this.consumption = consumption;
-        this.seats = seats;
-        this.category = category;
-        this.rating = rating;
-    }
 
     @Override
     public boolean equals(Object o) {
