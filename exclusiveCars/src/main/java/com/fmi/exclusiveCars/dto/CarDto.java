@@ -2,6 +2,7 @@ package com.fmi.exclusiveCars.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fmi.exclusiveCars.model.EFuelType;
+import com.fmi.exclusiveCars.model.EStandard;
 import com.fmi.exclusiveCars.model.ETransmission;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,6 +59,17 @@ public class CarDto {
     @NotNull(message = "You should provide a valid consumption value for this car!")
     @Min(value = 0, message = "The consumption value must be a positive float!")
     private Double consumption;
+
+    @NotNull(message = "You should provide a valid value for ac feature!")
+    private Boolean ac;
+
+    @NotNull(message = "You should provide a valid value for airbag feature!")
+    private Boolean airbag;
+
+    @NotNull(message = "You should provide a valid option for emission standard!")
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("emission_standard")
+    private EStandard emissionStandard;
 
     @NotNull(message = "You should provide a valid number of seats for this car!")
     @Min(value = 2, message = "The number of seats should be at least 2!")

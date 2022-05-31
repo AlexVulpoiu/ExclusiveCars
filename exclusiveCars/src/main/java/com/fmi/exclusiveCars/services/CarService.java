@@ -44,6 +44,9 @@ public class CarService {
                 .fuelType(carDto.getFuelType())
                 .consumption(carDto.getConsumption())
                 .seats(carDto.getSeats())
+                .ac(carDto.getAc())
+                .airbag(carDto.getAirbag())
+                .emissionStandard(carDto.getEmissionStandard())
                 .rating(0.0)
                 .model(currentCarModel)
                 .build();
@@ -77,6 +80,9 @@ public class CarService {
         currentCar.setFuelType(editCar.getFuelType());
         currentCar.setConsumption(editCar.getConsumption());
         currentCar.setSeats(editCar.getSeats());
+        currentCar.setAc(editCar.getAc());
+        currentCar.setAirbag(editCar.getAirbag());
+        currentCar.setEmissionStandard(editCar.getEmissionStandard());
         currentCar.setModel(newCarModel);
         carRepository.save(currentCar);
 

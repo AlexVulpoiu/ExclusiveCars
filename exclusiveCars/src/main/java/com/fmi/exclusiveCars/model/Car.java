@@ -63,6 +63,17 @@ public class Car {
     private Integer seats;
 
     @NotNull
+    private Boolean ac;
+
+    @NotNull
+    private Boolean airbag;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "emission_standard", length = 8)
+    private EStandard emissionStandard;
+
+    @NotNull
     @Min(value = 0)
     @Max(value = 5)
     private Double rating;
