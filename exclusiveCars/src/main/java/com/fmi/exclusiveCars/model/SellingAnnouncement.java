@@ -31,6 +31,11 @@ public class SellingAnnouncement {
     @Column(length = 1000)
     private String description;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 8)
+    private EState state;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
     private Car car;

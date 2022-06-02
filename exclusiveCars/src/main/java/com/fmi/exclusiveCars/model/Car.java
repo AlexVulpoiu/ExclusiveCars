@@ -3,10 +3,7 @@ package com.fmi.exclusiveCars.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.*;
 
 @AllArgsConstructor
@@ -26,6 +23,9 @@ public class Car {
     private Integer price;
 
     @NotNull
+    private Boolean negotiable;
+
+    @NotNull
     @Size(min = 3, max = 10)
     @Column(length = 10)
     private String color;
@@ -33,6 +33,16 @@ public class Car {
     @NotNull
     @Min(value = 1950)
     private Integer year;
+
+    @NotBlank
+    @Size(min = 4, max = 20)
+    @Column(length = 20)
+    private String country;
+
+    @NotBlank
+    @Size(min = 3, max = 30)
+    @Column(length = 30)
+    private String location;
 
     @NotNull
     @Min(value = 0)
@@ -48,6 +58,15 @@ public class Car {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 21)
+    private EGearbox gearbox;
+
+    @NotNull
+    @Min(4)
+    @Max(8)
+    private Integer gears;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 5)
     private ETransmission transmission;
 
     @Enumerated(EnumType.STRING)

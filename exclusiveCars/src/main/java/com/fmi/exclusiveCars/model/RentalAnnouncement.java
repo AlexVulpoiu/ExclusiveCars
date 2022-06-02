@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -18,6 +19,11 @@ public class RentalAnnouncement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 8)
+    private EState state;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnoreProperties("rentalAnnouncements")

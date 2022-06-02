@@ -134,6 +134,7 @@ public class RentalAnnouncementService {
 
             Car car = carService.addCar(carDto);
             RentalAnnouncement rentalAnnouncement = RentalAnnouncement.builder()
+                    .state(EState.PENDING)
                     .car(car)
                     .rentalCenter(currentRentalCenter)
                     .build();
