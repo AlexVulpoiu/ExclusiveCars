@@ -44,6 +44,11 @@ public class User {
     @Column(length = 10)
     private String phone;
 
+    @Column(name = "verification_code", length = 64)
+    private String verificationCode;
+
+    private Boolean enabled;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
