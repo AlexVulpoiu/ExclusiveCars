@@ -43,19 +43,6 @@ public class SellingAnnouncement {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @OneToMany(mappedBy = "announcement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments = new ArrayList<>();
-
-    public void addComment(Comment comment) {
-        comments.add(comment);
-        comment.setAnnouncement(this);
-    }
-
-    public void removeComment(Comment comment) {
-        comments.remove(comment);
-        comment.setAnnouncement(null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
