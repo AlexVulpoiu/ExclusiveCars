@@ -97,7 +97,7 @@ public class Car {
     @Max(value = 5)
     private Double rating;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "car_model_id")
     private CarModel model;
 

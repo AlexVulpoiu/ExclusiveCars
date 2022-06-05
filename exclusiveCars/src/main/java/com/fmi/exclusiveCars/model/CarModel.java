@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.List;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -33,6 +34,9 @@ public class CarModel {
     @Enumerated(EnumType.STRING)
     @Column(name = "category", length = 11)
     private ECategory category;
+
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL)
+    private List<Car> cars;
 
     @Override
     public boolean equals(Object o) {
