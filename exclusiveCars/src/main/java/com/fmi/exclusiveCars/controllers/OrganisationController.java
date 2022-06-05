@@ -44,7 +44,7 @@ public class OrganisationController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION') or hasRole('ADMIN')")
     public ResponseEntity<?> deleteOrganisation(@PathVariable Long id) {
         return organisationService.deleteOrganisation(id);
     }

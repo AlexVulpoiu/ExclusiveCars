@@ -42,7 +42,7 @@ public class RentalCenterController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION') or hasRole('ADMIN')")
     public ResponseEntity<?> deleteRentalCenter(@PathVariable Long id) {
         return rentalCenterService.deleteRentalCenter(id);
     }

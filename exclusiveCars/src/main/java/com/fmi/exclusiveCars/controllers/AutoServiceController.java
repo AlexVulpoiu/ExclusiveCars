@@ -42,7 +42,7 @@ public class AutoServiceController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ORGANISATION') or hasRole('ADMIN')")
     public ResponseEntity<?> deleteAutoService(@PathVariable Long id) {
         return autoServiceService.deleteAutoService(id);
     }
