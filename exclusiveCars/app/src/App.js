@@ -9,7 +9,7 @@ import AuthService from "./services/auth.service";
 
 import Login from "./components/login.component";
 import Register from "./components/register.component";
-import Home from "./components/home.component";
+import Home from "./components/news.component";
 import Profile from "./components/profile.component";
 
 class App extends Component {
@@ -49,14 +49,14 @@ class App extends Component {
 
         return (
             <div>
-                <nav className="navbar navbar-expand navbar-dark bg-dark">
+                <nav className="navbar navbar-expand navbar-dark bg-dark" style={{position: "sticky", top: 0, zIndex: 5}}>
                     <Link to={"/"} className="navbar-brand">
                         <img src={Image} style={imageStyle} alt={":((("}/>
                     </Link>
                     <div className="navbar-nav mr-auto">
                         <li className="nav-item">
-                            <Link to={"/home"} className="nav-link">
-                                Home
+                            <Link to={"/news"} className="nav-link">
+                                Sectiune stiri
                             </Link>
                         </li>
 
@@ -117,7 +117,7 @@ class App extends Component {
 
                 <div className="container mt-3">
                     <Switch>
-                        <Route exact path={["/", "/home"]} component={Home} />
+                        <Route exact path={["/", "/news"]} component={Home} />
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/register" component={Register} />
                         <Route exact path="/profile" component={Profile} />

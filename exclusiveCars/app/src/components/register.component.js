@@ -10,7 +10,7 @@ const required = value => {
     if (!value) {
         return (
             <div className="alert alert-danger" role="alert">
-                This field is required!
+                Acest camp este obligatoriu!
             </div>
         );
     }
@@ -20,7 +20,7 @@ const email = value => {
     if (!isEmail(value)) {
         return (
             <div className="alert alert-danger" role="alert">
-                This is not a valid email.
+                Acesta nu este un email valid.
             </div>
         );
     }
@@ -30,7 +30,29 @@ const vusername = value => {
     if (value.length < 3 || value.length > 20) {
         return (
             <div className="alert alert-danger" role="alert">
-                The username must be between 3 and 20 characters.
+                Numele de utilizator trebuie sa aiba intre 3 si 20 de caractere!
+            </div>
+        );
+    }
+};
+
+const vFirstName = value => {
+    const re = new RegExp("^[A-Z][a-zA-Z\\s]{2,29}$");
+    if(!re.test(value)) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                Prenumele trebuie sa inceapa cu litera mare si sa aiba intre 3 si 30 de caractere (doar litere si spatii)!
+            </div>
+        );
+    }
+};
+
+const vLastName = value => {
+    const re = new RegExp("^[A-Z][a-zA-Z\\s]{2,29}$");
+    if(!re.test(value)) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                Numele trebuie sa inceapa cu litera mare si sa aiba intre 3 si 30 de caractere (doar litere si spatii)!
             </div>
         );
     }
@@ -40,7 +62,7 @@ const vpassword = value => {
     if (value.length < 6 || value.length > 40) {
         return (
             <div className="alert alert-danger" role="alert">
-                The password must be between 6 and 40 characters.
+                Parola trebuie sa aiba intre 6 si 40 de caractere!
             </div>
         );
     }
@@ -50,13 +72,13 @@ const vphone = value => {
     if(value.length !== 10) {
         return (
             <div className="alert alert-danger" role="alert">
-                The phone number must have 10 characters.
+                Numarul de telefon trebuie sa aiba 10 cifre!
             </div>
         );
     } else if(value[0] !== '0' || value[1] !== '7') {
         return (
             <div className="alert alert-danger" role="alert">
-                The phone number must start with "07".
+                Numarul de telefon trebuie sa inceapa cu "07"!
             </div>
         );
     }
@@ -67,6 +89,8 @@ export default class Register extends Component {
         super(props);
         this.handleRegister = this.handleRegister.bind(this);
         this.onChangeUsername = this.onChangeUsername.bind(this);
+        this.onChangeFirstName = this.onChangeFirstName.bind(this);
+        this.onChangeLastName = this.onChangeLastName.bind(this);
         this.onChangeEmail = this.onChangeEmail.bind(this);
         this.onChangePassword = this.onChangePassword.bind(this);
         this.onChangePhone = this.onChangePhone.bind(this);
@@ -74,6 +98,8 @@ export default class Register extends Component {
         this.state = {
             username: "",
             email: "",
+            firstName: "",
+            lastName: "",
             password: "",
             phone: "",
             successful: false,
@@ -84,6 +110,18 @@ export default class Register extends Component {
     onChangeUsername(e) {
         this.setState({
             username: e.target.value
+        });
+    }
+
+    onChangeFirstName(e) {
+        this.setState({
+            firstName: e.target.value
+        });
+    }
+
+    onChangeLastName(e) {
+        this.setState({
+            lastName: e.target.value
         });
     }
 
@@ -118,6 +156,8 @@ export default class Register extends Component {
         if (this.checkBtn.context._errors.length === 0) {
             AuthService.register(
                 this.state.username,
+                this.state.firstName,
+                this.state.lastName,
                 this.state.email,
                 this.state.password,
                 this.state.phone
@@ -149,11 +189,12 @@ export default class Register extends Component {
         return (
             <div className="col-md-12">
                 <div className="card card-container">
-                    <img
-                        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-                        alt="profile-img"
-                        className="profile-img-card"
-                    />
+                    {/*<img*/}
+                    {/*    src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"*/}
+                    {/*    alt="profile-img"*/}
+                    {/*    className="profile-img-card"*/}
+                    {/*/>*/}
+                    <h2 style={{alignSelf: "center"}}>Bun venit!</h2>
 
                     <Form
                         onSubmit={this.handleRegister}
@@ -176,6 +217,30 @@ export default class Register extends Component {
                                 </div>
 
                                 <div className="form-group">
+                                    <label htmlFor="firstName">Prenume</label>
+                                    <Input
+                                        type="text"
+                                        className="form-control"
+                                        name="firstName"
+                                        value={this.state.firstName}
+                                        onChange={this.onChangeFirstName}
+                                        validations={[required, vFirstName]}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="lastName">Nume</label>
+                                    <Input
+                                        type="text"
+                                        className="form-control"
+                                        name="lastName"
+                                        value={this.state.lastName}
+                                        onChange={this.onChangeLastName}
+                                        validations={[required, vLastName]}
+                                    />
+                                </div>
+
+                                <div className="form-group">
                                     <label htmlFor="email">Email</label>
                                     <Input
                                         type="text"
@@ -188,7 +253,7 @@ export default class Register extends Component {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="password">Password</label>
+                                    <label htmlFor="password">Parola</label>
                                     <Input
                                         type="password"
                                         className="form-control"
@@ -200,7 +265,7 @@ export default class Register extends Component {
                                 </div>
 
                                 <div className="form-group">
-                                    <label htmlFor="phone">Phone</label>
+                                    <label htmlFor="phone">Telefon</label>
                                     <Input
                                         type="text"
                                         className="form-control"

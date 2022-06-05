@@ -67,7 +67,7 @@ public class AuthController {
 
         Optional<User> user = userRepository.findByEmail(loginRequest.getEmail());
         if(user.isEmpty()) {
-            return new ResponseEntity<>("An error occurred during login. Please try again!", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("A intervenit o eroare in timpul autentificarii. Te rugam sa incerci din nou!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -78,7 +78,7 @@ public class AuthController {
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         if(!userDetails.isEnabled()) {
-            return new ResponseEntity<>("You have to verify your account before login!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Trebuie sa iti validezi contul inainte de logare!", HttpStatus.BAD_REQUEST);
         }
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
@@ -96,19 +96,19 @@ public class AuthController {
         if(userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(new MessageResponse("Eroare: acest username exista deja!"));
         }
 
         if(userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Eroare: acest email este deja in uz!"));
         }
 
         if(userRepository.existsByPhone(signUpRequest.getPhone())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Phone number is already in use!"));
+                    .body(new MessageResponse("Eroare: acest numar de telefon este deja in uz!"));
         }
 
         // Create new user's account
@@ -124,32 +124,32 @@ public class AuthController {
 
         if (strRoles == null) {
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Eroare: rolul nu a fost gasit!"));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin":
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Eroare: rolul nu a fost gasit!"));
                         roles.add(adminRole);
 
                         break;
                     case "organisation":
                         Role organisationRole = roleRepository.findByName(ERole.ROLE_ORGANISATION)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Eroare: rolul nu a fost gasit!"));
                         roles.add(organisationRole);
 
                         break;
                     case "mod":
                         Role modRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Eroare: rolul nu a fost gasit!"));
                         roles.add(modRole);
 
                         break;
                     default:
                         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                                .orElseThrow(() -> new RuntimeException("Eroare: rolul nu a fost gasit!"));
                         roles.add(userRole);
                 }
             });
@@ -168,22 +168,22 @@ public class AuthController {
 
         sendVerificationEmail(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse("Felicitari, te-ai inregistrat cu succes! Verifica email-ul pentru a activa contul!"));
     }
 
     @PostMapping("/processRegister")
     public ResponseEntity<?> processRegister(SignupRequest signupRequest, HttpServletRequest request)
             throws MessagingException, UnsupportedEncodingException, NoSuchAlgorithmException {
         registerUser(signupRequest);
-        return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+        return new ResponseEntity<>("Felicitari, te-ai inregistrat cu succes! Verifica email-ul pentru a activa contul!", HttpStatus.OK);
     }
 
     @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(@Param("code") String code) {
         if(verify(code)) {
-            return new ResponseEntity<>("Account verification successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("Contul a fost validat cu succes! Acum poti folosi aplicatia!", HttpStatus.OK);
         }
-        return new ResponseEntity<>("Account verification failed!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Verificarea contului a esuat! :(", HttpStatus.BAD_REQUEST);
     }
 
     private String getSiteURL(HttpServletRequest request) {
