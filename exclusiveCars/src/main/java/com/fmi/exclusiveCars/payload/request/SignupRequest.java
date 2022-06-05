@@ -1,7 +1,10 @@
 package com.fmi.exclusiveCars.payload.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Set;
 
@@ -10,6 +13,16 @@ public class SignupRequest {
     @NotBlank
     @Size(min = 3, max = 20)
     private String username;
+
+    @NotBlank
+    @Pattern(regexp = "^[A-Z][a-zA-Z\\s]{2,29}$")
+    @JsonProperty("first_name")
+    private String firstName;
+
+    @NotBlank
+    @Pattern(regexp = "^[A-Z][a-zA-Z\\s]{2,29}$")
+    @JsonProperty("last_name")
+    private String lastName;
 
     @NotBlank
     @Size(max = 50)
@@ -32,6 +45,22 @@ public class SignupRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getEmail() {

@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.*;
@@ -27,6 +28,16 @@ public class User {
     @Size(min = 3, max = 20)
     @Column(length = 20)
     private String username;
+
+    @NotBlank
+    @Pattern(regexp = "^[A-Z][a-zA-Z\\s]{2,29}$")
+    @Column(name = "first_name", length = 30)
+    private String firstName;
+
+    @NotBlank
+    @Pattern(regexp = "^[A-Z][a-zA-Z\\s]{2,29}$")
+    @Column(name = "last_name", length = 30)
+    private String lastName;
 
     @NotBlank
     @Size(max = 100)
@@ -73,8 +84,10 @@ public class User {
     @JoinColumn(name = "organisation_id")
     private Organisation organisation;
 
-    public User(String username, String email, String password, String phone) {
+    public User(String username, String firstName, String lastName, String email, String password, String phone) {
         this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.phone = phone;
