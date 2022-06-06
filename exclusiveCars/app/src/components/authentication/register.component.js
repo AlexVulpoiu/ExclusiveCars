@@ -4,13 +4,13 @@ import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
 import { isEmail } from "validator";
 
-import AuthService from "../services/auth.service";
+import AuthService from "../../services/auth.service";
 
 const required = value => {
     if (!value) {
         return (
             <div className="alert alert-danger" role="alert">
-                Acest camp este obligatoriu!
+                Acest câmp este obligatoriu!
             </div>
         );
     }
@@ -30,7 +30,7 @@ const vusername = value => {
     if (value.length < 3 || value.length > 20) {
         return (
             <div className="alert alert-danger" role="alert">
-                Numele de utilizator trebuie sa aiba intre 3 si 20 de caractere!
+                Numele de utilizator trebuie să aibă între 3 si 20 de caractere!
             </div>
         );
     }
@@ -41,7 +41,7 @@ const vFirstName = value => {
     if(!re.test(value)) {
         return (
             <div className="alert alert-danger" role="alert">
-                Prenumele trebuie sa inceapa cu litera mare si sa aiba intre 3 si 30 de caractere (doar litere si spatii)!
+                Prenumele trebuie să înceapă cu literă mare și să aibă între 3 și 30 de caractere (doar litere și spații)!
             </div>
         );
     }

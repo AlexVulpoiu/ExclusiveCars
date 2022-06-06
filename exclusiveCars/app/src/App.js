@@ -7,10 +7,14 @@ import Image from "./app_logo.jpg";
 
 import AuthService from "./services/auth.service";
 
-import Login from "./components/login.component";
-import Register from "./components/register.component";
-import Home from "./components/news.component";
-import Profile from "./components/profile.component";
+import Login from "./components/authentication/login.component";
+import Register from "./components/authentication/register.component";
+import Profile from "./components/authentication/profile.component";
+
+import News from "./components/news/news.component";
+import NewsArticle from "./components/news/news_article.component";
+import AddNews from "./components/news/add_news.component"
+import EditNews from "./components/news/edit_news.component"
 
 class App extends Component {
     constructor(props) {
@@ -30,8 +34,8 @@ class App extends Component {
         if (user) {
             this.setState({
                 currentUser: user,
-                showModeratorBoard: user.roles.includes("ROLE_MODERATOR"),
-                showAdminBoard: user.roles.includes("ROLE_ADMIN"),
+                isModerator: user.roles.includes("ROLE_MODERATOR"),
+                isAdmin: user.roles.includes("ROLE_ADMIN"),
             });
         }
     }
@@ -41,7 +45,7 @@ class App extends Component {
     }
 
     render() {
-        const { currentUser, showModeratorBoard, showAdminBoard } = this.state;
+        const { currentUser, isModerator, isAdmin } = this.state;
         const imageStyle = {
             width: "70px",
             height: "70px"
@@ -56,33 +60,9 @@ class App extends Component {
                     <div className="navbar-nav mr-auto">
                         <li className="nav-item">
                             <Link to={"/news"} className="nav-link">
-                                Sectiune stiri
+                                Secțiune știri
                             </Link>
                         </li>
-
-                        {showModeratorBoard && (
-                            <li className="nav-item">
-                                <Link to={"/mod"} className="nav-link">
-                                    Moderator Board
-                                </Link>
-                            </li>
-                        )}
-
-                        {showAdminBoard && (
-                            <li className="nav-item">
-                                <Link to={"/admin"} className="nav-link">
-                                    Admin Board
-                                </Link>
-                            </li>
-                        )}
-
-                        {currentUser && (
-                            <li className="nav-item">
-                                <Link to={"/user"} className="nav-link">
-                                    User
-                                </Link>
-                            </li>
-                        )}
                     </div>
 
                     {currentUser ? (
@@ -117,10 +97,13 @@ class App extends Component {
 
                 <div className="container mt-3">
                     <Switch>
-                        <Route exact path={["/", "/news"]} component={Home} />
+                        <Route exact path={["/", "/news"]} component={News} />
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/register" component={Register} />
                         <Route exact path="/profile" component={Profile} />
+                        <Route exact path={"/news/add"} component={AddNews} />
+                        <Route exact path={"/news/edit/:id"} component={EditNews} />
+                        <Route exact path={"/news/:id"} component={NewsArticle} />
                     </Switch>
                 </div>
             </div>
