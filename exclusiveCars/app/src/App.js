@@ -13,8 +13,14 @@ import Profile from "./components/authentication/profile.component";
 
 import News from "./components/news/news.component";
 import NewsArticle from "./components/news/news_article.component";
-import AddNews from "./components/news/add_news.component"
-import EditNews from "./components/news/edit_news.component"
+import AddNews from "./components/news/add_news.component";
+import EditNews from "./components/news/edit_news.component";
+
+import AllOrganisations from "./components/organisations/all_organisations.component";
+import AddOrganisation from "./components/organisations/add_organisation.component";
+import EditOrganisation from "./components/organisations/edit_organisation.component";
+import Organisation from "./components/organisations/organisation.component";
+import MyOrganisation from "./components/organisations/my_organisation.component";
 
 class App extends Component {
     constructor(props) {
@@ -34,6 +40,8 @@ class App extends Component {
         if (user) {
             this.setState({
                 currentUser: user,
+                isOnlyUser: user.roles.length === 1,
+                isOrganisation: user.roles.includes("ROLE_ORGANISATION"),
                 isModerator: user.roles.includes("ROLE_MODERATOR"),
                 isAdmin: user.roles.includes("ROLE_ADMIN"),
             });
@@ -63,6 +71,30 @@ class App extends Component {
                                 Secțiune știri
                             </Link>
                         </li>
+
+                        {(isModerator || isAdmin) && (
+                            <li className="nav-item">
+                                <Link to={"/organisations"} className="nav-link">
+                                    Organizații
+                                </Link>
+                            </li>
+                        )}
+
+                        {currentUser && this.state.isOnlyUser && (
+                            <li className="nav-item">
+                                <Link to={"/organisations/add"} className="nav-link">
+                                    Creează organizație
+                                </Link>
+                            </li>
+                        )}
+
+                        {currentUser && this.state.isOrganisation && (
+                            <li className="nav-item">
+                                <Link to={"/organisations/myOrganisation"} className="nav-link">
+                                    Organizația mea
+                                </Link>
+                            </li>
+                        )}
                     </div>
 
                     {currentUser ? (
@@ -97,13 +129,20 @@ class App extends Component {
 
                 <div className="container mt-3">
                     <Switch>
-                        <Route exact path={["/", "/news"]} component={News} />
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/register" component={Register} />
                         <Route exact path="/profile" component={Profile} />
+
+                        <Route exact path={["/", "/news"]} component={News} />
                         <Route exact path={"/news/add"} component={AddNews} />
                         <Route exact path={"/news/edit/:id"} component={EditNews} />
                         <Route exact path={"/news/:id"} component={NewsArticle} />
+
+                        <Route exact path={"/organisations"} component={AllOrganisations} />
+                        <Route exact path={"/organisations/add"} component={AddOrganisation} />
+                        <Route exact path={"/organisations/edit"} component={EditOrganisation} />
+                        <Route exact path={"/organisations/myOrganisation"} component={MyOrganisation} />
+                        <Route exact path={"/organisations/:id"} component={Organisation} />
                     </Switch>
                 </div>
             </div>

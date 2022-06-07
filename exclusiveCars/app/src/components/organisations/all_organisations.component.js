@@ -1,33 +1,25 @@
 import React, {useState, Component, useEffect} from "react";
 
-import {Button} from "reactstrap";
-import {Link} from "react-router-dom";
-
 import "../../styles/pagination.css";
+import authHeader from '../../services/auth-header';
 import AuthService from "../../services/auth.service";
+import axios from "axios";
 
-const formatDate = value => {
-    const dateString = String(value);
-    const values = dateString.split("-");
-    return values.reverse().join("-");
-};
-
-function NewsRepresentation(props) {
-    const {id, title, content, date, hour} = props.data
+function OrganisationRepresentation(props) {
+    const {id, name, owner} = props.data
     return (
-        <header className="jumbotron">
-            <h3>{title}</h3>
-            <p>{content.substring(0, 500) + "[...]"}</p>
-            <Button color={"primary"} style={{float: "left"}} tag={Link} to={`/news/${id}`}>Citește articolul</Button>
-            <h6 style={{float: "right"}}>{"Articol postat în data de " + formatDate(date) + ", ora " + hour}</h6>
-        </header>
+        <div style={{padding: "10px", margin: "20px", borderColor: "black", borderWidth: "2px"}} className={"organisationName"}>
+            <a href={`/organisations/${id}`}>
+                <h4>{name}</h4>
+                <p>{owner}</p>
+            </a>
+        </div>
     );
 }
 
 function Pagination({ data, RenderComponent, title, pageLimit, dataLimit }) {
     const [pages] = useState(Math.round(data.length / dataLimit));
     const [currentPage, setCurrentPage] = useState(1);
-    const user = AuthService.getCurrentUser();
 
     useEffect(() => {
         window.scrollTo({ behavior: 'smooth', top: '0px' });
@@ -72,8 +64,6 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit }) {
             <div style={{height: "80px"}}>
                 <h1 style={{float: "left"}}>{title}</h1>
 
-                {user != null && (user.roles.includes('ROLE_MODERATOR') || user.roles.includes('ROLE_ADMIN')) &&
-                    (<Button color={"success"} tag={Link} to={`/news/add`} style={{float: "right"}}>Adaugă o știre</Button>)}
             </div>
             <br/>
 
@@ -121,31 +111,59 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit }) {
     );
 }
 
-export default class News extends Component {
+export default class AllOrganisations extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            newsList: [],
+            organisationsList: [],
             loading: true
         };
+
+        this.currentUser = AuthService.getCurrentUser();
+    }
+
+    hasAccess(user) {
+        if(user === null) {
+            return false;
+        }
+        return user.roles.includes('ROLE_MODERATOR') || user.roles.includes('ROLE_ADMIN');
     }
 
     componentDidMount() {
         this.setState({loading: true});
-        fetch("/api/news")
-            .then((response) => response.json())
-            .then((data) => this.setState({newsList: data, loading: false}))
+        axios.get("/api/organisations", {
+            headers: {
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((data) => this.setState({organisationsList: data["data"], loading: false}))
+            .catch((error) => {
+                console.log(error.response.data);
+            })
     }
 
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        localStorage.setItem("infoMessage", "");
+        localStorage.setItem("organisationsMessage", "");
     }
 
     render() {
-        const {newsList, loading} = this.state;
+        if(!this.hasAccess(this.currentUser)) {
+            setTimeout(() => {
+                this.props.history.push("/news");
+                window.location.reload();
+            }, 2000);
+            return (
+                <div className={"col-md-12"}>
+                    <h1>Nu aveți dreptul de a accesa această pagină!</h1>
+                    <h1>Veți fi redirecționat...</h1>
+                </div>
+            );
+        }
+
+        const {organisationsList, loading} = this.state;
 
         if(loading) {
             return (
@@ -155,7 +173,7 @@ export default class News extends Component {
 
         return (
             <div className="container">
-                {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
+                {localStorage.getItem("organisationsMessage") !== "" && localStorage.getItem("organisationsMessage") !== null && (
                     <div
                         id={"notification"}
                         role="alert"
@@ -170,15 +188,15 @@ export default class News extends Component {
                         >
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        {localStorage.getItem("infoMessage")}
+                        {localStorage.getItem("organisationsMessage")}
                     </div>
                 )}
-                {newsList.length > 0 ? (
+                {organisationsList.length > 0 ? (
                     <>
                         <Pagination
-                            data={newsList}
-                            RenderComponent={NewsRepresentation}
-                            title="Secțiune știri"
+                            data={organisationsList}
+                            RenderComponent={OrganisationRepresentation}
+                            title="Organizații"
                             pageLimit={5}
                             dataLimit={5}
                         />
@@ -187,7 +205,7 @@ export default class News extends Component {
                         <br/>
                     </>
                 ) : (
-                    <h1>Nu a fost postată nicio știre!</h1>
+                    <h1>Momentan nu a fost creată nicio organizație!</h1>
                 )}
             </div>
         );

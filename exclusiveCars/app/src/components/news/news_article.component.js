@@ -3,7 +3,7 @@ import React, {Component} from "react";
 import {Button} from "reactstrap";
 import {Link} from "react-router-dom";
 
-import "../../styles/news.css";
+import "../../styles/pagination.css";
 import AuthService from "../../services/auth.service";
 import authHeader from '../../services/auth-header';
 
@@ -40,7 +40,7 @@ export default class NewsArticle extends Component {
                 Authorization: authHeader().Authorization
             },
         }).then(() => {
-            localStorage.setItem("newsMessage", "Articolul a fost șters cu succes!");
+            localStorage.setItem("infoMessage", "Articolul a fost șters cu succes!");
             this.props.history.push("/news");
         });
     }

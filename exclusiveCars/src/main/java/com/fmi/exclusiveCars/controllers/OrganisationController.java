@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/organisations")
 public class OrganisationController {
@@ -30,6 +31,12 @@ public class OrganisationController {
     @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> getOrganisation(@PathVariable Long id) {
         return organisationService.getOrganisation(id);
+    }
+
+    @GetMapping("/myOrganisation")
+    @PreAuthorize("hasRole('ORGANISATION')")
+    public ResponseEntity<?> getMyOrganisation() {
+        return organisationService.getMyOrganisation();
     }
 
     @PostMapping("/add")

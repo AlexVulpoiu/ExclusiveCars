@@ -78,6 +78,9 @@ export default class AddNews extends Component {
     }
 
     hasAccess(user) {
+        if(user === null) {
+            return false;
+        }
         return user.roles.includes('ROLE_MODERATOR') || user.roles.includes('ROLE_ADMIN');
     }
 
@@ -104,7 +107,7 @@ export default class AddNews extends Component {
                 }
             })
             .then(() => {
-                localStorage.setItem("newsMessage", "Articolul a fost adăugat cu succes!");
+                localStorage.setItem("infoMessage", "Articolul a fost adăugat cu succes!");
                 this.props.history.push("/news");
             })
             .catch((error) => {
@@ -130,9 +133,14 @@ export default class AddNews extends Component {
 
     render() {
         if(!this.hasAccess(this.currentUser)) {
+            setTimeout(() => {
+                this.props.history.push("/news");
+                window.location.reload();
+            }, 2000);
             return (
                 <div className={"col-md-12"}>
                     <h1>Nu aveți dreptul de a accesa această pagină!</h1>
+                    <h1>Veți fi redirecționat...</h1>
                 </div>
             );
         }

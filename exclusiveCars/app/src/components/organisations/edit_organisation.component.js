@@ -18,46 +18,34 @@ const required = value => {
     }
 };
 
-const vTitle = value => {
-    if(value.trim().length < 3 || value.trim().length > 100) {
+const vName = value => {
+    const re = new RegExp("^[A-Z].{2,29}$");
+    if(!re.test(value)) {
         return (
             <div className="alert alert-danger" role="alert">
-                Titlul trebuie să aibă între 3 și 100 de caractere!
+                Numele trebuie să înceapă cu literă mare și să aibă între 3 și 30 de caractere!
             </div>
         );
     }
 }
 
-const vContent = value => {
-    if(value.trim().length < 10 || value.trim().length > 10000) {
-        return (
-            <div className="alert alert-danger" role="alert">
-                Conținutul trebuie să aibă între 10 și 10000 de caractere!
-            </div>
-        );
-    }
-}
+export default class EditOrganisation extends Component {
 
-export default class EditNews extends Component {
-
-    emptyArticle = {
-        title: "",
-        content: ""
+    emptyOrganisation = {
+        name: ""
     }
 
     constructor(props) {
         super(props);
 
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.onChangeTitle = this.onChangeTitle.bind(this);
-        this.onChangeContent = this.onChangeContent.bind(this);
+        this.onChangeName = this.onChangeName.bind(this);
 
         this.currentUser = AuthService.getCurrentUser();
 
         this.state = {
-            newsArticle: null,
-            title: "",
-            content: "",
+            organisation: null,
+            name: "",
             loading: false,
             message: ""
         }
@@ -65,39 +53,33 @@ export default class EditNews extends Component {
 
     componentDidMount() {
         this.setState({loading: true});
-        fetch(`/api/news/${this.props.match.params.id}`)
-            .then((response) => response.json())
+
+        axios.get(`http://localhost:8090/api/organisations/myOrganisation`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
             .then((data) => {
-                this.setState({newsArticle: data, loading: false});
+                this.setState({organisationsList: data["data"], loading: false});
 
-                let newTitle = localStorage.getItem("newsTitleEdit");
-                if(newTitle !== "" && newTitle !== null) {
-                    this.setState({title: newTitle});
+                let newName = localStorage.getItem("organisationNameEdit");
+                if(newName !== "" && newName !== null) {
+                    this.setState({name: newName});
                 } else {
-                    this.setState({title: data["title"]});
+                    this.setState({name: data["data"]["name"]});
                 }
-
-                let newContent = localStorage.getItem("newsContentEdit");
-                if(newContent !== "" && newContent !== null) {
-                    this.setState({content: newContent});
-                } else {
-                    this.setState({content: data["content"]});
-                }
-
-                localStorage.setItem("newsTitleEdit", "");
-                localStorage.setItem("newsContentEdit", "");
-            });
+                localStorage.setItem("organisationNameEdit", "");
+            })
+            .catch((error) => {
+                console.log(error.response.data);
+            })
     }
 
-    onChangeTitle(e) {
+    onChangeName(e) {
         this.setState({
-            title: e.target.value
-        });
-    }
-
-    onChangeContent(e) {
-        this.setState({
-            content: e.target.value
+            name: e.target.value
         });
     }
 
@@ -105,7 +87,7 @@ export default class EditNews extends Component {
         if(user === null) {
             return false;
         }
-        return user.roles.includes('ROLE_MODERATOR') || user.roles.includes('ROLE_ADMIN');
+        return user.roles.includes('ROLE_ORGANISATION');
     }
 
     async handleSubmit(e) {
@@ -119,11 +101,10 @@ export default class EditNews extends Component {
         this.form.validateAll();
 
         if(this.checkBtn.context._errors.length === 0) {
-            const newArticle = this.emptyArticle
-            newArticle["title"] = this.state.title.trim()
-            newArticle["content"] = this.state.content.trim()
+            const newOrganisation = this.emptyOrganisation
+            newOrganisation["name"] = this.state.name.trim()
 
-            await axios.put(`http://localhost:8090/api/news/edit/${this.state.newsArticle["id"]}`, newArticle, {
+            await axios.put("http://localhost:8090/api/organisations/edit", newOrganisation, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -131,16 +112,17 @@ export default class EditNews extends Component {
                 }
             })
                 .then(() => {
-                    localStorage.setItem("infoMessage", "Articolul a fost editat cu succes!");
+                    localStorage.setItem("infoMessage", "Organizația a fost editată cu succes!");
+                    // TODO: schimbă news cu altceva
                     this.props.history.push("/news");
                 })
                 .catch((error) => {
-                    localStorage.setItem("newsEditMessage", error.response.data);
-                    localStorage.setItem("newsTitleEdit", newArticle["title"]);
-                    localStorage.setItem("newsContentEdit", newArticle["content"]);
+                    console.log(error);
+                    // localStorage.setItem("organisationsEditMessage", error.response.data);
+                    localStorage.setItem("organisationNameEdit", newOrganisation["name"]);
 
-                    this.props.history.push(`/news/edit/${this.state.newsArticle["id"]}`);
-                    window.location.reload();
+                    // this.props.history.push(`/organisation/edit`);
+                    // window.location.reload();
                 });
         } else {
             this.setState({
@@ -152,7 +134,7 @@ export default class EditNews extends Component {
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        localStorage.setItem("newsEditMessage", "");
+        localStorage.setItem("organisationsEditMessage", "");
     }
 
     render() {
@@ -172,7 +154,7 @@ export default class EditNews extends Component {
         return (
             <div className={"col-md-12"}>
                 <div>
-                    {localStorage.getItem("newsEditMessage") !== null && localStorage.getItem("newsEditMessage") !== "" && (
+                    {localStorage.getItem("organisationsEditMessage") !== null && localStorage.getItem("organisationsEditMessage") !== "" && (
                         <div
                             id={"notification"}
                             role="alert"
@@ -187,11 +169,11 @@ export default class EditNews extends Component {
                             >
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            {localStorage.getItem("newsEditMessage")}
+                            {localStorage.getItem("organisationsEditMessage")}
                         </div>
                     )}
 
-                    <h2 style={{alignSelf: "center"}}>Editare știre</h2>
+                    <h2 style={{alignSelf: "center"}}>Editare organizație</h2>
 
                     <Form
                         onSubmit={this.handleSubmit}
@@ -200,25 +182,14 @@ export default class EditNews extends Component {
                         }}
                     >
                         <div className={"form-group"}>
-                            <label htmlFor={"title"}>Titlu</label>
+                            <label htmlFor={"name"}>Nume</label>
                             <Input
                                 type={"text"}
                                 className={"form-control"}
-                                name={"title"}
-                                value={this.state.title}
-                                onChange={this.onChangeTitle}
-                                validations={[required, vTitle]}
-                            />
-                        </div>
-
-                        <div className={"form-group"}>
-                            <label htmlFor={"content"}>Conținut</label>
-                            <textarea
-                                className={"form-control"}
-                                name={"content"}
-                                value={this.state.content}
-                                onChange={this.onChangeContent}
-                                rows={10}
+                                name={"name"}
+                                value={this.state.name}
+                                onChange={this.onChangeName}
+                                validations={[required, vName]}
                             />
                         </div>
 

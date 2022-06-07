@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.OrganisationDto;
+import com.fmi.exclusiveCars.dto.OrganisationResponseDto;
 import com.fmi.exclusiveCars.model.ERole;
 import com.fmi.exclusiveCars.model.Organisation;
 import com.fmi.exclusiveCars.model.Role;
@@ -40,10 +41,19 @@ public class OrganisationService {
 
         Collection<Organisation> organisations = organisationRepository.findAll();
         if(organisations.isEmpty()) {
-            return new ResponseEntity<>("There is no organisation created yet!", HttpStatus.OK);
+            return new ResponseEntity<>("Momentan nu există nicio organizație!", HttpStatus.OK);
         }
 
-        List<Organisation> organisationList = new ArrayList<>(organisations);
+        List<OrganisationResponseDto> organisationList = new ArrayList<>();
+        for(Organisation organisation: organisations) {
+            OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
+                    .id(organisation.getId())
+                    .name(organisation.getName())
+                    .owner(organisation.getOwner().getFirstName() + " " + organisation.getOwner().getLastName())
+                    .ownerId(organisation.getOwner().getId())
+                    .build();
+            organisationList.add(organisationResponseDto);
+        }
         return new ResponseEntity<>(organisationList, HttpStatus.OK);
     }
 
@@ -57,22 +67,57 @@ public class OrganisationService {
 
             Optional<Organisation> organisation = organisationRepository.findById(id);
             if(organisation.isEmpty()) {
-                return new ResponseEntity<>("This organisation doesn't exist!", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Această organizație nu există!", HttpStatus.NOT_FOUND);
             }
             if(user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             if(!userHasRole(user.get(), ERole.ROLE_ADMIN)
                     && !userHasRole(user.get(), ERole.ROLE_MODERATOR)
                     && !organisation.get().getOwner().equals(user.get())) {
-                return new ResponseEntity<>("You can't access this page!", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai permisiunea de a accesa această pagină!", HttpStatus.FORBIDDEN);
             }
 
-            return new ResponseEntity<>(organisation.get(), HttpStatus.OK);
+            Organisation currentOrganisation = organisation.get();
+
+            OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
+                    .id(currentOrganisation.getId())
+                    .name(currentOrganisation.getName())
+                    .owner(currentOrganisation.getOwner().getFirstName() + " " + currentOrganisation.getOwner().getLastName())
+                    .ownerId(currentOrganisation.getOwner().getId())
+                    .build();
+
+            return new ResponseEntity<>(organisationResponseDto, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> getMyOrganisation() {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+            }
+
+            Organisation organisation = user.get().getOrganisation();
+            OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
+                    .id(organisation.getId())
+                    .name(organisation.getName())
+                    .owner(organisation.getOwner().getFirstName() + " " + organisation.getOwner().getLastName())
+                    .ownerId(organisation.getOwner().getId())
+                    .build();
+
+            return new ResponseEntity<>(organisationResponseDto, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> addOrganisation(OrganisationDto organisationDto) {
@@ -84,16 +129,16 @@ public class OrganisationService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if(user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             if(user.get().getOrganisation() != null) {
-                return new ResponseEntity<>("You can't create more than one organisation!", HttpStatus.METHOD_NOT_ALLOWED);
+                return new ResponseEntity<>("Poți deține o singură organizație!", HttpStatus.METHOD_NOT_ALLOWED);
             }
 
             Optional<Organisation> organisation = organisationRepository.findByName(organisationDto.getName());
             if(organisation.isPresent()) {
-                return new ResponseEntity<>("There is already an organisation with this name!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Acest nume este deținut deja de altă organizație!", HttpStatus.BAD_REQUEST);
             }
 
             User currentUser = user.get();
@@ -105,10 +150,10 @@ public class OrganisationService {
             currentUser.setOrganisation(newOrganisation);
             userRepository.save(currentUser);
 
-            return new ResponseEntity<>("Organisation successfully added!", HttpStatus.OK);
+            return new ResponseEntity<>("Organizația a fost adăugată cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> editOrganisation(OrganisationDto organisationDto) {
@@ -120,33 +165,33 @@ public class OrganisationService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             User currentUser = user.get();
             if(currentUser.getOrganisation() == null) {
-                return new ResponseEntity<>("You are not allowed to perform this operation!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Nu ai permisiunea de a efectua această operație!", HttpStatus.BAD_REQUEST);
             }
 
             Long organisationId = currentUser.getOrganisation().getId();
             Optional<Organisation> organisation = organisationRepository.findById(organisationId);
             if(organisation.isEmpty()) {
-                return new ResponseEntity<>("You are not allowed to perform this operation!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Nu ai permisiunea de a efectua această operație!", HttpStatus.BAD_REQUEST);
             }
 
             Optional<Organisation> organisationByName = organisationRepository.findByName(organisationDto.getName());
             if(organisationByName.isPresent() && !organisation.get().equals(organisationByName.get())) {
-                return new ResponseEntity<>("There is already an organisation with this name!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Acest nume este deținut deja de altă organizație!", HttpStatus.BAD_REQUEST);
             }
 
             Organisation currentOrganisation = organisation.get();
             currentOrganisation.setName(organisationDto.getName());
             organisationRepository.save(currentOrganisation);
 
-            return new ResponseEntity<>("The organisation was successfully deleted!", HttpStatus.OK);
+            return new ResponseEntity<>("Organizația a fost editată cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteOrganisation(Long id) {
@@ -158,12 +203,12 @@ public class OrganisationService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             Optional<Organisation> organisation = organisationRepository.findById(id);
             if(organisation.isEmpty()) {
-                return new ResponseEntity<>("This organisation doesn't exist!", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Această rganizație nu există!", HttpStatus.NOT_FOUND);
             }
 
             Organisation currentOrganisation = organisation.get();
@@ -179,13 +224,13 @@ public class OrganisationService {
                 currentOrganisation.setOwner(null);
                 organisationRepository.delete(currentOrganisation);
 
-                return new ResponseEntity<>("The organisation was successfully deleted!", HttpStatus.OK);
+                return new ResponseEntity<>("Organizația a fost ștearsă cu succes!", HttpStatus.OK);
             }
 
-            return new ResponseEntity<>("You can't perform this action!", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Nu ai permisiunea de a efectua această operație!", HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     private boolean userHasRole(User user, ERole role) {

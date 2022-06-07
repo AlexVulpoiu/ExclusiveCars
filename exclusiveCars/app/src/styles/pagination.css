@@ -47,3 +47,7 @@
     box-shadow: none;
     color: #999;
 }
+
+.organisationName:hover {
+    background-color: #ffc966;
+}
