@@ -21,6 +21,7 @@ import AddOrganisation from "./components/organisations/add_organisation.compone
 import EditOrganisation from "./components/organisations/edit_organisation.component";
 import Organisation from "./components/organisations/organisation.component";
 import MyOrganisation from "./components/organisations/my_organisation.component";
+import Navbar from "./components/side_menu/Navbar";
 
 class App extends Component {
     constructor(props) {
@@ -62,14 +63,19 @@ class App extends Component {
         return (
             <div>
                 <nav className="navbar navbar-expand navbar-dark bg-dark" style={{position: "sticky", top: 0, zIndex: 5}}>
+                    <Navbar />
                     <Link to={"/"} className="navbar-brand">
                         <img src={Image} style={imageStyle} alt={":((("}/>
                     </Link>
                     <div className="navbar-nav mr-auto">
+                        {/*<li className="nav-item">*/}
+                        {/*    <Link to={"/news"} className="nav-link">*/}
+                        {/*        Secțiune știri*/}
+                        {/*    </Link>*/}
+                        {/*</li>*/}
+
                         <li className="nav-item">
-                            <Link to={"/news"} className="nav-link">
-                                Secțiune știri
-                            </Link>
+                            <span style={{color: "white", fontSize: "30px"}}>ExclusiveCars</span>
                         </li>
 
                         {(isModerator || isAdmin) && (
