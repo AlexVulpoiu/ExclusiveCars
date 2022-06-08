@@ -34,7 +34,7 @@ public class RentalCenterService {
     public ResponseEntity<?> getAllRentalCenters() {
         Collection<RentalCenter> rentalCenters = rentalCenterRepository.findAll();
         if(rentalCenters.isEmpty()) {
-            return new ResponseEntity<>("There are no rental centers listed yet!", HttpStatus.OK);
+            return new ResponseEntity<>("Încă nu a fost adăugat niciun centru de închiriere!", HttpStatus.OK);
         }
 
         List<RentalCenter> rentalCenterList = new ArrayList<>(rentalCenters);
@@ -72,7 +72,7 @@ public class RentalCenterService {
             return new ResponseEntity<>(rentalCenterResponseDto, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("The rental center you asked for doesn't exist!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Centrul de închirieri căutat nu există!", HttpStatus.NOT_FOUND);
     }
 
     public ResponseEntity<?> addRentalCenter(RentalCenterDto rentalCenterDto) {
@@ -80,7 +80,7 @@ public class RentalCenterService {
         Optional<RentalCenter> rentalCenterByEmail = rentalCenterRepository.findByEmail(rentalCenterDto.getEmail());
         Optional<RentalCenter> rentalCenterByPhone = rentalCenterRepository.findByPhone(rentalCenterDto.getPhone());
         if(rentalCenterByName.isPresent() || rentalCenterByEmail.isPresent() || rentalCenterByPhone.isPresent()) {
-            return new ResponseEntity<>("There is already a rental center with this information!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Există deja un centru de închirieri cu aceleași informații!", HttpStatus.BAD_REQUEST);
         }
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -90,7 +90,7 @@ public class RentalCenterService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             Organisation organisation = user.get().getOrganisation();
@@ -108,7 +108,7 @@ public class RentalCenterService {
             organisation.getRentalCenters().add(rentalCenterToAdd);
             organisationRepository.save(organisation);
 
-            return new ResponseEntity<>("The rental center was successfully added!", HttpStatus.OK);
+            return new ResponseEntity<>("Centrul de închirieri a fost adăugat cu succes!", HttpStatus.OK);
         }
 
         return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
@@ -128,7 +128,7 @@ public class RentalCenterService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             if(actualRentalCenter.isPresent()) {
@@ -140,13 +140,13 @@ public class RentalCenterService {
                 Organisation rentalCenterOrganisation = currentRentalCenter.getOrganisation();
                 if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
                         && organisation != rentalCenterOrganisation) {
-                    return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                    return new ResponseEntity<>("Nu ai dreptul de a efectua această operație!", HttpStatus.FORBIDDEN);
                 }
 
                 if((rentalCenterByName.isPresent() && rentalCenterByName.get() != actualRentalCenter.get())
                         || (rentalCenterByEmail.isPresent() && rentalCenterByEmail.get() != actualRentalCenter.get())
                         || (rentalCenterByPhone.isPresent() && rentalCenterByPhone.get() != actualRentalCenter.get())) {
-                    return new ResponseEntity<>("There is already a rental center with this information!", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Există deja un centrude închirieri cu aceaste informații!", HttpStatus.BAD_REQUEST);
                 }
 
                 currentRentalCenter.setName(rentalCenterDto.getName());
@@ -156,20 +156,20 @@ public class RentalCenterService {
                 currentRentalCenter.setPhone(rentalCenterDto.getPhone());
 
                 rentalCenterRepository.save(currentRentalCenter);
-                return new ResponseEntity<>("The rental center was successfully edited!", HttpStatus.OK);
+                return new ResponseEntity<>("Centrul de închirieri a fost editat cu succes!", HttpStatus.OK);
             }
 
-            return new ResponseEntity<>("The rental center you have requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Centrul de închirieri căutat nu există!", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteRentalCenter(Long id) {
         Optional<RentalCenter> rentalCenter = rentalCenterRepository.findById(id);
 
         if(rentalCenter.isEmpty()) {
-            return new ResponseEntity<>("The rental center you requested to delete doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest centru de închirieri nu există!", HttpStatus.NOT_FOUND);
         }
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -179,7 +179,7 @@ public class RentalCenterService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             RentalCenter currentRentalCenter = rentalCenter.get();
@@ -188,7 +188,7 @@ public class RentalCenterService {
 
             if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
                     && organisation != currentRentalCenter.getOrganisation()) {
-                return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai dreptul de a efectua această acțiune!", HttpStatus.FORBIDDEN);
             }
 
             if(currentRentalCenter.getOrganisation() == organisation) {
@@ -197,10 +197,10 @@ public class RentalCenterService {
 
             currentRentalCenter.setOrganisation(null);
             rentalCenterRepository.delete(currentRentalCenter);
-            return new ResponseEntity<>("The rental center was successfully deleted!", HttpStatus.OK);
+            return new ResponseEntity<>("Centrul de închirieri a fost șters cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     private boolean userHasRole(User user, ERole role) {

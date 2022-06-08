@@ -21,7 +21,11 @@ import AddOrganisation from "./components/organisations/add_organisation.compone
 import EditOrganisation from "./components/organisations/edit_organisation.component";
 import Organisation from "./components/organisations/organisation.component";
 import MyOrganisation from "./components/organisations/my_organisation.component";
+
 import Navbar from "./components/side_menu/Navbar";
+
+import AutoService from "./components/auto_services/autoService.component";
+import RentalCenter from "./components/rental_centers/rentalCenter.component";
 
 class App extends Component {
     constructor(props) {
@@ -68,39 +72,10 @@ class App extends Component {
                         <img src={Image} style={imageStyle} alt={":((("}/>
                     </Link>
                     <div className="navbar-nav mr-auto">
-                        {/*<li className="nav-item">*/}
-                        {/*    <Link to={"/news"} className="nav-link">*/}
-                        {/*        Secțiune știri*/}
-                        {/*    </Link>*/}
-                        {/*</li>*/}
 
                         <li className="nav-item">
                             <span style={{color: "white", fontSize: "30px"}}>ExclusiveCars</span>
                         </li>
-
-                        {(isModerator || isAdmin) && (
-                            <li className="nav-item">
-                                <Link to={"/organisations"} className="nav-link">
-                                    Organizații
-                                </Link>
-                            </li>
-                        )}
-
-                        {currentUser && this.state.isOnlyUser && (
-                            <li className="nav-item">
-                                <Link to={"/organisations/add"} className="nav-link">
-                                    Creează organizație
-                                </Link>
-                            </li>
-                        )}
-
-                        {currentUser && this.state.isOrganisation && (
-                            <li className="nav-item">
-                                <Link to={"/organisations/myOrganisation"} className="nav-link">
-                                    Organizația mea
-                                </Link>
-                            </li>
-                        )}
                     </div>
 
                     {currentUser ? (
@@ -149,6 +124,10 @@ class App extends Component {
                         <Route exact path={"/organisations/edit"} component={EditOrganisation} />
                         <Route exact path={"/organisations/myOrganisation"} component={MyOrganisation} />
                         <Route exact path={"/organisations/:id"} component={Organisation} />
+
+                        <Route exact path={"/autoServices/:id"} component={AutoService} />
+
+                        <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
                     </Switch>
                 </div>
             </div>

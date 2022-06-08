@@ -34,7 +34,7 @@ public class AutoServiceService {
     public ResponseEntity<?> getAllAutoServices() {
         Collection<AutoService> autoServices = autoServiceRepository.findAll();
         if(autoServices.isEmpty()) {
-            return new ResponseEntity<>("There are no services listed yet!", HttpStatus.OK);
+            return new ResponseEntity<>("Nu a fost adăugat niciun service auto", HttpStatus.OK);
         }
 
         List<AutoService> autoServiceList = new ArrayList<>(autoServices);
@@ -77,7 +77,7 @@ public class AutoServiceService {
             return new ResponseEntity<>(autoServiceResponseDto, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("The service you asked for doesn't exist!", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Acest service auto nu există!", HttpStatus.NOT_FOUND);
     }
 
     public ResponseEntity<?> addAutoService(AutoServiceDto autoServiceDto) {
@@ -85,7 +85,7 @@ public class AutoServiceService {
         Optional<AutoService> autoServiceByEmail = autoServiceRepository.findByEmail(autoServiceDto.getEmail());
         Optional<AutoService> autoServiceByPhone = autoServiceRepository.findByPhone(autoServiceDto.getPhone());
         if(autoServiceByName.isPresent() || autoServiceByEmail.isPresent() || autoServiceByPhone.isPresent()) {
-            return new ResponseEntity<>("There is already an auto service with this information!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Există deja un service auto cu aceste informații de contact!", HttpStatus.BAD_REQUEST);
         }
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -95,7 +95,7 @@ public class AutoServiceService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             Organisation organisation = user.get().getOrganisation();
@@ -114,10 +114,10 @@ public class AutoServiceService {
             organisation.getAutoServices().add(autoServiceToAdd);
             organisationRepository.save(organisation);
 
-            return new ResponseEntity<>("The auto service was added successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("Service-ul auto a fost adăugat cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> editAutoService(Long id, AutoServiceDto autoServiceDto) {
@@ -134,7 +134,7 @@ public class AutoServiceService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             if (actualAutoService.isPresent()) {
@@ -146,13 +146,13 @@ public class AutoServiceService {
                 Organisation serviceOrganisation = currentAutoService.getOrganisation();
                 if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
                         && organisation != serviceOrganisation) {
-                    return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                    return new ResponseEntity<>("Nu ai permisiunea de a efectua această operație!", HttpStatus.FORBIDDEN);
                 }
 
                 if ((autoServiceByName.isPresent() && autoServiceByName.get() != actualAutoService.get())
                         || (autoServiceByEmail.isPresent() && autoServiceByEmail.get() != actualAutoService.get())
                         || (autoServiceByPhone.isPresent() && autoServiceByPhone.get() != actualAutoService.get())) {
-                    return new ResponseEntity<>("There is already an auto service with this information!", HttpStatus.BAD_REQUEST);
+                    return new ResponseEntity<>("Există deja un service auto cu aceste informații de contact!", HttpStatus.BAD_REQUEST);
                 }
 
                 currentAutoService.setName(autoServiceDto.getName());
@@ -163,20 +163,20 @@ public class AutoServiceService {
                 currentAutoService.setPhone(autoServiceDto.getPhone());
 
                 autoServiceRepository.save(currentAutoService);
-                return new ResponseEntity<>("The auto service was successfully edited!", HttpStatus.OK);
+                return new ResponseEntity<>("Service-ul auto a fost editat cu succes!", HttpStatus.OK);
             }
 
-            return new ResponseEntity<>("The auto service you requested to edit doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest service auto nu există!", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteAutoService(Long id) {
         Optional<AutoService> autoService = autoServiceRepository.findById(id);
 
         if(autoService.isEmpty()) {
-            return new ResponseEntity<>("The auto service you requested to delete doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest service auto nu există!", HttpStatus.NOT_FOUND);
         }
 
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -186,7 +186,7 @@ public class AutoServiceService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
             }
 
             AutoService currentAutoService = autoService.get();
@@ -195,7 +195,7 @@ public class AutoServiceService {
 
             if(!userHasRole(currentUser, ERole.ROLE_ADMIN) && !userHasRole(currentUser, ERole.ROLE_MODERATOR)
                     && organisation != currentAutoService.getOrganisation()) {
-                return new ResponseEntity<>("You can't perform this operation!", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai permisiunea de a efectua această operație!", HttpStatus.FORBIDDEN);
             }
 
             if(currentAutoService.getOrganisation() == organisation) {
@@ -204,10 +204,10 @@ public class AutoServiceService {
 
             currentAutoService.setOrganisation(null);
             autoServiceRepository.delete(currentAutoService);
-            return new ResponseEntity<>("The auto service was successfully deleted!", HttpStatus.OK);
+            return new ResponseEntity<>("Service-ul auto a fost șters cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
     private boolean userHasRole(User user, ERole role) {

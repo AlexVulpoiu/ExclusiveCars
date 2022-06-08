@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,4 +22,10 @@ public class OrganisationResponseDto {
 
     @JsonProperty("owner_id")
     private Long ownerId;
+
+    @JsonProperty("auto_services")
+    private List<AutoServiceResponseDto> autoServices;
+
+    @JsonProperty("rental_centers")
+    private List<RentalCenterResponseDto> rentalCenters;
 }

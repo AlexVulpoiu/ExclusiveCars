@@ -1,11 +1,10 @@
 package com.fmi.exclusiveCars.services;
 
+import com.fmi.exclusiveCars.dto.AutoServiceResponseDto;
 import com.fmi.exclusiveCars.dto.OrganisationDto;
 import com.fmi.exclusiveCars.dto.OrganisationResponseDto;
-import com.fmi.exclusiveCars.model.ERole;
-import com.fmi.exclusiveCars.model.Organisation;
-import com.fmi.exclusiveCars.model.Role;
-import com.fmi.exclusiveCars.model.User;
+import com.fmi.exclusiveCars.dto.RentalCenterResponseDto;
+import com.fmi.exclusiveCars.model.*;
 import com.fmi.exclusiveCars.repository.OrganisationRepository;
 import com.fmi.exclusiveCars.repository.RoleRepository;
 import com.fmi.exclusiveCars.repository.UserRepository;
@@ -46,11 +45,24 @@ public class OrganisationService {
 
         List<OrganisationResponseDto> organisationList = new ArrayList<>();
         for(Organisation organisation: organisations) {
+
+            List<AutoServiceResponseDto> autoServiceList = new ArrayList<>();
+            for(AutoService autoService: organisation.getAutoServices()) {
+                autoServiceList.add(mapAutoServiceToAutoServiceResponseDto(autoService));
+            }
+
+            List<RentalCenterResponseDto> rentalCenterList = new ArrayList<>();
+            for(RentalCenter rentalCenter: organisation.getRentalCenters()) {
+                rentalCenterList.add(mapRentalCenterToRentalCenterResponseDto(rentalCenter));
+            }
+
             OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
                     .id(organisation.getId())
                     .name(organisation.getName())
                     .owner(organisation.getOwner().getFirstName() + " " + organisation.getOwner().getLastName())
                     .ownerId(organisation.getOwner().getId())
+                    .autoServices(autoServiceList)
+                    .rentalCenters(rentalCenterList)
                     .build();
             organisationList.add(organisationResponseDto);
         }
@@ -81,11 +93,23 @@ public class OrganisationService {
 
             Organisation currentOrganisation = organisation.get();
 
+            List<AutoServiceResponseDto> autoServiceList = new ArrayList<>();
+            for(AutoService autoService: currentOrganisation.getAutoServices()) {
+                autoServiceList.add(mapAutoServiceToAutoServiceResponseDto(autoService));
+            }
+
+            List<RentalCenterResponseDto> rentalCenterList = new ArrayList<>();
+            for(RentalCenter rentalCenter: currentOrganisation.getRentalCenters()) {
+                rentalCenterList.add(mapRentalCenterToRentalCenterResponseDto(rentalCenter));
+            }
+
             OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
                     .id(currentOrganisation.getId())
                     .name(currentOrganisation.getName())
                     .owner(currentOrganisation.getOwner().getFirstName() + " " + currentOrganisation.getOwner().getLastName())
                     .ownerId(currentOrganisation.getOwner().getId())
+                    .autoServices(autoServiceList)
+                    .rentalCenters(rentalCenterList)
                     .build();
 
             return new ResponseEntity<>(organisationResponseDto, HttpStatus.OK);
@@ -107,11 +131,24 @@ public class OrganisationService {
             }
 
             Organisation organisation = user.get().getOrganisation();
+
+            List<AutoServiceResponseDto> autoServiceList = new ArrayList<>();
+            for(AutoService autoService: organisation.getAutoServices()) {
+                autoServiceList.add(mapAutoServiceToAutoServiceResponseDto(autoService));
+            }
+
+            List<RentalCenterResponseDto> rentalCenterList = new ArrayList<>();
+            for(RentalCenter rentalCenter: organisation.getRentalCenters()) {
+                rentalCenterList.add(mapRentalCenterToRentalCenterResponseDto(rentalCenter));
+            }
+
             OrganisationResponseDto organisationResponseDto = OrganisationResponseDto.builder()
                     .id(organisation.getId())
                     .name(organisation.getName())
                     .owner(organisation.getOwner().getFirstName() + " " + organisation.getOwner().getLastName())
                     .ownerId(organisation.getOwner().getId())
+                    .autoServices(autoServiceList)
+                    .rentalCenters(rentalCenterList)
                     .build();
 
             return new ResponseEntity<>(organisationResponseDto, HttpStatus.OK);
@@ -256,5 +293,30 @@ public class OrganisationService {
         Optional<Role> organisationRole = roleRepository.findByName(ERole.ROLE_ORGANISATION);
         organisationRole.ifPresent(role -> user.getRoles().remove(role));
         userRepository.save(user);
+    }
+
+    private AutoServiceResponseDto mapAutoServiceToAutoServiceResponseDto(AutoService autoService) {
+        return AutoServiceResponseDto.builder()
+                .id(autoService.getId())
+                .name(autoService.getName())
+                .city(autoService.getCity())
+                .address(autoService.getAddress())
+                .numberOfStations(autoService.getNumberOfStations())
+                .email(autoService.getEmail())
+                .phone(autoService.getPhone())
+                .organisation(autoService.getOrganisation().getName())
+                .build();
+    }
+
+    private RentalCenterResponseDto mapRentalCenterToRentalCenterResponseDto(RentalCenter rentalCenter) {
+        return RentalCenterResponseDto.builder()
+                .id(rentalCenter.getId())
+                .name(rentalCenter.getName())
+                .city(rentalCenter.getCity())
+                .address(rentalCenter.getAddress())
+                .email(rentalCenter.getEmail())
+                .phone(rentalCenter.getPhone())
+                .organisation(rentalCenter.getOrganisation().getName())
+                .build();
     }
 }
