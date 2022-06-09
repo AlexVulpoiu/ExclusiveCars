@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,13 +17,19 @@ public class ServiceAppointmentResponseDto {
 
     private String user;
 
+    @JsonProperty("service_id")
+    private Long autoServiceId;
+
+    @JsonProperty("auto_service")
     private String autoService;
 
+    @JsonProperty("problem_description")
     private String problemDescription;
 
     private LocalDate date;
 
     private LocalTime hour;
 
+    @JsonProperty("station_number")
     private Integer stationNumber;
 }

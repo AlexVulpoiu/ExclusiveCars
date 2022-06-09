@@ -26,6 +26,8 @@ import Navbar from "./components/side_menu/Navbar";
 
 import AutoService from "./components/auto_services/autoService.component";
 import RentalCenter from "./components/rental_centers/rentalCenter.component";
+import MakeServiceAppointment from "./components/service_appointments/make_service_appointment.component";
+import MyServiceAppointments from "./components/service_appointments/my_service_appointments.component";
 
 class App extends Component {
     constructor(props) {
@@ -128,6 +130,9 @@ class App extends Component {
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
 
                         <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
+
+                        <Route exact path={"/serviceAppointments"} component={MyServiceAppointments} />
+                        <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />
                     </Switch>
                 </div>
             </div>

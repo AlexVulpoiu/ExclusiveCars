@@ -140,6 +140,9 @@ export default class AutoService extends Component {
                         <ul>
                             <li>dispunem de {autoService["numberOfStations"]} stații de lucru</li>
                             <li>facem parte din organizația {autoService["organisation"]}</li>
+                            <li>
+                                program: {autoService["startHour"].substring(0, 5) + " - " + autoService["endHour"].substring(0, 5)}
+                            </li>
                         </ul>
 
                         <br/>
@@ -153,7 +156,7 @@ export default class AutoService extends Component {
                         <br/>
 
                         {this.currentUser.roles.length === 1 &&
-                        (<Button color={"success"} tag={Link} to={`/serviceAppointments/${autoService["id"]}`}>
+                        (<Button color={"success"} tag={Link} to={`/serviceAppointments/makeAppointment/${autoService["id"]}`}>
                             Efectuează o programare &nbsp; <BsIcons.BsFillCalendarCheckFill />
                         </Button>)}
 
@@ -161,7 +164,7 @@ export default class AutoService extends Component {
                                 || this.currentUser.roles.includes("ROLE_ADMIN")
                                 || this.currentUser.roles.includes("ROLE_MODERATOR")) &&
                             (<Button color={"success"} tag={Link} to={`/serviceAppointments/${autoService["id"]}`}>
-                                Vezi programările &nbsp; <BsIcons.BsFillCalendarCheckFill />
+                                Vezi programările &nbsp; <BsIcons.BsCalendar3 />
                             </Button>)}
                     </div>
 

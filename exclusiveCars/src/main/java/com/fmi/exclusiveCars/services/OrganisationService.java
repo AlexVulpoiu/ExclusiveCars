@@ -302,6 +302,8 @@ public class OrganisationService {
                 .city(autoService.getCity())
                 .address(autoService.getAddress())
                 .numberOfStations(autoService.getNumberOfStations())
+                .startHour(autoService.getStartHour())
+                .endHour(autoService.getEndHour())
                 .email(autoService.getEmail())
                 .phone(autoService.getPhone())
                 .organisation(autoService.getOrganisation().getName())

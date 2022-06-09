@@ -4,11 +4,13 @@ import com.fmi.exclusiveCars.dto.ServiceAppointmentDto;
 import com.fmi.exclusiveCars.services.ServiceAppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/serviceAppointments")
 public class ServiceAppointmentController {
@@ -26,13 +28,12 @@ public class ServiceAppointmentController {
     }
 
     @GetMapping("/{autoServiceId}")
-    @PreAuthorize("hasRole('ORGANISATION') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> getAppointmentsForAutoService(@PathVariable Long autoServiceId) {
         return serviceAppointmentService.getAppointmentsForAutoService(autoServiceId);
     }
 
     @PostMapping("/makeAppointment/{autoServiceId}")
-    public ResponseEntity<?> makeAppointmentForAutoService(@PathVariable Long autoServiceId, @Valid @RequestBody ServiceAppointmentDto serviceAppointmentDto) {
+    public ResponseEntity<?> makeAppointmentForAutoService(@PathVariable Long autoServiceId, @Valid @RequestBody ServiceAppointmentDto serviceAppointmentDto) throws MessagingException, UnsupportedEncodingException {
         return serviceAppointmentService.makeAppointmentForAutoService(autoServiceId, serviceAppointmentDto);
     }
 

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +31,14 @@ public class AutoServiceDto {
     @Min(value = 0, message = "The number of stations can't be negative or 0!")
     @JsonProperty("number_of_stations")
     private Integer numberOfStations;
+
+    @NotNull
+    @JsonProperty("start_hour")
+    private LocalTime startHour;
+
+    @NotNull
+    @JsonProperty("end_hour")
+    private LocalTime endHour;
 
     @NotBlank(message = "The email must not be blank!")
     @Size(max = 100, message = "Email size should be at most 100 characters!")

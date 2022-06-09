@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +22,10 @@ public class AutoServiceResponseDto {
     private String address;
 
     private Integer numberOfStations;
+
+    private LocalTime startHour;
+
+    private LocalTime endHour;
 
     private String email;
 

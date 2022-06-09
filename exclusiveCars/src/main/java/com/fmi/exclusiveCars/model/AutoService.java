@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,14 @@ public class AutoService {
     @Column(name = "number_of_stations")
     @JsonProperty("number_of_stations")
     private Integer numberOfStations;
+
+    @NotNull
+    @Column(name = "start_hour")
+    private LocalTime startHour;
+
+    @NotNull
+    @Column(name = "end_hour")
+    private LocalTime endHour;
 
     @NotBlank
     @Size(max = 100)

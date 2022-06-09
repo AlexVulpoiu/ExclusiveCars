@@ -49,6 +49,8 @@ public class AutoServiceService {
                     .email(autoService.getEmail())
                     .phone(autoService.getPhone())
                     .numberOfStations(autoService.getNumberOfStations())
+                    .startHour(autoService.getStartHour())
+                    .endHour(autoService.getEndHour())
                     .organisation(autoService.getOrganisation().getName())
                     .build();
             autoServiceResponseDtoList.add(autoServiceResponseDto);
@@ -71,6 +73,8 @@ public class AutoServiceService {
                     .email(currentAutoService.getEmail())
                     .phone(currentAutoService.getPhone())
                     .numberOfStations(currentAutoService.getNumberOfStations())
+                    .startHour(currentAutoService.getStartHour())
+                    .endHour(currentAutoService.getEndHour())
                     .organisation(currentAutoService.getOrganisation().getName())
                     .build();
 
@@ -105,6 +109,8 @@ public class AutoServiceService {
                     .city(autoServiceDto.getCity())
                     .address(autoServiceDto.getAddress())
                     .numberOfStations(autoServiceDto.getNumberOfStations())
+                    .startHour(autoServiceDto.getStartHour())
+                    .endHour(autoServiceDto.getEndHour())
                     .email(autoServiceDto.getEmail())
                     .phone(autoServiceDto.getPhone())
                     .organisation(organisation)
@@ -159,6 +165,8 @@ public class AutoServiceService {
                 currentAutoService.setCity(autoServiceDto.getCity());
                 currentAutoService.setAddress(autoServiceDto.getAddress());
                 currentAutoService.setNumberOfStations(autoServiceDto.getNumberOfStations());
+                currentAutoService.setStartHour(autoServiceDto.getStartHour());
+                currentAutoService.setEndHour(autoServiceDto.getEndHour());
                 currentAutoService.setEmail(autoServiceDto.getEmail());
                 currentAutoService.setPhone(autoServiceDto.getPhone());
 

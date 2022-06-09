@@ -3,6 +3,7 @@ package com.fmi.exclusiveCars.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -28,7 +29,7 @@ public class ServiceAppointment {
     @MapsId("serviceId")
     private AutoService autoService;
 
-    @NotNull
+    @NotBlank
     @Size(max = 200)
     @Column(name = "problem_description", length = 200)
     private String problemDescription;

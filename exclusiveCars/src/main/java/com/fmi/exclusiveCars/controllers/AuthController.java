@@ -197,11 +197,11 @@ public class AuthController {
         String toAddress = user.getEmail();
         String fromAddress = "exclusivecars22@outlook.com";
         String senderName = "ExclusiveCars";
-        String subject = "Please verify your registration";
-        String content = "Dear [[name]],<br>"
-                + "Please click the link below to verify your registration:<br>"
-                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-                + "Thank you,<br>"
+        String subject = "Verificare înregistrare";
+        String content = "Salut [[name]],<br>"
+                + "Te rugăm să accesezi link-ul de mai jos pentru a confirma crearea contului pe platforma ExclusiveCars:<br>"
+                + "<h3><a href=\"[[URL]]\" target=\"_self\">CONFIRMĂ</a></h3>"
+                + "Mulțumim,<br>"
                 + "ExclusiveCars";
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -211,7 +211,7 @@ public class AuthController {
         helper.setTo(toAddress);
         helper.setSubject(subject);
 
-        content = content.replace("[[name]]", user.getUsername());
+        content = content.replace("[[name]]", user.getFirstName() + " " + user.getLastName());
         String verifyURL = SITE_URL + "/api/auth/verify?code=" + user.getVerificationCode();
 
         content = content.replace("[[URL]]", verifyURL);

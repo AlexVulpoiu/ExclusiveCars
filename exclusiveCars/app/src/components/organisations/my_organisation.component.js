@@ -27,12 +27,13 @@ import authHeader from '../../services/auth-header';
 import axios from "axios";
 
 function AutoServiceRepresentation(props) {
-    const {id, name, city, address, numberOfStations, email, phone, organisation} = props.data
+    const {id, name, city, address, startHour, endHour, numberOfStations, email, phone, organisation} = props.data
     return (
         <Card style={{padding: "0px"}}>
             <CardHeader style={{backgroundColor: "#e6f3ff"}} component="h5">{name}</CardHeader>
             <CardBody>
                 <CardTitle><GrIcons.GrMapLocation/>&nbsp;{city + ", " + address}</CardTitle>
+                <CardText><BsIcons.BsFillClockFill/>&nbsp;{startHour.substring(0, 5) + " - " + endHour.substring(0, 5)}</CardText>
                 <CardText><IoIcons.IoMdMail/>&nbsp;{email}</CardText>
                 <CardText><ImIcons.ImPhone/>&nbsp;{phone}</CardText>
                 <br/>

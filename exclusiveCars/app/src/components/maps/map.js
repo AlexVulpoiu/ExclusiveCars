@@ -171,7 +171,7 @@ function MyMap() {
                     </Box>
 
                     <ButtonGroup>
-                        <Button color={"success"} style={{borderRadius: "10px"}} title={"Navighează între locațiile introduse"}
+                        <Button color={"success"} style={{borderRadius: "50%"}} title={"Navighează între locațiile introduse"}
                                 type='submit' onClick={calculateRoute}>
                             <FaDirections />
                         </Button>
