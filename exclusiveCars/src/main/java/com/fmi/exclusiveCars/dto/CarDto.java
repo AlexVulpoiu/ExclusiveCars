@@ -84,7 +84,7 @@ public class CarDto {
     private Boolean ac;
 
     @NotNull(message = "You should provide a valid value for airbag feature!")
-    private Boolean airbag;
+    private Integer airbags;
 
     @NotNull(message = "You should provide a valid option for emission standard!")
     @Enumerated(EnumType.STRING)

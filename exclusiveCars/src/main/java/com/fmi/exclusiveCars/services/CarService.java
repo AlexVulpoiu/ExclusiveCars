@@ -50,9 +50,8 @@ public class CarService {
                 .consumption(carDto.getConsumption())
                 .seats(carDto.getSeats())
                 .ac(carDto.getAc())
-                .airbag(carDto.getAirbag())
+                .airbags(carDto.getAirbags())
                 .emissionStandard(carDto.getEmissionStandard())
-                .rating(0.0)
                 .model(currentCarModel)
                 .build();
 
@@ -63,12 +62,12 @@ public class CarService {
 
         Optional<Car> car = carRepository.findById(id);
         if(car.isEmpty()) {
-            return new ResponseEntity<>("The car you requested doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest autovehicul nu există!", HttpStatus.NOT_FOUND);
         }
 
         Optional<CarModel> carModel = carModelRepository.findById(editCar.getCarModelId());
         if(carModel.isEmpty()) {
-            return new ResponseEntity<>("This car model doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest model de autovehicul nu există!", HttpStatus.NOT_FOUND);
         }
 
         CarModel newCarModel = carModel.get();
@@ -90,24 +89,24 @@ public class CarService {
         currentCar.setConsumption(editCar.getConsumption());
         currentCar.setSeats(editCar.getSeats());
         currentCar.setAc(editCar.getAc());
-        currentCar.setAirbag(editCar.getAirbag());
+        currentCar.setAirbags(editCar.getAirbags());
         currentCar.setEmissionStandard(editCar.getEmissionStandard());
         currentCar.setModel(newCarModel);
         carRepository.save(currentCar);
 
-        return new ResponseEntity<>("The car was edited successfully!", HttpStatus.OK);
+        return new ResponseEntity<>("Autovehiculul a fost editat cu succes!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> delete(Long id) {
 
         Optional<Car> car = carRepository.findById(id);
         if(car.isEmpty()) {
-            return new ResponseEntity<>("The car you requested to delete doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest autovehicul nu există!", HttpStatus.NOT_FOUND);
         }
 
         Car currentCar = car.get();
         carRepository.delete(currentCar);
 
-        return new ResponseEntity<>("The car was successfully deleted!", HttpStatus.OK);
+        return new ResponseEntity<>("Autovehiculul a fost editat cu succes!", HttpStatus.OK);
     }
 }

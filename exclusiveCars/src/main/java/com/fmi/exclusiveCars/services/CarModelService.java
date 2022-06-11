@@ -15,6 +15,8 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -27,11 +29,69 @@ public class CarModelService {
         this.carModelRepository = carModelRepository;
     }
 
+    public ResponseEntity<?> getCarModels() {
+        List<CarModel> carModels = carModelRepository.findAll();
+        return new ResponseEntity<>(carModels, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getCarBrands() {
+        List<String> carBrands = carModelRepository.getCarBrands();
+        return new ResponseEntity<>(carBrands, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getCarModelsByBrand() {
+        List<String> carModelsByBrand = carModelRepository.getCarModelsByBrand();
+        HashMap<String, List<String>> carModelsByBrandDict = new HashMap<>();
+
+        for(String carModelByBrand: carModelsByBrand) {
+
+            String car = carModelByBrand.split(",")[0];
+            String model = carModelByBrand.split(",")[1];
+
+            if(carModelsByBrandDict.containsKey(car)) {
+                List<String> models = carModelsByBrandDict.get(car);
+                models.add(model);
+                carModelsByBrandDict.put(car, models);
+            } else {
+                List<String> models = new ArrayList<>();
+                models.add(model);
+                carModelsByBrandDict.put(car, models);
+            }
+        }
+
+        return new ResponseEntity<>(carModelsByBrandDict, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getCarCategoriesByBrandAndModel() {
+        List<String> carModels = carModelRepository.getCarCategoriesByBrandAndModel();
+        HashMap<String, List<ECategory>> carCategoriesByBrandAndModel = new HashMap<>();
+
+        for(String carCategoryByBrandAndModel: carModels) {
+
+            String car = carCategoryByBrandAndModel.split(",")[0];
+            String model = carCategoryByBrandAndModel.split(",")[1];
+            String category = carCategoryByBrandAndModel.split(",")[2];
+            String key = car + "_" + model;
+
+            if(carCategoriesByBrandAndModel.containsKey(key)) {
+                List<ECategory> categories = carCategoriesByBrandAndModel.get(key);
+                categories.add(ECategory.valueOf(category));
+                carCategoriesByBrandAndModel.put(key, categories);
+            } else {
+                List<ECategory> categories = new ArrayList<>();
+                categories.add(ECategory.valueOf(category));
+                carCategoriesByBrandAndModel.put(key, categories);
+            }
+        }
+
+        return new ResponseEntity<>(carCategoriesByBrandAndModel, HttpStatus.OK);
+    }
+
     public ResponseEntity<?> addCarModels() {
 
         List<CarModel> carModels = carModelRepository.findAll();
         if(!carModels.isEmpty()) {
-            return new ResponseEntity<>("The car models were already added to database!", HttpStatus.OK);
+            return new ResponseEntity<>("Modele de mașini au fost deja adăugate în baza de date!", HttpStatus.OK);
         }
 
         try {
@@ -80,14 +140,23 @@ public class CarModelService {
                     }
                     first = false;
                 }
-                return new ResponseEntity<>("Car models added successfully!", HttpStatus.OK);
+
+                for(ECategory eCategory: ECategory.values()) {
+                    CarModel carModel = CarModel.builder()
+                            .manufacturer("Other")
+                            .model("Other")
+                            .category(eCategory)
+                            .build();
+                    carModelRepository.save(carModel);
+                }
+                return new ResponseEntity<>("Modelele de mașini au fost adăugate cu succes!", HttpStatus.OK);
 
             } finally {
                 urlConnection.disconnect();
             }
         } catch (Exception e) {
             System.out.println("Error: " + e);
-            return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("A a apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
         }
     }
 }

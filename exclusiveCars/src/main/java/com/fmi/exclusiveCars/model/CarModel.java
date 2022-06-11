@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,6 +37,7 @@ public class CarModel {
     private ECategory category;
 
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("model")
     private List<Car> cars;
 
     @Override

@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import java.util.*;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "cars")
 public class Car {
     @Id
@@ -85,26 +87,23 @@ public class Car {
     private Boolean ac;
 
     @NotNull
-    private Boolean airbag;
+    private Integer airbags;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "emission_standard", length = 8)
     private EStandard emissionStandard;
 
-    @NotNull
-    @Min(value = 0)
-    @Max(value = 5)
-    private Double rating;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "car_model_id")
+    @JsonIgnoreProperties("cars")
     private CarModel model;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentCar> rentalClients = new ArrayList<>();
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("car")
     private List<Image> images = new ArrayList<>();
 
     @Override

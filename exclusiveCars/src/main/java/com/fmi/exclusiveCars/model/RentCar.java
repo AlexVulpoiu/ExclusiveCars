@@ -30,17 +30,11 @@ public class RentCar {
     @NotNull
     private LocalDate endDate;
 
-    @NotNull
-    @Min(value = 0)
-    @Column(name = "delay_fee")
-    private Integer delayFee;
-
-    public RentCar(User user, Car car, LocalDate startDate, LocalDate endDate, Integer delayFee) {
+    public RentCar(User user, Car car, LocalDate startDate, LocalDate endDate) {
         this.id = new RentCarId(user.getId(), car.getId(), startDate);
         this.user = user;
         this.car = car;
         this.endDate = endDate;
-        this.delayFee = delayFee;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class RentalAnnouncementService {
 
         List<RentalAnnouncement> rentalAnnouncements = rentalAnnouncementRepository.findAll();
         if(rentalAnnouncements.isEmpty()) {
-            return new ResponseEntity<>("There is no rental announcement posted yet!", HttpStatus.OK);
+            return new ResponseEntity<>("Nu a fost postat niciun anunț de închiriere!", HttpStatus.OK);
         }
 
         List<RentalAnnouncementDto> rentalAnnouncementDtoList = new ArrayList<>();
@@ -53,7 +53,6 @@ public class RentalAnnouncementService {
                     .carModel(currentRentalAnnouncement.getCar().getModel().getModel())
                     .carCategory(currentRentalAnnouncement.getCar().getModel().getCategory())
                     .price(currentRentalAnnouncement.getCar().getPrice())
-                    .carRating(currentRentalAnnouncement.getCar().getRating())
                     .build();
             rentalAnnouncementDtoList.add(rentalAnnouncementDto);
         }
@@ -65,29 +64,17 @@ public class RentalAnnouncementService {
 
         Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);
         if(rentalAnnouncement.isEmpty()) {
-            return new ResponseEntity<>("The rental announcement you requested doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest anunț de închiriere nu există!", HttpStatus.NOT_FOUND);
         }
-        RentalAnnouncement currentRentalAnnouncement = rentalAnnouncement.get();
-        RentalAnnouncementDto rentalAnnouncementDto = RentalAnnouncementDto.builder()
-                .id(currentRentalAnnouncement.getId())
-                .carId(currentRentalAnnouncement.getCar().getId())
-                .carManufacturer(currentRentalAnnouncement.getCar().getModel().getManufacturer())
-                .carModel(currentRentalAnnouncement.getCar().getModel().getModel())
-                .carCategory(currentRentalAnnouncement.getCar().getModel().getCategory())
-                .price(currentRentalAnnouncement.getCar().getPrice())
-                .carRating(currentRentalAnnouncement.getCar().getRating())
-                .build();
-
-        return new ResponseEntity<>(rentalAnnouncementDto, HttpStatus.OK);
+        return new ResponseEntity<>(rentalAnnouncement.get(), HttpStatus.OK);
     }
-
 
     public ResponseEntity<?> getRentalAnnouncementsFromRentalCenter(Long rentalCenterId) {
 
         List<RentalAnnouncement> rentalAnnouncements = 
                 rentalAnnouncementRepository.getRentalAnnouncementFromRentalCenter(rentalCenterId);
         if(rentalAnnouncements.isEmpty()) {
-            return new ResponseEntity<>("There are no rental announcements posted by this rental center!", HttpStatus.OK);
+            return new ResponseEntity<>("Nu este disponibil niciun anunț de închiriere de la acest centru!", HttpStatus.OK);
         }
 
         List<RentalAnnouncementDto> rentalAnnouncementDtoList = new ArrayList<>();
@@ -100,7 +87,6 @@ public class RentalAnnouncementService {
                     .carModel(currentRentalAnnouncement.getCar().getModel().getModel())
                     .carCategory(currentRentalAnnouncement.getCar().getModel().getCategory())
                     .price(currentRentalAnnouncement.getCar().getPrice())
-                    .carRating(currentRentalAnnouncement.getCar().getRating())
                     .build();
             rentalAnnouncementDtoList.add(rentalAnnouncementDto);
         }
@@ -112,7 +98,7 @@ public class RentalAnnouncementService {
 
         Optional<RentalCenter> rentalCenter = rentalCenterRepository.findById(rentalCenterId);
         if(rentalCenter.isEmpty()) {
-            return new ResponseEntity<>("The rental center doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Centrul de închiriere nu există!", HttpStatus.NOT_FOUND);
         }
 
         RentalCenter currentRentalCenter = rentalCenter.get();
@@ -124,12 +110,12 @@ public class RentalAnnouncementService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             User currentUser = user.get();
             if(!currentRentalCenter.getOrganisation().getOwner().equals(currentUser)) {
-                return new ResponseEntity<>("You are not allowed to perform this operation!", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai dreptul de a efectua această acțiune!", HttpStatus.FORBIDDEN);
             }
 
             Car car = carService.addCar(carDto);
@@ -143,17 +129,18 @@ public class RentalAnnouncementService {
             currentRentalCenter.getRentalAnnouncements().add(rentalAnnouncement);
             rentalCenterRepository.save(currentRentalCenter);
 
-            return new ResponseEntity<>("Rental announcement successfully added!", HttpStatus.OK);
+            // returnez id-ul mașinii pentru a putea adăuga și pozele
+            return new ResponseEntity<>(car.getId(), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> editRentalAnnouncement(Long id, CarDto carDto) {
 
         Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);
         if(rentalAnnouncement.isEmpty()) {
-            return new ResponseEntity<>("The rental announcement doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest anunț de închiriere nu există!", HttpStatus.NOT_FOUND);
         }
 
         RentalAnnouncement currentRentalAnnouncement = rentalAnnouncement.get();
@@ -165,28 +152,28 @@ public class RentalAnnouncementService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             User currentUser = user.get();
             if(!currentRentalAnnouncement.getRentalCenter().getOrganisation().getOwner().equals(currentUser)) {
-                return new ResponseEntity<>("You are not allowed to perform this operation!", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu poți efectua această acțiune!", HttpStatus.FORBIDDEN);
             }
 
             Long carId = currentRentalAnnouncement.getCar().getId();
             carService.editCar(carId, carDto);
 
-            return new ResponseEntity<>("Rental announcement successfully edited!", HttpStatus.OK);
+            return new ResponseEntity<>("Anunțul de închiriere a fost editat cu succes!", HttpStatus.OK);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteRentalAnnouncement(Long id) {
 
         Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);
         if(rentalAnnouncement.isEmpty()) {
-            return new ResponseEntity<>("The rental announcement doesn't exist!", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest anunț de închiriere nu există!", HttpStatus.NOT_FOUND);
         }
 
         RentalAnnouncement currentRentalAnnouncement = rentalAnnouncement.get();
@@ -198,7 +185,7 @@ public class RentalAnnouncementService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if (user.isEmpty()) {
-                return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
             User currentUser = user.get();
@@ -206,13 +193,13 @@ public class RentalAnnouncementService {
                     || currentRentalAnnouncement.getRentalCenter().getOrganisation().getOwner().equals(currentUser)) {
 
                 rentalAnnouncementRepository.delete(currentRentalAnnouncement);
-                return new ResponseEntity<>("The rental announcement was deleted successfully!", HttpStatus.OK);
+                return new ResponseEntity<>("Anunțul de închiriere a fost șters cu succes!", HttpStatus.OK);
             }
 
-            return new ResponseEntity<>("You are not allowed to perform this operation!", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Nu ai permisiunea de a efectua această acțiune!", HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<>("An error occurred during your request. Please try again!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     private boolean userHasRole(User user, ERole role) {

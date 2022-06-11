@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "rental_centers", uniqueConstraints = {@UniqueConstraint(columnNames = "name"),
                                                     @UniqueConstraint(columnNames = "email"),
                                                     @UniqueConstraint(columnNames = "phone")})

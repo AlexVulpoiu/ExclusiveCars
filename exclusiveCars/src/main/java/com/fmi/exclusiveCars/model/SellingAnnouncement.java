@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,16 +16,12 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "selling_announcements")
 public class SellingAnnouncement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotNull
-    @Size(min = 5, max = 50)
-    @Column(length = 50)
-    private String title;
 
     @NotNull
     @Size(min = 20, max = 1000)
@@ -38,9 +35,12 @@ public class SellingAnnouncement {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id")
+    @JsonIgnoreProperties("rentalClients")
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"password", "verificationCode", "enabled", "roles", "services", "favoriteCars", "cars",
+            "sellingAnnouncements", "organisation"})
     private User user;
 
     @Override

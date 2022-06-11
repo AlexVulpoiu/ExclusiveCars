@@ -12,6 +12,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,7 +42,14 @@ public class ImageService {
         try {
             Arrays.asList(multipartFiles).forEach(multipartFile -> {
                 try {
+                    int numberOfImages = imageRepository.findAll().size();
                     String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+                    int p = fileName.lastIndexOf('.');
+                    String extension = fileName.substring(p);
+                    fileName = fileName.substring(0, p) + "_" + (numberOfImages + 1) + extension;
+
+                    Files.copy(multipartFile.getInputStream(), Path.of("C:\\Users\\vulpo\\Desktop\\Facultate\\Licenta\\Anul 3\\ExclusiveCars\\exclusiveCars\\app\\public\\assets\\images\\" + fileName));
+
                     Image image = Image.builder()
                             .name(fileName)
                             .type(multipartFile.getContentType())
@@ -54,9 +63,9 @@ public class ImageService {
                 }
             });
 
-            return new ResponseEntity<>("Images were added successfully!", HttpStatus.OK);
+            return new ResponseEntity<>("Imaginile au fost încărcate cu succes!", HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("An error occurred during images upload!", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("A apărut o eroare la încărcarea imaginilor!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

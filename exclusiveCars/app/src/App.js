@@ -29,6 +29,11 @@ import RentalCenter from "./components/rental_centers/rentalCenter.component";
 import MakeServiceAppointment from "./components/service_appointments/make_service_appointment.component";
 import MyServiceAppointments from "./components/service_appointments/my_service_appointments.component";
 
+import AddRentalAnnouncement from "./components/rental_announcements/add_rental_announcement.component";
+import RentalAnnouncement from "./components/rental_announcements/rental_announcement.component";
+
+import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -130,6 +135,11 @@ class App extends Component {
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
 
                         <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
+
+                        <Route exact path={"/rentalAnnouncements/add/:rentalCenterId"} component={AddRentalAnnouncement} />
+                        <Route exact path={"/rentalAnnouncements/:id"} component={RentalAnnouncement} />
+
+                        <Route exact path={"/sellingAnnouncements/:id"} component={SellingAnnouncement} />
 
                         <Route exact path={"/serviceAppointments"} component={MyServiceAppointments} />
                         <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />

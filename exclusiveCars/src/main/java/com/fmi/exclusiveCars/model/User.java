@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import java.util.*;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email"),
                                             @UniqueConstraint(columnNames = "username"),
                                             @UniqueConstraint(columnNames = "phone")})
@@ -122,8 +124,8 @@ public class User {
         serviceAppointment.setAutoService(null);
     }
 
-    public void addRentCar(Car car, LocalDate startDate, LocalDate endDate, Integer fee) {
-        RentCar rentCar = new RentCar(this, car, startDate, endDate, fee);
+    public void addRentCar(Car car, LocalDate startDate, LocalDate endDate) {
+        RentCar rentCar = new RentCar(this, car, startDate, endDate);
         cars.add(rentCar);
         car.getRentalClients().add(rentCar);
     }

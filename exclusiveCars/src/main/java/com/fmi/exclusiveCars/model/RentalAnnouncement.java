@@ -26,11 +26,12 @@ public class RentalAnnouncement {
     private EState state;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("rentalAnnouncements")
+    @JsonIgnoreProperties({"rentalAnnouncements", "organisation"})
     private RentalCenter rentalCenter;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "car_id")
+    @JsonIgnoreProperties("rentalClients")
     private Car car;
 
     @Override
