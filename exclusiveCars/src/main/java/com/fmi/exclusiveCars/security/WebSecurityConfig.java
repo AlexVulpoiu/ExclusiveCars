@@ -67,6 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/carModels/add").authenticated()
                 .antMatchers("/api/cars/**").authenticated()
                 .antMatchers("/api/rentalAnnouncements/**").authenticated()
+                .antMatchers("/api/sellingAnnouncements/**").authenticated()
                 .antMatchers("/api/images/**").authenticated()
                 .anyRequest().authenticated();
 

@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.services;
 
+import com.fmi.exclusiveCars.model.EState;
 import com.fmi.exclusiveCars.model.SellingAnnouncement;
 import com.fmi.exclusiveCars.repository.SellingAnnouncementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,5 +29,15 @@ public class SellingAnnouncementService {
         }
 
         return new ResponseEntity<>(sellingAnnouncement.get(), HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getPendingSellingAnnouncements() {
+
+        List<SellingAnnouncement> pendingSellingAnnouncements = sellingAnnouncementRepository.getSellingAnnouncementsByState(EState.PENDING);
+        if(pendingSellingAnnouncements.isEmpty()) {
+            return new ResponseEntity<>("Nu sunt anunțuri de vânzare care așteapta aprobare!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(pendingSellingAnnouncements, HttpStatus.OK);
     }
 }

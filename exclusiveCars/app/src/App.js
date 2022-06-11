@@ -33,6 +33,7 @@ import AddRentalAnnouncement from "./components/rental_announcements/add_rental_
 import RentalAnnouncement from "./components/rental_announcements/rental_announcement.component";
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
+import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
 
 class App extends Component {
     constructor(props) {
@@ -138,6 +139,8 @@ class App extends Component {
 
                         <Route exact path={"/rentalAnnouncements/add/:rentalCenterId"} component={AddRentalAnnouncement} />
                         <Route exact path={"/rentalAnnouncements/:id"} component={RentalAnnouncement} />
+
+                        <Route exact path={"/announcements/pending"} component={PendingAnnouncements} />
 
                         <Route exact path={"/sellingAnnouncements/:id"} component={SellingAnnouncement} />
 

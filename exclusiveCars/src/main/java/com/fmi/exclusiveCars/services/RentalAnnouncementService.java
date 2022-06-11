@@ -60,6 +60,16 @@ public class RentalAnnouncementService {
         return new ResponseEntity<>(rentalAnnouncementDtoList, HttpStatus.OK);
     }
 
+    public ResponseEntity<?> getPendingRentalAnnouncements() {
+
+        List<RentalAnnouncement> pendingRentalAnnouncements = rentalAnnouncementRepository.getRentalAnnouncementsByState(EState.PENDING);
+        if(pendingRentalAnnouncements.isEmpty()) {
+            return new ResponseEntity<>("Nu sunt anunțuri de închiriere care așteapta aprobare!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(pendingRentalAnnouncements, HttpStatus.OK);
+    }
+
     public ResponseEntity<?> getRentalAnnouncement(Long id) {
 
         Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);

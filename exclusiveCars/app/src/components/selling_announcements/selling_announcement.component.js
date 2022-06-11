@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import authHeader from "../../services/auth-header";
 import AuthService from "../../services/auth.service";
+import {Button} from "reactstrap";
 import {Carousel} from "react-bootstrap";
 import * as AiIcons from "react-icons/ai";
 import * as BsIcons from "react-icons/bs";
@@ -130,9 +131,17 @@ export default class SellingAnnouncement extends Component {
                     <div style={{width: "5%"}} />
 
                     <div className={"column"} style={{width: "45%"}}>
-                        <h1>
-                            <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
-                        </h1>
+                        <div className={"row"}>
+                            <div style={{width: "60%"}}>
+                                <h1>
+                                    <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
+                                </h1>
+                            </div>
+
+                            <div>
+                                <Button color={"primary"}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
+                            </div>
+                        </div>
 
                         <br/>
 

@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.repository;
 
+import com.fmi.exclusiveCars.model.EState;
 import com.fmi.exclusiveCars.model.RentalAnnouncement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,4 +13,7 @@ public interface RentalAnnouncementRepository extends JpaRepository<RentalAnnoun
 
     @Query("SELECT r FROM RentalAnnouncement r WHERE r.rentalCenter.id = ?1")
     List<RentalAnnouncement> getRentalAnnouncementFromRentalCenter(Long rentalCenterId);
+
+    @Query("SELECT r FROM RentalAnnouncement r WHERE r.state = ?1")
+    List<RentalAnnouncement> getRentalAnnouncementsByState(EState state);
 }

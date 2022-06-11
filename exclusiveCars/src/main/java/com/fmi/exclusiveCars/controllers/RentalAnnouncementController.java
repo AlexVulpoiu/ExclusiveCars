@@ -26,6 +26,12 @@ public class RentalAnnouncementController {
         return rentalAnnouncementService.getAllRentalAnnouncements();
     }
 
+    @GetMapping("/pending")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> getPendingRentalAnnouncements() {
+        return rentalAnnouncementService.getPendingRentalAnnouncements();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getRentalAnnouncement(@PathVariable Long id) {
         return rentalAnnouncementService.getRentalAnnouncement(id);
