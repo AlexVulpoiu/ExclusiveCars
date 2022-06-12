@@ -34,6 +34,9 @@ import RentalAnnouncement from "./components/rental_announcements/rental_announc
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
 import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
+import DeleteProfile from "./components/authentication/delete_profile.component";
+
+import UserReport from "./components/users/user_report.component";
 
 class App extends Component {
     constructor(props) {
@@ -121,6 +124,7 @@ class App extends Component {
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/register" component={Register} />
                         <Route exact path="/profile" component={Profile} />
+                        <Route exact path="/profile/delete" component={DeleteProfile} />
 
                         <Route exact path={["/", "/news"]} component={News} />
                         <Route exact path={"/news/add"} component={AddNews} />
@@ -146,6 +150,8 @@ class App extends Component {
 
                         <Route exact path={"/serviceAppointments"} component={MyServiceAppointments} />
                         <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />
+
+                        <Route exact path={"/users/report/:userId"} component={UserReport} />
                     </Switch>
                 </div>
             </div>

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -44,6 +45,12 @@ public class UserController {
         return userService.getMyProfile();
     }
 
+    @GetMapping("/report/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getUserReport(@PathVariable Long id) {
+        return userService.getUserReport(id);
+    }
+
     @PutMapping("/editRole/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editUserRoles(@PathVariable Long id, @RequestBody Collection<Role> roles) {
@@ -51,8 +58,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
 }

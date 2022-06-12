@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.services;
 
+import com.fmi.exclusiveCars.dto.UserDto;
 import com.fmi.exclusiveCars.model.ERole;
 import com.fmi.exclusiveCars.model.Role;
 import com.fmi.exclusiveCars.model.User;
@@ -27,9 +28,12 @@ public class UserService {
         Optional<User> currentUser = userRepository.findById(id);
 
         if(currentUser.isPresent()) {
-            return new ResponseEntity<>(currentUser.get(), HttpStatus.OK);
+            User user = currentUser.get();
+            UserDto userDto = mapUserToUserDto(user);
+
+            return new ResponseEntity<>(userDto, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Acest utilizator nu există!", HttpStatus.NOT_FOUND);
    }
 
     public Boolean isAdmin(User user) {
@@ -48,7 +52,7 @@ public class UserService {
         if(user.isPresent()) {
             User currentUser = user.get();
             if(isAdmin(currentUser)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai dreptul de a efectua această acțiune!", HttpStatus.FORBIDDEN);
             }
 
             currentUser.setRoles(roles);
@@ -57,21 +61,21 @@ public class UserService {
             return new ResponseEntity<>(currentUser, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Acest utilizator nu există!", HttpStatus.NOT_FOUND);
     }
 
-    public ResponseEntity<HttpStatus> deleteUser(Long id) {
+    public ResponseEntity<?> deleteUser(Long id) {
         Optional<User> user = userRepository.findById(id);
 
         if(user.isPresent()) {
             User currentUser = user.get();
             if(isAdmin(currentUser)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Nu ai dreptul de a efectua această acțiune!", HttpStatus.FORBIDDEN);
             }
         }
 
         userRepository.deleteById(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>("Utilizatorul a fost șters cu succes!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> getMyProfile() {
@@ -82,11 +86,39 @@ public class UserService {
             Optional<User> user = userRepository.findByUsername(username);
 
             if(user.isPresent()) {
-                return new ResponseEntity<>(user, HttpStatus.OK);
+                User currentUser = user.get();
+                UserDto userDto = mapUserToUserDto(currentUser);
+                return new ResponseEntity<>(userDto, HttpStatus.OK);
             }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Acest utilizator nu există!", HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii tale. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> getUserReport(Long id) {
+
+        Optional<User> currentUser = userRepository.findById(id);
+        if(currentUser.isEmpty()) {
+            return new ResponseEntity<>("Acest utilizator nu există", HttpStatus.NOT_FOUND);
+        }
+
+        User user = currentUser.get();
+        if(user.getOrganisation() != null) {
+            return new ResponseEntity<>(user.getOrganisation(), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(user.getSellingAnnouncements(), HttpStatus.OK);
+    }
+
+    private UserDto mapUserToUserDto(User user) {
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .build();
     }
 }
