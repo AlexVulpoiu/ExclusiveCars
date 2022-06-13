@@ -139,7 +139,7 @@ export default class SellingAnnouncement extends Component {
                             </div>
 
                             <div>
-                                <Button color={"primary"}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
+                                <Button style={{backgroundColor: "#ffb833", color: "black", borderColor: "#ffb833"}}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
                             </div>
                         </div>
 

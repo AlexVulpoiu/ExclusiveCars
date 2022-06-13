@@ -37,6 +37,7 @@ import PendingAnnouncements from "./components/selling_announcements/pending_ann
 import DeleteProfile from "./components/authentication/delete_profile.component";
 
 import UserReport from "./components/users/user_report.component";
+import OrganisationStats from "./components/organisations/organisation_stats.component";
 
 class App extends Component {
     constructor(props) {
@@ -135,6 +136,7 @@ class App extends Component {
                         <Route exact path={"/organisations/add"} component={AddOrganisation} />
                         <Route exact path={"/organisations/edit"} component={EditOrganisation} />
                         <Route exact path={"/organisations/myOrganisation"} component={MyOrganisation} />
+                        <Route exact path={"/organisations/myStats"} component={OrganisationStats} />
                         <Route exact path={"/organisations/:id"} component={Organisation} />
 
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
