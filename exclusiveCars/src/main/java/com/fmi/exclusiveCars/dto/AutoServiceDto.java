@@ -15,37 +15,37 @@ import java.time.LocalTime;
 @Builder
 public class AutoServiceDto {
 
-    @NotBlank(message = "The name must not be blank!")
-    @Size(min = 3, max = 50, message = "The name should contain between 3 and 50 characters!")
+    @NotBlank(message = "Numele nu poate fi un string gol!")
+    @Size(min = 3, max = 50, message = "Numele trebuie să aibă între 3 și 50 de caractere!")
     private String name;
 
-    @NotBlank(message = "The city must not be blank!")
-    @Size(min = 4, max = 50, message = "The city should contain between 4 and 50 characters!")
+    @NotBlank(message = "Orașul nu poate fi un string gol!")
+    @Size(min = 4, max = 50, message = "Orașul trebuie să aibă între 4 și 50 de caractere!")
     private String city;
 
-    @NotBlank(message = "The address must not be blank!")
-    @Size(min = 20, max = 200, message = "The city should contain between 20 and 200 characters!")
+    @NotBlank(message = "Adresa nu poate fi un string gol!")
+    @Size(min = 10, max = 100, message = "Orașul trebuie să aibă între 10 și 100 de caractere!")
     private String address;
 
-    @NotNull(message = "You should provide a value for the number of stations!")
-    @Min(value = 0, message = "The number of stations can't be negative or 0!")
+    @NotNull(message = "Numărul de stații trebuie să fie mai mare decât 0!")
+    @Min(value = 0, message = "Numărul de stații trebuie să fie mai mare decât 0!")
     @JsonProperty("number_of_stations")
     private Integer numberOfStations;
 
-    @NotNull
+    @NotNull(message = "Trebuie să alegeți o valoare pentru ora de start a programului!")
     @JsonProperty("start_hour")
     private LocalTime startHour;
 
-    @NotNull
+    @NotNull(message = "Trebuie să alegeți o valoare pentru ora de final a programului!")
     @JsonProperty("end_hour")
     private LocalTime endHour;
 
-    @NotBlank(message = "The email must not be blank!")
-    @Size(max = 100, message = "Email size should be at most 100 characters!")
-    @Email(message = "The string must follow the email format!")
+    @NotBlank(message = "Emailul nu poate fi un string gol!")
+    @Size(max = 100, message = "Emailul nu poate avea mai mult de 100 de caractere!")
+    @Email(message = "Valoarea introdusă nu respectă formatul unei adrese de email!")
     private String email;
 
-    @NotBlank(message = "The phone number must not be blank!")
-    @Pattern(regexp = "^07\\d{8}$", message = "The phone number should contain 10 digits, starting with 07!")
+    @NotBlank(message = "Trebuie să introduceți numărul de telefon!")
+    @Pattern(regexp = "^07\\d{8}$", message = "Numărul de telefon trebuie să aibă 10 cifre și să înceapă cu '07'!")
     private String phone;
 }

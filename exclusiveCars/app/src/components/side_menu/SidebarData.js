@@ -132,7 +132,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
         },
         {
             title: 'Organizația mea',
-            path: '/organisations/add',
+            path: '/organisations/myOrganisation',
             icon: <CgIcons.CgOrganisation/>,
             cName: 'nav-text'
         },

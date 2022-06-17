@@ -59,7 +59,7 @@ export default class MakeServiceAppointment extends Component  {
             message: ""
         };
 
-        localStorage.getItem("appointmentDescription", "");
+        localStorage.setItem("appointmentDescription", "");
 
         this.currentUser = AuthService.getCurrentUser();
 

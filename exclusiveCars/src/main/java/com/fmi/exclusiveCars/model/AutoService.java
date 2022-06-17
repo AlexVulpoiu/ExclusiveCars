@@ -34,8 +34,8 @@ public class AutoService {
     private String city;
 
     @NotBlank
-    @Size(min = 20, max = 200)
-    @Column(length = 200)
+    @Size(min = 10, max = 100)
+    @Column(length = 100)
     private String address;
 
     @NotNull

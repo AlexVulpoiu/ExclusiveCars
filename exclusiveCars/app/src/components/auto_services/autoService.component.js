@@ -58,6 +58,7 @@ export default class AutoService extends Component {
             .then((response) => response.json())
             .then((data) => {
                 this.setState({autoService: data, loading: false});
+                document.title = data["name"];
             })
             .catch((error) => {
                 console.log(error);
@@ -86,6 +87,12 @@ export default class AutoService extends Component {
     currentUserIsOwner() {
         return this.state.currentOrganisation !== null
             && this.state.currentOrganisation.name === this.state.autoService.organisation;
+    }
+
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        localStorage.setItem("infoMessage", "");
     }
 
     render() {
@@ -117,7 +124,26 @@ export default class AutoService extends Component {
         localStorage.setItem("locationType", "service");
 
         return (
-            <>
+            <div className={"col-md-12"}>
+                {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {localStorage.getItem("infoMessage")}
+                    </div>
+                )}
+
                 <div style={{height: "50px"}}>
                     <h1 style={{float: "left"}}>{autoService["name"]}</h1>
                     <div style={{float: "right"}}>
@@ -173,7 +199,7 @@ export default class AutoService extends Component {
                         <MyMap />
                     </div>
                 </div>
-            </>
+            </div>
         );
     }
 }

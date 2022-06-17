@@ -25,7 +25,10 @@ import MyOrganisation from "./components/organisations/my_organisation.component
 import Navbar from "./components/side_menu/Navbar";
 
 import AutoService from "./components/auto_services/autoService.component";
+import AddAutoService from "./components/auto_services/add_autoService.component";
+
 import RentalCenter from "./components/rental_centers/rentalCenter.component";
+
 import MakeServiceAppointment from "./components/service_appointments/make_service_appointment.component";
 import MyServiceAppointments from "./components/service_appointments/my_service_appointments.component";
 
@@ -34,10 +37,13 @@ import RentalAnnouncement from "./components/rental_announcements/rental_announc
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
 import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
+
 import DeleteProfile from "./components/authentication/delete_profile.component";
 
 import UserReport from "./components/users/user_report.component";
+
 import OrganisationStats from "./components/organisations/organisation_stats.component";
+import EditAutoService from "./components/auto_services/edit_autoService.component";
 
 class App extends Component {
     constructor(props) {
@@ -139,6 +145,8 @@ class App extends Component {
                         <Route exact path={"/organisations/myStats"} component={OrganisationStats} />
                         <Route exact path={"/organisations/:id"} component={Organisation} />
 
+                        <Route exact path={"/autoServices/add"} component={AddAutoService} />
+                        <Route exact path={"/autoServices/edit/:id"} component={EditAutoService} />
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
 
                         <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
