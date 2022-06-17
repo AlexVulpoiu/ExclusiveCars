@@ -11,6 +11,9 @@ import CheckButton from "react-validation/build/button";
 import {isEmail} from "validator";
 import {setHours, setMinutes} from "date-fns";
 import axios from "axios";
+import * as MdIcons from "react-icons/md";
+import * as GiIcons from "react-icons/gi";
+import * as BsIcons from "react-icons/bs";
 
 const required = value => {
     if (!value) {
@@ -434,7 +437,7 @@ export default class EditAutoService extends Component {
                     <div className={"row"}>
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"name"}>Nume</label>
+                                <label htmlFor={"name"}><BiIcons.BiRename /> Nume</label>
                                 <Input
                                     type={"text"}
                                     className={"form-control"}
@@ -450,7 +453,7 @@ export default class EditAutoService extends Component {
 
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"city"}>Oraș</label>
+                                <label htmlFor={"city"}><MdIcons.MdLocationCity/> Oraș</label>
                                 <Input
                                     type={"text"}
                                     className={"form-control"}
@@ -466,7 +469,7 @@ export default class EditAutoService extends Component {
                     <div className={"row"}>
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"address"}>Adresa</label>
+                                <label htmlFor={"address"}><MdIcons.MdLocationOn/> Adresa</label>
                                 <Input
                                     type={"text"}
                                     className={"form-control"}
@@ -482,7 +485,7 @@ export default class EditAutoService extends Component {
 
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"number_of_stations"}>Numărul de stații de lucru</label>
+                                <label htmlFor={"number_of_stations"}><GiIcons.GiMechanicGarage/> Numărul de stații de lucru</label>
                                 <Input
                                     type={"number"}
                                     min={1}
@@ -499,7 +502,7 @@ export default class EditAutoService extends Component {
                     <div className={"row"}>
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"start_hour"}><BiIcons.BiTimeFive/> Ora de început a programului</label>
+                                <label htmlFor={"start_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de început a programului</label>
                                 <DatePicker
                                     name={"start_hour"}
                                     selected={this.state.start_hour}
@@ -521,7 +524,7 @@ export default class EditAutoService extends Component {
 
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"end_hour"}><BiIcons.BiTimeFive/> Ora de sfârșit a programului</label>
+                                <label htmlFor={"end_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de sfârșit a programului</label>
                                 <DatePicker
                                     name={"end_hour"}
                                     selected={this.state.end_hour}
@@ -543,7 +546,7 @@ export default class EditAutoService extends Component {
                     <div className={"row"}>
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"email"}>Email</label>
+                                <label htmlFor={"email"}><MdIcons.MdEmail/> Email</label>
                                 <Input
                                     type={"text"}
                                     className={"form-control"}
@@ -559,7 +562,7 @@ export default class EditAutoService extends Component {
 
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
-                                <label htmlFor={"phone"}>Telefon</label>
+                                <label htmlFor={"phone"}><BsIcons.BsTelephoneFill/> Telefon</label>
                                 <Input
                                     type={"text"}
                                     className={"form-control"}
