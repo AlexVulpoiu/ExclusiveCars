@@ -24,7 +24,6 @@ import {Link} from "react-router-dom";
 import "../../styles/pagination.css";
 import AuthService from "../../services/auth.service";
 import authHeader from '../../services/auth-header';
-import axios from "axios";
 
 function AutoServiceRepresentation(props) {
     const {id, name, city, address, startHour, endHour, numberOfStations, email, phone, organisation} = props.data
@@ -165,34 +164,59 @@ export default class MyOrganisation extends Component {
 
         this.state = {
             organisation: null,
-            activeTab: '1',
+            autoServices: [],
+            rentalCenters: [],
+            activeTab: sessionStorage.getItem("filter") === "rentals" ? '2' : '1',
             loading: true,
-            serviceName: "",
-            rentalCenterName: ""
+            serviceName: sessionStorage.getItem("serviceName"),
+            rentalCenterName: sessionStorage.getItem("rentalCenterName")
         };
+
+        sessionStorage.setItem("serviceName", "");
+        sessionStorage.setItem("rentalCenterName", "");
 
         this.toggle = this.toggle.bind(this);
 
         this.currentUser = AuthService.getCurrentUser();
+
+        this.onChangeRentalCenterName = this.onChangeRentalCenterName.bind(this);
+        this.onChangeServiceName = this.onChangeServiceName.bind(this);
     }
 
     componentDidMount() {
+
+        document.title = "Organizația mea";
         this.setState({loading: true});
-        axios.get(`http://localhost:8090/api/organisations/myOrganisation`, {
+
+        fetch(`http://localhost:8090/api/organisations/myOrganisation`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 Authorization: authHeader().Authorization
             }
         })
+            .then((response) => response.json())
             .then((data) => {
-                this.setState({organisation: data["data"], loading: false});
-                console.log(data);
-                console.log(data["data"]);
+
+                const filter = sessionStorage.getItem("filter");
+                let filteredAutoServices = data["auto_services"];
+                let filteredRentalCenters = data["rental_centers"];
+
+                if(filter === "services") {
+                    filteredAutoServices = JSON.parse(sessionStorage.getItem("filteredAutoServices"));
+                    sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
+                    sessionStorage.setItem("filter", "");
+                } else if(filter === "rentals") {
+                    filteredRentalCenters = JSON.parse(sessionStorage.getItem("filteredRentalCenters"));
+                    sessionStorage.setItem("filteredRentalCenters", JSON.stringify([]));
+                    sessionStorage.setItem("filter", "");
+                }
+                this.setState({organisation: data, autoServices: filteredAutoServices,
+                    rentalCenters: filteredRentalCenters, loading: false});
             })
             .catch((error) => {
                 console.log(error);
-            })
+            });
     }
 
     async deleteOrganisation(id) {
@@ -210,10 +234,8 @@ export default class MyOrganisation extends Component {
         });
     }
 
-    hasAccess(user, organisation) {
-        return true;
-        // todo: check permissions here
-        return organisation["owner_id"] === user["id"] || user.roles.includes('ROLE_ADMIN');
+    hasAccess(user) {
+        return user !== null && user.roles.includes('ROLE_ORGANISATION');
     }
 
     toggle(tab) {
@@ -232,10 +254,61 @@ export default class MyOrganisation extends Component {
         this.setState({rentalCenterName: e.target.value});
     }
 
+    filterAutoServices = () => {
+        if(this.state.serviceName !== null && this.state.serviceName !== "") {
+            fetch(`http://localhost:8090/api/autoServices/filter?filter=${this.state.serviceName}`,{
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: authHeader().Authorization
+                }
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if(typeof(data) === "string") {
+                        sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
+                    } else {
+                        sessionStorage.setItem("filteredAutoServices", JSON.stringify(data));
+                    }
+                    sessionStorage.setItem("filter", "services");
+                    sessionStorage.setItem("serviceName", this.state.serviceName);
+                    window.location.reload();
+                })
+                .catch((error) => console.log(error));
+        } else {
+            window.location.reload();
+        }
+    }
+
+    filterRentalCenters = () => {
+        if(this.state.rentalCenterName !== null && this.state.rentalCenterName !== "") {
+            fetch(`http://localhost:8090/api/rentalCenters/filter?filter=${this.state.rentalCenterName}`,{
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: authHeader().Authorization
+                }
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if(typeof(data) === "string") {
+                        sessionStorage.setItem("filteredRentalCenters", JSON.stringify([]));
+                    } else {
+                        sessionStorage.setItem("filteredRentalCenters", JSON.stringify(data));
+                    }
+                    sessionStorage.setItem("filter", "rentals");
+                    sessionStorage.setItem("rentalCenterName", this.state.rentalCenterName);
+                    window.location.reload();
+                })
+                .catch((error) => console.log(error));
+        } else {
+            window.location.reload();
+        }
+    }
+
     render() {
-        const organisation = this.state.organisation;
+
         const loading = this.state.loading;
-        const user = AuthService.getCurrentUser();
 
         if(loading) {
             return (
@@ -243,7 +316,10 @@ export default class MyOrganisation extends Component {
             );
         }
 
-        if(!this.hasAccess(this.currentUser, organisation)) {
+        const organisation = this.state.organisation;
+        const user = AuthService.getCurrentUser();
+
+        if(!this.hasAccess(this.currentUser)) {
             setTimeout(() => {
                 this.props.history.push("/news");
                 window.location.reload();
@@ -300,7 +376,7 @@ export default class MyOrganisation extends Component {
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
-                            {organisation["auto_services"].length > 0 ? (
+                            {this.state.autoServices.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
                                         <h1 style={{float: "left"}}>Service-uri auto</h1>
@@ -324,7 +400,7 @@ export default class MyOrganisation extends Component {
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 type="button"
-                                                onClick={() => {}}
+                                                onClick={this.filterAutoServices}
                                             >
                                                 Căutare &nbsp;<BsIcons.BsSearch/>
                                             </button>
@@ -332,7 +408,7 @@ export default class MyOrganisation extends Component {
                                     </div>
 
                                     <Pagination
-                                        data={organisation["auto_services"].sort(compare)}
+                                        data={this.state.autoServices.sort(compare)}
                                         RenderComponent={AutoServiceRepresentation}
                                         title="Service-uri auto"
                                         pageLimit={5}
@@ -357,7 +433,7 @@ export default class MyOrganisation extends Component {
 
                         <TabPane tabId="2">
 
-                            {organisation["rental_centers"].length > 0 ? (
+                            {this.state.rentalCenters.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
                                         <h1 style={{float: "left"}}>Centre de închirieri auto</h1>
@@ -381,7 +457,7 @@ export default class MyOrganisation extends Component {
                                             <button
                                                 className="btn btn-outline-secondary"
                                                 type="button"
-                                                onClick={() => {}}
+                                                onClick={this.filterRentalCenters}
                                             >
                                                 Căutare &nbsp;<BsIcons.BsSearch/>
                                             </button>
@@ -389,7 +465,7 @@ export default class MyOrganisation extends Component {
                                     </div>
 
                                     <Pagination
-                                        data={organisation["rental_centers"].sort(compare)}
+                                        data={this.state.rentalCenters.sort(compare)}
                                         RenderComponent={RentalCenterRepresentation}
                                         title="Centre de închirieri auto"
                                         pageLimit={5}

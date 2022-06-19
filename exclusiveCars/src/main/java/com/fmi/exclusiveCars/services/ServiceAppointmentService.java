@@ -19,10 +19,9 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ServiceAppointmentService {
@@ -65,7 +64,9 @@ public class ServiceAppointmentService {
             List<ServiceAppointmentResponseDto> myAppointmentsDtoList = new ArrayList<>();
             for(ServiceAppointment serviceAppointment: myAppointments) {
                 ServiceAppointmentResponseDto serviceAppointmentResponseDto = ServiceAppointmentResponseDto.builder()
-                        .user(serviceAppointment.getUser().getUsername())
+                        .user(serviceAppointment.getUser().getFirstName() + " " + serviceAppointment.getUser().getLastName())
+                        .userId(serviceAppointment.getUser().getId())
+                        .phone(serviceAppointment.getUser().getPhone())
                         .autoServiceId(serviceAppointment.getAutoService().getId())
                         .autoService(serviceAppointment.getAutoService().getName())
                         .problemDescription(serviceAppointment.getProblemDescription())
@@ -107,7 +108,9 @@ public class ServiceAppointmentService {
             List<ServiceAppointmentResponseDto> serviceAppointmentResponseDtos = new ArrayList<>();
             for(ServiceAppointment serviceAppointment: serviceAppointments) {
                 ServiceAppointmentResponseDto serviceAppointmentResponseDto = ServiceAppointmentResponseDto.builder()
-                        .user(serviceAppointment.getUser().getUsername())
+                        .user(serviceAppointment.getUser().getFirstName() + " " + serviceAppointment.getUser().getLastName())
+                        .userId(serviceAppointment.getUser().getId())
+                        .phone(serviceAppointment.getUser().getPhone())
                         .autoServiceId(serviceAppointment.getAutoService().getId())
                         .autoService(serviceAppointment.getAutoService().getName())
                         .problemDescription(serviceAppointment.getProblemDescription())
@@ -166,7 +169,7 @@ public class ServiceAppointmentService {
                     .id(serviceAppointmentId)
                     .problemDescription(serviceAppointmentDto.getProblemDescription())
                     .hour(serviceAppointmentDto.getHour())
-                    .stationNumber(serviceAppointmentDto.getStationNumber())
+                    .stationNumber(findStationNumber(currentAutoService, serviceAppointmentDto.getDate(), serviceAppointmentDto.getHour()))
                     .autoService(currentAutoService)
                     .user(currentUser)
                     .build();
@@ -209,9 +212,27 @@ public class ServiceAppointmentService {
 
             User currentUser = user.get();
             ServiceAppointment serviceAppointment = appointment.get();
+            Optional<AutoService> autoService = autoServiceRepository.findById(serviceId);
+
+            if(autoService.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+            }
+
             if(serviceAppointment.getUser() == currentUser) {
 
                 currentUser.removeServiceAppointment(serviceAppointment);
+                serviceAppointmentRepository.delete(serviceAppointment);
+                return new ResponseEntity<>("Programarea a fost ștearsă cu succes!", HttpStatus.OK);
+            }
+
+            if(autoService.get().getOrganisation() == currentUser.getOrganisation()) {
+
+                Optional<User> client = userRepository.findById(userId);
+                if(client.isEmpty()) {
+                    return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+                }
+                User customer = client.get();
+                customer.removeServiceAppointment(serviceAppointment);
                 serviceAppointmentRepository.delete(serviceAppointment);
                 return new ResponseEntity<>("Programarea a fost ștearsă cu succes!", HttpStatus.OK);
             }
@@ -274,5 +295,26 @@ public class ServiceAppointmentService {
         helper.setText(content, true);
 
         mailSender.send(message);
+    }
+
+    private int findStationNumber(AutoService autoService, LocalDate date, LocalTime time) {
+
+        List<ServiceAppointment> serviceAppointments = autoService.getUsers();
+        List<Integer> stations = new ArrayList<>();
+        for(ServiceAppointment serviceAppointment: serviceAppointments) {
+            if(serviceAppointment.getId().getDate().equals(date) && serviceAppointment.getHour().equals(time)) {
+                stations.add(serviceAppointment.getStationNumber());
+            }
+        }
+
+        Collections.sort(stations);
+
+        for(int i = 0; i < stations.size(); i++) {
+            if(stations.get(i) != i + 1) {
+                return i + 1;
+            }
+        }
+
+        return stations.size() + 1;
     }
 }

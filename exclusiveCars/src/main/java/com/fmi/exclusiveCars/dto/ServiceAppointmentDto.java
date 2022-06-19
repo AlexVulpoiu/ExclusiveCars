@@ -18,18 +18,14 @@ import java.time.LocalTime;
 @Builder
 public class ServiceAppointmentDto {
 
-    @NotBlank(message = "You must provide a valid description for the purpose of your visit in our service!")
-    @Size(max = 200, message = "The description should have at most 200 characters!")
+    @NotBlank(message = "Te rugăm să ne oferi o scurtă descriere despre vizita în service!")
+    @Size(max = 200, message = "Descrierea trebuie să aibă maxim 200 de caractere!")
     @JsonProperty("problem_description")
     private String problemDescription;
 
-    @NotNull(message = "You must provide a valid date!")
+    @NotNull(message = "Trebuie să alegi o dată validă!")
     private LocalDate date;
 
-    @NotNull(message = "You must select a valid hour!")
+    @NotNull(message = "Trebuie să alegi o oră validă!")
     private LocalTime hour;
-
-    @NotNull(message = "Error at the assignation of a station number!")
-    @JsonProperty("station_number")
-    private Integer stationNumber;
 }

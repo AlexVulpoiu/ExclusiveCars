@@ -30,6 +30,11 @@ public class AutoServiceController {
         return autoServiceService.getAutoService(id);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<?> getAutoServicesByNameOrLocation(@RequestParam(required = false) String filter) {
+        return autoServiceService.getAutoServicesByNameOrLocation(filter);
+    }
+
     @PostMapping("/add")
     @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> addAutoService(@Valid @RequestBody AutoServiceDto autoServiceDto) {

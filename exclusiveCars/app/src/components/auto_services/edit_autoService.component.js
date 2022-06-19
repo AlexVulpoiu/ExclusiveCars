@@ -382,7 +382,7 @@ export default class EditAutoService extends Component {
 
     render() {
 
-        if(this.state.loading) {
+        if(this.state.organisation === null || this.state.loading) {
             return (
                 <h1>Se încarcă...</h1>
             );

@@ -1,47 +1,18 @@
 import React, {Component, useEffect, useState} from "react";
-import {
-    Button,
-    Card,
-    CardBody, CardHeader,
-    CardText,
-    Nav,
-    NavItem,
-    NavLink,
-    TabContent,
-    TabPane
-} from 'reactstrap';
-import classnames from 'classnames';
-
-import * as GoIcons from "react-icons/go";
-import * as BsIcons from "react-icons/bs";
+import authHeader from "../../services/auth-header";
+import {Button, Card, CardBody, CardHeader, CardText, Nav, NavItem, NavLink, TabContent, TabPane} from "reactstrap";
 import * as ImIcons from "react-icons/im";
-
-import {Link} from "react-router-dom";
-
-import "../../styles/pagination.css";
 import AuthService from "../../services/auth.service";
-import authHeader from '../../services/auth-header';
-import axios from "axios";
+import * as BsIcons from "react-icons/bs";
+import * as GoIcons from "react-icons/go";
+import classnames from "classnames";
+import {Link} from "react-router-dom";
 
 const formatDate = value => {
     const dateString = String(value);
     const values = dateString.split("-");
     return values.reverse().join("-");
 };
-
-async function deleteServiceAppointment(id) {
-    await fetch(`/api/serviceAppointments/deleteAppointment/${id}`, {
-        method: 'DELETE',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authHeader().Authorization
-        },
-    }).then(() => {
-        localStorage.setItem("infoMessage", "Programarea a fost anulată cu succes!");
-        window.location.reload();
-    });
-}
 
 function ServiceAppointmentRepresentation(props) {
     const {user, user_id, phone, service_id, auto_service, problem_description, date, hour, station_number} = props.data
@@ -55,8 +26,7 @@ function ServiceAppointmentRepresentation(props) {
 
                     <Button style={{float: "right", width: "220px"}} color={"danger"}
                             onClick={() => {
-                                const userId = AuthService.getCurrentUser()["id"];
-                                const appointmentId = userId + "_" + service_id + "_" + date;
+                                const appointmentId = user_id + "_" + service_id + "_" + date;
                                 deleteServiceAppointment(appointmentId);
                             }}
                     >
@@ -68,25 +38,39 @@ function ServiceAppointmentRepresentation(props) {
             <CardBody>
                 <div className={"row"}>
                     <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillCalendarDateFill/>&nbsp;{formatDate(date)}
+                        <BsIcons.BsFillPersonFill/>&nbsp;{user}
                     </CardText>
 
                     <div style={{width: "5%"}}/>
+
+                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
+                        <BsIcons.BsTelephoneFill />&nbsp;{phone}
+                    </CardText>
+
+                    <div style={{width: "5%"}}/>
+
+                    <CardText style={{width: "30%", textAlign: "center"}}>
+                        <BsIcons.BsFillPinFill/>&nbsp;Stația {station_number}
+                    </CardText>
+                </div>
+
+                <div className={"row"}>
+                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
+                        <BsIcons.BsFillCalendarDateFill/>&nbsp;{formatDate(date)}
+                    </CardText>
+
+                    <div style={{width: "5%"}} />
 
                     <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
                         <BsIcons.BsFillClockFill/>&nbsp;{hour.substring(0, 5)}
                     </CardText>
 
-                    <div style={{width: "5%"}}/>
+                    <div style={{width: "5%"}} />
 
                     <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillPinFill/>&nbsp;Stația {station_number}
+                        <GoIcons.GoIssueOpened/>&nbsp;{problem_description}
                     </CardText>
                 </div>
-
-                <CardText style={{textAlign: "center"}}>
-                    <GoIcons.GoIssueOpened/>&nbsp;{problem_description}
-                </CardText>
             </CardBody>
         </Card>
     );
@@ -192,43 +176,66 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
     );
 }
 
-export default class MyServiceAppointments extends Component {
+async function deleteServiceAppointment(id) {
+
+    await fetch(`http://localhost:8090/api/serviceAppointments/deleteAppointment/${id}`, {
+        method: 'DELETE',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: authHeader().Authorization
+        },
+    }).then(() => {
+        localStorage.setItem("infoMessage", "Programarea a fost anulată cu succes!");
+        window.location.reload();
+    });
+}
+
+export default class ServiceAppointmentsForAutoService extends Component {
+
     constructor(props) {
         super(props);
 
         this.state = {
+            autoService: null,
             serviceAppointments: [],
             activeTab: '1',
             loading: true
         };
 
-        this.toggle = this.toggle.bind(this);
-
         this.currentUser = AuthService.getCurrentUser();
     }
 
     componentDidMount() {
-        document.title = "Programările mele";
+
         this.setState({loading: true});
-        axios.get(`http://localhost:8090/api/serviceAppointments`, {
+
+        fetch(`http://localhost:8090/api/autoServices/${this.props.match.params.serviceId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 Authorization: authHeader().Authorization
             }
         })
+            .then((response) => response.json())
             .then((data) => {
-                this.setState({serviceAppointments: data["data"], loading: false});
-                console.log(data);
-                console.log(data["data"]);
-            })
-            .catch((error) => {
-                console.log(error);
-            })
+                this.setState({autoService: data});
+                document.title = "Programări " + data["name"];
+            });
+
+        fetch(`http://localhost:8090/api/serviceAppointments/${this.props.match.params.serviceId}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => this.setState({serviceAppointments: data, loading: false}));
     }
 
     hasAccess(user) {
-        return user !== null && user.roles.length === 1;
+        return user !== null && user.roles.includes("ROLE_ORGANISATION");
     }
 
     toggle(tab) {
@@ -268,10 +275,10 @@ export default class MyServiceAppointments extends Component {
         }
 
         const serviceAppointments = this.state.serviceAppointments;
-        if(serviceAppointments === [] || serviceAppointments === "Nu ai efectuat nicio programare momentan!") {
+        if(serviceAppointments === [] || serviceAppointments === "Nu au fost făcute programări la acest service!") {
             return (
                 <div className={"col-md-12"}>
-                    <h2>Nu aveți nicio programare!</h2>
+                    <h2>Nu au fost făcute programări la acest service!</h2>
                 </div>
             );
         }
@@ -320,7 +327,7 @@ export default class MyServiceAppointments extends Component {
                 )}
 
                 <div style={{height: "50px"}}>
-                    <h1>Programările mele</h1>
+                    <h1>Programări <a href={`/autoServices/${this.state.autoService["id"]}`} target={"_blank"}>{this.state.autoService["name"]}</a></h1>
                 </div>
                 <br/>
                 <br/>
@@ -347,7 +354,7 @@ export default class MyServiceAppointments extends Component {
 
                     <br/>
 
-                    
+
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
@@ -376,7 +383,7 @@ export default class MyServiceAppointments extends Component {
                                     <br/>
                                 </>) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare viitoare!</h2>
+                                    <h2 style={{float: "left"}}>Nu există nicio programare viitoare!</h2>
 
                                     <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
                                         Service-uri auto
@@ -414,7 +421,7 @@ export default class MyServiceAppointments extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare din trecut!</h2>
+                                    <h2 style={{float: "left"}}>Nu există nicio programare din trecut!</h2>
 
                                     <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
                                         Service-uri auto

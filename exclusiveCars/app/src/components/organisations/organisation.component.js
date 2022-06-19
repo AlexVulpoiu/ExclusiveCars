@@ -29,7 +29,15 @@ export default class Organisation extends Component {
             }
         })
             .then((response) => response.json())
-            .then((data) => this.setState({organisation: data, loading: false}));
+            .then((data) => {
+                this.setState({organisation: data, loading: false});
+                document.title = data["name"];
+            })
+            .catch((error) => {
+                this.state.loading = false;
+                console.log(this.state.loading);
+                console.log(error);
+            });
     }
 
     async deleteOrganisation(id) {
@@ -48,15 +56,13 @@ export default class Organisation extends Component {
     }
 
     hasAccess(user, organisation) {
-        return organisation["owner_id"] === user["id"] || user.roles.includes('ROLE_ADMIN');
+        return user !== null && (user.roles.includes('ROLE_ADMIN') || organisation["owner_id"] === user["id"]);
     }
 
     render() {
-        const organisation = this.state.organisation;
-        const loading = this.state.loading;
-        const user = AuthService.getCurrentUser();
 
-        if(!this.hasAccess(this.currentUser, organisation)) {
+        const user = AuthService.getCurrentUser();
+        if(user !== null && !user.roles.includes("ROLE_ORGANISATION") && !user.roles.includes("ROLE_ADMIN")) {
             setTimeout(() => {
                 this.props.history.push("/news");
                 window.location.reload();
@@ -69,9 +75,25 @@ export default class Organisation extends Component {
             );
         }
 
+        const loading = this.state.loading;
         if(loading) {
             return (
                 <h1>Se încarcă...</h1>
+            );
+        }
+
+        const organisation = this.state.organisation;
+
+        if(!this.hasAccess(this.currentUser, organisation)) {
+            setTimeout(() => {
+                this.props.history.push("/news");
+                window.location.reload();
+            }, 2000);
+            return (
+                <div className={"col-md-12"}>
+                    <h1>Nu aveți dreptul de a accesa această pagină!</h1>
+                    <h1>Veți fi redirecționat...</h1>
+                </div>
             );
         }
 

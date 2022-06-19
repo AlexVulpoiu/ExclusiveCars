@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RentalCenterService {
@@ -40,15 +41,7 @@ public class RentalCenterService {
         List<RentalCenter> rentalCenterList = new ArrayList<>(rentalCenters);
         List<RentalCenterResponseDto> rentalCenterResponseDtoList = new ArrayList<>();
         for(RentalCenter rentalCenter: rentalCenterList) {
-            RentalCenterResponseDto rentalCenterResponseDto = RentalCenterResponseDto.builder()
-                    .id(rentalCenter.getId())
-                    .name(rentalCenter.getName())
-                    .city(rentalCenter.getCity())
-                    .address(rentalCenter.getAddress())
-                    .email(rentalCenter.getEmail())
-                    .phone(rentalCenter.getPhone())
-                    .organisation(rentalCenter.getOrganisation().getName())
-                    .build();
+            RentalCenterResponseDto rentalCenterResponseDto = mapRentalCenterToRentalCenterResponseDto(rentalCenter);
             rentalCenterResponseDtoList.add(rentalCenterResponseDto);
         }
 
@@ -60,19 +53,34 @@ public class RentalCenterService {
 
         if(rentalCenter.isPresent()) {
             RentalCenter currentRentalCenter = rentalCenter.get();
-            RentalCenterResponseDto rentalCenterResponseDto = RentalCenterResponseDto.builder()
-                    .id(currentRentalCenter.getId())
-                    .name(currentRentalCenter.getName())
-                    .city(currentRentalCenter.getCity())
-                    .address(currentRentalCenter.getAddress())
-                    .email(currentRentalCenter.getEmail())
-                    .phone(currentRentalCenter.getPhone())
-                    .organisation(currentRentalCenter.getOrganisation().getName())
-                    .build();
+            RentalCenterResponseDto rentalCenterResponseDto = mapRentalCenterToRentalCenterResponseDto(currentRentalCenter);
             return new ResponseEntity<>(rentalCenterResponseDto, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("Centrul de închirieri căutat nu există!", HttpStatus.NOT_FOUND);
+    }
+    
+    public ResponseEntity<?> getRentalCentersByNameOrLocation(String filter) {
+        
+        List<RentalCenter> rentalCenters = rentalCenterRepository.findAll();
+        if(filter == null || filter.trim().length() == 0 || rentalCenters.isEmpty()) {
+            return getAllRentalCenters();
+        }
+
+        String clearFilter = filter.trim().toLowerCase().replace(" ", "");
+        List<RentalCenter> filteredRentalCenters = rentalCenters.stream().filter(
+                r -> r.getName().toLowerCase().replace(" ", "").trim().contains(clearFilter)
+                        || r.getCity().toLowerCase().replace(" ", "").trim().contains(clearFilter)
+        ).collect(Collectors.toList());
+        
+        List<RentalCenterResponseDto> rentalCenterResponseDtoList = new ArrayList<>();
+        
+        for(RentalCenter rentalCenter: filteredRentalCenters) {
+            RentalCenterResponseDto rentalCenterResponseDto = mapRentalCenterToRentalCenterResponseDto(rentalCenter);
+            rentalCenterResponseDtoList.add(rentalCenterResponseDto);
+        }
+        
+        return new ResponseEntity<>(rentalCenterResponseDtoList, HttpStatus.OK);
     }
 
     public ResponseEntity<?> addRentalCenter(RentalCenterDto rentalCenterDto) {
@@ -212,5 +220,17 @@ public class RentalCenterService {
         }
 
         return false;
+    }
+    
+    private RentalCenterResponseDto mapRentalCenterToRentalCenterResponseDto(RentalCenter rentalCenter) {
+        return RentalCenterResponseDto.builder()
+                .id(rentalCenter.getId())
+                .name(rentalCenter.getName())
+                .city(rentalCenter.getCity())
+                .address(rentalCenter.getAddress())
+                .email(rentalCenter.getEmail())
+                .phone(rentalCenter.getPhone())
+                .organisation(rentalCenter.getOrganisation().getName())
+                .build();
     }
 }

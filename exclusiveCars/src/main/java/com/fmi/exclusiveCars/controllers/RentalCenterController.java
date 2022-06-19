@@ -30,6 +30,11 @@ public class RentalCenterController {
         return rentalCenterService.getRentalCenter(id);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<?> getRentalCentersByNameOrLocation(@RequestParam(required = false) String filter) {
+        return rentalCenterService.getRentalCentersByNameOrLocation(filter);
+    }
+
     @PostMapping("/add")
     @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> addRentalCenter(@Valid @RequestBody RentalCenterDto rentalCenterDto) {

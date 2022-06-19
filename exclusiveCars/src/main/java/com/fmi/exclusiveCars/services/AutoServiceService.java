@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AutoServiceService {
@@ -41,18 +42,7 @@ public class AutoServiceService {
         List<AutoServiceResponseDto> autoServiceResponseDtoList = new ArrayList<>();
 
         for(AutoService autoService: autoServiceList) {
-            AutoServiceResponseDto autoServiceResponseDto = AutoServiceResponseDto.builder()
-                    .id(autoService.getId())
-                    .name(autoService.getName())
-                    .city(autoService.getCity())
-                    .address(autoService.getAddress())
-                    .email(autoService.getEmail())
-                    .phone(autoService.getPhone())
-                    .numberOfStations(autoService.getNumberOfStations())
-                    .startHour(autoService.getStartHour())
-                    .endHour(autoService.getEndHour())
-                    .organisation(autoService.getOrganisation().getName())
-                    .build();
+            AutoServiceResponseDto autoServiceResponseDto = mapAutoServiceToAutoServiceResponseDto(autoService);
             autoServiceResponseDtoList.add(autoServiceResponseDto);
         }
 
@@ -64,24 +54,35 @@ public class AutoServiceService {
 
         if(autoService.isPresent()) {
             AutoService currentAutoService = autoService.get();
-
-            AutoServiceResponseDto autoServiceResponseDto = AutoServiceResponseDto.builder()
-                    .id(currentAutoService.getId())
-                    .name(currentAutoService.getName())
-                    .city(currentAutoService.getCity())
-                    .address(currentAutoService.getAddress())
-                    .email(currentAutoService.getEmail())
-                    .phone(currentAutoService.getPhone())
-                    .numberOfStations(currentAutoService.getNumberOfStations())
-                    .startHour(currentAutoService.getStartHour())
-                    .endHour(currentAutoService.getEndHour())
-                    .organisation(currentAutoService.getOrganisation().getName())
-                    .build();
+            AutoServiceResponseDto autoServiceResponseDto = mapAutoServiceToAutoServiceResponseDto(currentAutoService);
 
             return new ResponseEntity<>(autoServiceResponseDto, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("Acest service auto nu există!", HttpStatus.NOT_FOUND);
+    }
+
+    public ResponseEntity<?> getAutoServicesByNameOrLocation(String filter) {
+
+        List<AutoService> autoServices = autoServiceRepository.findAll();
+        if(filter == null || filter.trim().length() == 0 || autoServices.isEmpty()) {
+            return getAllAutoServices();
+        }
+
+        String clearFilter = filter.trim().toLowerCase().replace(" ", "");
+        List<AutoService> filteredAutoServices = autoServices.stream().filter(
+                s -> s.getName().toLowerCase().replace(" ", "").trim().contains(clearFilter)
+                        || s.getCity().toLowerCase().replace(" ", "").trim().contains(clearFilter)
+        ).collect(Collectors.toList());
+
+        List<AutoServiceResponseDto> autoServiceResponseDtoList = new ArrayList<>();
+
+        for(AutoService autoService: filteredAutoServices) {
+            AutoServiceResponseDto autoServiceResponseDto = mapAutoServiceToAutoServiceResponseDto(autoService);
+            autoServiceResponseDtoList.add(autoServiceResponseDto);
+        }
+
+        return new ResponseEntity<>(autoServiceResponseDtoList, HttpStatus.OK);
     }
 
     public ResponseEntity<?> addAutoService(AutoServiceDto autoServiceDto) {
@@ -227,5 +228,20 @@ public class AutoServiceService {
         }
 
         return false;
+    }
+
+    private AutoServiceResponseDto mapAutoServiceToAutoServiceResponseDto(AutoService autoService) {
+        return AutoServiceResponseDto.builder()
+                .id(autoService.getId())
+                .name(autoService.getName())
+                .city(autoService.getCity())
+                .address(autoService.getAddress())
+                .email(autoService.getEmail())
+                .phone(autoService.getPhone())
+                .numberOfStations(autoService.getNumberOfStations())
+                .startHour(autoService.getStartHour())
+                .endHour(autoService.getEndHour())
+                .organisation(autoService.getOrganisation().getName())
+                .build();
     }
 }

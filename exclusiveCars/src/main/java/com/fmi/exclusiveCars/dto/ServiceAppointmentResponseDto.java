@@ -17,6 +17,11 @@ public class ServiceAppointmentResponseDto {
 
     private String user;
 
+    @JsonProperty("user_id")
+    private Long userId;
+
+    private String phone;
+
     @JsonProperty("service_id")
     private Long autoServiceId;
 

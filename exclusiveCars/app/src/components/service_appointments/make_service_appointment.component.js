@@ -27,39 +27,31 @@ const required = value => {
     }
 };
 
-const vDescription = value => {
-    if(value.trim().length === 0 || value.trim().length > 200) {
-        return (
-            <div className="alert alert-danger" role="alert">
-                Te rugăm să oferi o scurtă descriere a vizitei tale în service!
-            </div>
-        );
-    }
-}
-
 export default class MakeServiceAppointment extends Component  {
 
     emptyAppointment = {
         problem_description: "",
         date: "",
-        hour: "",
-        station_number: 0
+        hour: ""
     }
 
     constructor (props) {
         super(props)
 
         this.state = {
-            startDate: "",
-            startTime: "",
+            startDate: sessionStorage.getItem("appointmentDate") ? new Date(sessionStorage.getItem("appointmentDate")) : sessionStorage.getItem("appointmentDate"),
+            startTime: sessionStorage.getItem("appointmentTime") ? new Date(sessionStorage.getItem("appointmentTime")) : sessionStorage.getItem("appointmentTime"),
             autoService: {},
-            description: localStorage.getItem("appointmentDescription"),
+            description: sessionStorage.getItem("appointmentDescription"),
             appointments: [],
             loading: false,
-            message: ""
+            message: "",
+            appointmentsByHour: {}
         };
 
-        localStorage.setItem("appointmentDescription", "");
+        sessionStorage.setItem("appointmentDescription", "");
+        sessionStorage.setItem("appointmentDate", "");
+        sessionStorage.setItem("appointmentTime", "");
 
         this.currentUser = AuthService.getCurrentUser();
 
@@ -70,6 +62,7 @@ export default class MakeServiceAppointment extends Component  {
     }
 
     componentDidMount() {
+        document.title = "Efectuează programare"
         this.setState({loading: true});
         fetch(`http://localhost:8090/api/autoServices/${this.props.match.params.serviceId}`, {
             headers: {
@@ -93,9 +86,7 @@ export default class MakeServiceAppointment extends Component  {
                 Authorization: authHeader().Authorization
             }
         })
-            .then((response) => {
-                response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
                 this.setState({appointments: data, loading: false});
             });
@@ -103,14 +94,15 @@ export default class MakeServiceAppointment extends Component  {
 
     handleDateChange(date) {
         this.setState({
-            startDate: date
+            startDate: date,
+            startTime: ""
         })
     }
 
     handleTimeChange(date) {
         this.setState({
             startTime: date
-        })
+        });
     }
 
     onChangeDescription(e) {
@@ -147,11 +139,33 @@ export default class MakeServiceAppointment extends Component  {
         const minDateTime = setHours(setMinutes(new Date(selectedDate), 0), startHour);
         const maxDateTime = setHours(setMinutes(new Date(selectedDate), 0), endHour);
 
-        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() < maxDateTime.getTime();
-    }
+        this.state.appointmentsByHour = {};
+        for(let hour = startHour; hour < endHour; hour++) {
+            this.state.appointmentsByHour[hour] = [];
+        }
+        if(this.state.startDate) {
+            for (let i in appointments) {
+                const appointmentDate = new Date(appointments[i]["date"]);
+                if (appointments[i]["service_id"] === Number(this.props.match.params.serviceId)
+                    && appointmentDate.getDate() === this.state.startDate.getDate()
+                    && appointmentDate.getMonth() === this.state.startDate.getMonth()
+                    && appointmentDate.getFullYear() === this.state.startDate.getFullYear()) {
 
-    findStationNumber() {
-        return 1;
+                    this.state.appointmentsByHour[Number(appointments[i]["hour"].substring(0, 2))]
+                        .push(Number(appointments[i]["station_number"]));
+                }
+            }
+        }
+
+        const excludedHours = [];
+        for(let i in this.state.appointmentsByHour) {
+            if(this.state.appointmentsByHour[i].length === this.state.autoService["numberOfStations"]) {
+                excludedHours.push(Number(i));
+            }
+        }
+
+        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() < maxDateTime.getTime()
+                && !excludedHours.includes(selectedDate.getHours());
     }
 
     async handleSubmit(e) {
@@ -164,20 +178,42 @@ export default class MakeServiceAppointment extends Component  {
 
         this.form.validateAll();
 
+        if(this.state.description === null || this.state.description.trim().length === 0
+            || this.state.startDate === null || this.state.startDate === ""
+            || this.state.startTime === null || this.state.startTime === "") {
+
+            sessionStorage.setItem("appointmentAddMessage", "Toate câmpurile sunt obligatorii!");
+            if(this.state.description !== null) {
+                sessionStorage.setItem("appointmentDescription", this.state.description.trim());
+            }
+
+            if(this.state.startDate !== null && this.state.startDate !== "") {
+                sessionStorage.setItem("appointmentDate", this.state.startDate.toString());
+            } else {
+                sessionStorage.setItem("appointmentDate", "");
+            }
+
+            if(this.state.startTime !== null && this.state.startTime !== "") {
+                sessionStorage.setItem("appointmentTime", this.state.startTime.toString());
+            } else {
+                sessionStorage.setItem("appointmentTime", "");
+            }
+
+            window.location.reload();
+        }
+
         if(this.checkBtn.context._errors.length === 0) {
-            const newAppointment = this.emptyAppointment
-            newAppointment["problem_description"] = this.state.description.trim()
+            const newAppointment = this.emptyAppointment;
+            newAppointment["problem_description"] = this.state.description.trim();
 
             const year = this.state.startDate.getFullYear();
-            const month = (this.state.startDate.getMonth() + 1) < 10 ? "0" + (this.state.startDate.getMonth() + 1) : (this.state.startDate.getMonth() + 1)
+            const month = (this.state.startDate.getMonth() + 1) < 10 ? "0" + (this.state.startDate.getMonth() + 1) : (this.state.startDate.getMonth() + 1);
             const day = this.state.startDate.getDate() < 10 ? "0" + this.state.startDate.getDate() : this.state.startDate.getDate();
             newAppointment["date"] = year + "-" + month + "-" + day;
 
             const hour = this.state.startTime.getHours() < 10 ? "0" + this.state.startTime.getHours() : this.state.startTime.getHours();
             const minutes = this.state.startTime.getMinutes() < 10 ? "0" + this.state.startTime.getMinutes() : this.state.startTime.getMinutes();
             newAppointment["hour"] = hour + ":" + minutes;
-
-            newAppointment["station_number"] = this.findStationNumber()
 
             await axios.post(`http://localhost:8090/api/serviceAppointments/makeAppointment/${this.props.match.params.serviceId}`, newAppointment, {
                 headers: {
@@ -188,15 +224,19 @@ export default class MakeServiceAppointment extends Component  {
             })
                 .then(() => {
                     localStorage.setItem("infoMessage", "Programarea a fost efectuată cu succes!");
-                    localStorage.setItem("appointmentDescription", "");
+                    sessionStorage.setItem("appointmentDescription", "");
+                    sessionStorage.setItem("appointmentDate", "");
+                    sessionStorage.setItem("appointmentTime", "");
                     this.props.history.push("/news");
                 })
                 .catch((error) => {
                     this.props.history.push(`/serviceAppointments/makeAppointment/${this.props.match.params.serviceId}`);
                     window.location.reload();
 
-                    localStorage.setItem("appointmentAddMessage", error.response.data);
-                    localStorage.setItem("appointmentDescription", newAppointment["description"] ? newAppointment["description"] : "");
+                    sessionStorage.setItem("appointmentAddMessage", error.response.data);
+                    sessionStorage.setItem("appointmentDescription", this.state.description);
+                    sessionStorage.setItem("appointmentDate", this.state.startDate);
+                    sessionStorage.setItem("appointmentTime", this.state.startTime);
                 });
         } else {
             this.setState({
@@ -208,7 +248,7 @@ export default class MakeServiceAppointment extends Component  {
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        localStorage.setItem("appointmentAddMessage", "");
+        sessionStorage.setItem("appointmentAddMessage", "");
     }
 
     render() {
@@ -235,8 +275,8 @@ export default class MakeServiceAppointment extends Component  {
         }
 
         return (
-            <>
-                {localStorage.getItem("appointmentAddMessage") !== null && localStorage.getItem("appointmentAddMessage") !== "" && (
+            <div className={"col-md-12"}>
+                {sessionStorage.getItem("appointmentAddMessage") !== null && sessionStorage.getItem("appointmentAddMessage") !== "" && (
                     <div
                         id={"notification"}
                         role="alert"
@@ -251,7 +291,7 @@ export default class MakeServiceAppointment extends Component  {
                         >
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        {localStorage.getItem("appointmentAddMessage")}
+                        {sessionStorage.getItem("appointmentAddMessage")}
                     </div>
                 )}
 
@@ -300,13 +340,12 @@ export default class MakeServiceAppointment extends Component  {
                                 maxDate={addDays(new Date(), 30)}
                                 validations={[required]}
                                 autoFocus
-                                shouldCloseOnSelect={false}
                             />
                         </div>
 
                         <div style={{width: "5%"}} />
 
-                        <div style={{width: "10%"}} className={"form-group"}>
+                        <div style={{width: "20%"}} className={"form-group"}>
                             <label htmlFor={"time"}><BiIcons.BiTimeFive/> Ora</label>
                             <DatePicker
                                 name={"time"}
@@ -322,7 +361,6 @@ export default class MakeServiceAppointment extends Component  {
                                 validations={[required]}
                                 filterTime={this.filterTime}
                                 autoFocus
-                                shouldCloseOnSelect={false}
                             />
                         </div>
                     </div>
@@ -361,7 +399,7 @@ export default class MakeServiceAppointment extends Component  {
                         }}
                     />
                 </Form>
-            </>
+            </div>
         );
     }
 

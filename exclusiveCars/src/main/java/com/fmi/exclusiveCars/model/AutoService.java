@@ -8,6 +8,7 @@ import javax.validation.constraints.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -68,4 +69,17 @@ public class AutoService {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Organisation organisation;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AutoService that = (AutoService) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
