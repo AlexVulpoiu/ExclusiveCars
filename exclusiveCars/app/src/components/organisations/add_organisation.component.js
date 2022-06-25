@@ -59,7 +59,7 @@ export default class AddOrganisation extends Component {
     }
 
     hasAccess(user) {
-        return user !== null;
+        return user !== null && !user.roles.includes("ROLE_ORGANISATION");
     }
 
     async handleSubmit(e) {
@@ -119,6 +119,13 @@ export default class AddOrganisation extends Component {
                     <h1>Nu aveți dreptul de a accesa această pagină!</h1>
                     <h1>Veți fi redirecționat...</h1>
                 </div>
+            );
+        }
+
+        const loading = this.state.loading;
+        if(loading) {
+            return (
+                <h1>Se încarcă...</h1>
             );
         }
 

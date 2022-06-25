@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RentalAnnouncementService {
@@ -38,26 +39,9 @@ public class RentalAnnouncementService {
 
     public ResponseEntity<?> getAllRentalAnnouncements() {
 
-        List<RentalAnnouncement> rentalAnnouncements = rentalAnnouncementRepository.findAll();
-        if(rentalAnnouncements.isEmpty()) {
-            return new ResponseEntity<>("Nu a fost postat niciun anunț de închiriere!", HttpStatus.OK);
-        }
+        List<RentalAnnouncement> rentalAnnouncements = rentalAnnouncementRepository.getRentalAnnouncementsByState(EState.ACCEPTED);
 
-        List<RentalAnnouncementDto> rentalAnnouncementDtoList = new ArrayList<>();
-
-        for(RentalAnnouncement currentRentalAnnouncement: rentalAnnouncements) {
-            RentalAnnouncementDto rentalAnnouncementDto = RentalAnnouncementDto.builder()
-                    .id(currentRentalAnnouncement.getId())
-                    .carId(currentRentalAnnouncement.getCar().getId())
-                    .carManufacturer(currentRentalAnnouncement.getCar().getModel().getManufacturer())
-                    .carModel(currentRentalAnnouncement.getCar().getModel().getModel())
-                    .carCategory(currentRentalAnnouncement.getCar().getModel().getCategory())
-                    .price(currentRentalAnnouncement.getCar().getPrice())
-                    .build();
-            rentalAnnouncementDtoList.add(rentalAnnouncementDto);
-        }
-
-        return new ResponseEntity<>(rentalAnnouncementDtoList, HttpStatus.OK);
+        return new ResponseEntity<>(rentalAnnouncements, HttpStatus.OK);
     }
 
     public ResponseEntity<?> getPendingRentalAnnouncements() {
@@ -79,29 +63,34 @@ public class RentalAnnouncementService {
         return new ResponseEntity<>(rentalAnnouncement.get(), HttpStatus.OK);
     }
 
+    public ResponseEntity<?> getRentalAnnouncementsByCar(String filter, Long id) {
+
+        List<RentalAnnouncement> rentalAnnouncements = rentalAnnouncementRepository.getRentalAnnouncementsFromRentalCenterByState(id, EState.ACCEPTED);
+        if(filter == null || filter.trim().length() == 0 || rentalAnnouncements.isEmpty()) {
+            return getRentalAnnouncementsFromRentalCenter(id);
+        }
+
+        String[] queries = filter.split(" ");
+        String brand = queries[0].toLowerCase();
+        String model = "";
+        if(queries.length > 1) {
+            model = queries[1];
+        }
+        String finalModel = model.toLowerCase();
+        List<RentalAnnouncement> filteredRentalAnnouncements = rentalAnnouncements.stream().filter(
+                r -> r.getCar().getModel().getManufacturer().toLowerCase().contains(brand)
+                        && r.getCar().getModel().getModel().toLowerCase().contains(finalModel)
+        ).collect(Collectors.toList());
+
+        return new ResponseEntity<>(filteredRentalAnnouncements, HttpStatus.OK);
+    }
+
     public ResponseEntity<?> getRentalAnnouncementsFromRentalCenter(Long rentalCenterId) {
 
         List<RentalAnnouncement> rentalAnnouncements = 
-                rentalAnnouncementRepository.getRentalAnnouncementFromRentalCenter(rentalCenterId);
-        if(rentalAnnouncements.isEmpty()) {
-            return new ResponseEntity<>("Nu este disponibil niciun anunț de închiriere de la acest centru!", HttpStatus.OK);
-        }
-
-        List<RentalAnnouncementDto> rentalAnnouncementDtoList = new ArrayList<>();
-
-        for(RentalAnnouncement currentRentalAnnouncement: rentalAnnouncements) {
-            RentalAnnouncementDto rentalAnnouncementDto = RentalAnnouncementDto.builder()
-                    .id(currentRentalAnnouncement.getId())
-                    .carId(currentRentalAnnouncement.getCar().getId())
-                    .carManufacturer(currentRentalAnnouncement.getCar().getModel().getManufacturer())
-                    .carModel(currentRentalAnnouncement.getCar().getModel().getModel())
-                    .carCategory(currentRentalAnnouncement.getCar().getModel().getCategory())
-                    .price(currentRentalAnnouncement.getCar().getPrice())
-                    .build();
-            rentalAnnouncementDtoList.add(rentalAnnouncementDto);
-        }
+                rentalAnnouncementRepository.getRentalAnnouncementsFromRentalCenterByState(rentalCenterId, EState.ACCEPTED);
         
-        return new ResponseEntity<>(rentalAnnouncementDtoList, HttpStatus.OK);
+        return new ResponseEntity<>(rentalAnnouncements, HttpStatus.OK);
     }
 
     public ResponseEntity<?> addRentalAnnouncement(Long rentalCenterId, CarDto carDto) {

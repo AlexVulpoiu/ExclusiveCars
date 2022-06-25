@@ -43,10 +43,11 @@ public class ImageService {
             Arrays.asList(multipartFiles).forEach(multipartFile -> {
                 try {
                     int numberOfImages = imageRepository.findAll().size();
+                    long maxId = imageRepository.findAll().get(numberOfImages - 1).getId();
                     String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
                     int p = fileName.lastIndexOf('.');
                     String extension = fileName.substring(p);
-                    fileName = fileName.substring(0, p) + "_" + (numberOfImages + 1) + extension;
+                    fileName = fileName.substring(0, p) + "_" + (numberOfImages + 1) + "_" + carId + "_" + maxId + extension;
 
                     Files.copy(multipartFile.getInputStream(), Path.of("C:\\Users\\vulpo\\Desktop\\Facultate\\Licenta\\Anul 3\\ExclusiveCars\\exclusiveCars\\app\\public\\assets\\images\\" + fileName));
 
@@ -67,5 +68,32 @@ public class ImageService {
         } catch (Exception e) {
             return new ResponseEntity<>("A apărut o eroare la încărcarea imaginilor!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public ResponseEntity<?> delete(String id) {
+
+        String[] ids = id.split("_");
+        Long imageId = Long.parseLong(ids[0]);
+        Long carId = Long.parseLong(ids[1]);
+
+        Optional<Image> image = imageRepository.findById(imageId);
+        if(image.isEmpty()) {
+            return new ResponseEntity<>("Această imagine nu există!", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Car> car = carRepository.findById(carId);
+        if(car.isEmpty()) {
+            return new ResponseEntity<>("Această mașină nu există!", HttpStatus.NOT_FOUND);
+        }
+
+        Image currentImage = image.get();
+        Car currentCar = car.get();
+
+        currentCar.getImages().remove(currentImage);
+        carRepository.save(currentCar);
+
+        imageRepository.delete(currentImage);
+
+        return new ResponseEntity<>("Imaginea a fost ștearsă cu succes!", HttpStatus.OK);
     }
 }

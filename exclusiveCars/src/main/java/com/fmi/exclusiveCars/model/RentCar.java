@@ -1,9 +1,9 @@
 package com.fmi.exclusiveCars.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -14,6 +14,7 @@ import java.util.Objects;
 @Setter
 @Builder
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "rent_cars")
 public class RentCar {
     @EmbeddedId
@@ -21,10 +22,13 @@ public class RentCar {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
+    @JsonIgnoreProperties({"roles", "services", "favoriteSellingAnnouncements", "favoriteRentalAnnouncements", "cars",
+            "sellingAnnouncements", "organisation"})
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("carId")
+    @JsonIgnoreProperties({"rentalClients"})
     private Car car;
 
     @NotNull

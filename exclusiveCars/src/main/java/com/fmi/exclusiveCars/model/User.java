@@ -71,10 +71,17 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ServiceAppointment> services = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinTable(name = "favorites", joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "car_id"))
-    private Set<Car> favoriteCars = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "favorite_selling_announcements",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "selling_announcement_id"))
+    private List<SellingAnnouncement> favoriteSellingAnnouncements = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "favorite_rental_announcements",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "rental_announcement_id"))
+    private List<RentalAnnouncement> favoriteRentalAnnouncements = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RentCar> cars = new ArrayList<>();
@@ -105,14 +112,6 @@ public class User {
         sellingAnnouncement.setUser(null);
     }
 
-    public void addFavoriteCar(Car car) {
-        favoriteCars.add(car);
-    }
-
-    public void removeFavoriteCar(Car car) {
-        favoriteCars.remove(car);
-    }
-
     public void addServiceAppointment(AutoService autoService, ServiceAppointment serviceAppointment) {
         services.add(serviceAppointment);
         autoService.getUsers().add(serviceAppointment);
@@ -124,23 +123,16 @@ public class User {
         serviceAppointment.setAutoService(null);
     }
 
-    public void addRentCar(Car car, LocalDate startDate, LocalDate endDate) {
-        RentCar rentCar = new RentCar(this, car, startDate, endDate);
+    public void addRentCar(RentCar rentCar) {
         cars.add(rentCar);
+        Car car = rentCar.getCar();
         car.getRentalClients().add(rentCar);
     }
 
-    public void removeRentCar(Car car) {
-        for(Iterator<RentCar> iterator = cars.iterator(); iterator.hasNext();) {
-            RentCar rentCar = iterator.next();
-
-            if(rentCar.getUser().equals(this) && rentCar.getCar().equals(car)) {
-                iterator.remove();
-                rentCar.getCar().getRentalClients().remove(rentCar);
-                rentCar.setUser(null);
-                rentCar.setCar(null);
-            }
-        }
+    public void removeRentCar(RentCar rentCar) {
+        cars.remove(rentCar);
+        Car car = rentCar.getCar();
+        car.getRentalClients().remove(rentCar);
     }
 
     @Override

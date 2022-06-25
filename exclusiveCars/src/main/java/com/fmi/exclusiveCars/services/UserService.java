@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.UserDto;
+import com.fmi.exclusiveCars.dto.UserEditDto;
 import com.fmi.exclusiveCars.model.ERole;
 import com.fmi.exclusiveCars.model.Role;
 import com.fmi.exclusiveCars.model.User;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,10 +19,14 @@ import java.util.Set;
 
 @Service
 public class UserService {
+
+    private final PasswordEncoder passwordEncoder;
+
     private final UserRepository userRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -46,6 +52,30 @@ public class UserService {
         return false;
     }
 
+    public ResponseEntity<?> editUser(UserEditDto userEditDto) {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+            }
+
+            User currentUser = user.get();
+            currentUser.setFirstName(userEditDto.getFirstName());
+            currentUser.setLastName(userEditDto.getLastName());
+            currentUser.setPhone(userEditDto.getPhone());
+            userRepository.save(currentUser);
+
+            return new ResponseEntity<>("Editarea contului a fost realizată cu succes!", HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+    }
+
     public ResponseEntity<?> editRoles(Long id, Set<Role> roles) {
         Optional<User> user = userRepository.findById(id);
 
@@ -62,6 +92,29 @@ public class UserService {
         }
 
         return new ResponseEntity<>("Acest utilizator nu există!", HttpStatus.NOT_FOUND);
+    }
+
+    public ResponseEntity<?> checkPassword(String password) {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl)principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if(user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii tale. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+            }
+
+            User currentUser = user.get();
+            String encodedPassword = currentUser.getPassword();
+
+            boolean check = passwordEncoder.matches(password, encodedPassword);
+
+            return new ResponseEntity<>(String.valueOf(check), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii tale. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
     public ResponseEntity<?> deleteUser(Long id) {

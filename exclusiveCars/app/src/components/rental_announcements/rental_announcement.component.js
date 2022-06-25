@@ -11,6 +11,7 @@ import DatePicker from "react-datepicker";
 import ro from 'date-fns/locale/ro';
 import addDays from "date-fns/addDays";
 import Form from "react-validation/build/form";
+import axios from "axios";
 
 export default class RentalAnnouncement extends Component {
 
@@ -19,19 +20,25 @@ export default class RentalAnnouncement extends Component {
 
         this.state = {
             rentalAnnouncement: {},
+            carRentals: [],
+            userRentals: [],
             startDate: "",
             endDate: "",
+            excludedDates: [],
             dateRange: "",
             button: 0,
+            favorites: [],
             loading: true
         };
 
         this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.setState({loading: true});
-        fetch(`http://localhost:8090/api/rentalAnnouncements/${this.props.match.params.id}`, {
+
+        fetch(`http://localhost:8090/api/favoriteRentalAnnouncements`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -39,7 +46,89 @@ export default class RentalAnnouncement extends Component {
             }
         })
             .then((response) => response.json())
-            .then((data) => this.setState({rentalAnnouncement: data, loading: false}));
+            .then((data) => {
+                const fav = [];
+                for(let i in data) {
+                    fav.push(data[i]["id"]);
+                }
+                this.setState({favorites: fav});
+            })
+
+        await fetch(`http://localhost:8090/api/rentalAnnouncements/${this.props.match.params.id}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                this.setState({rentalAnnouncement: data})
+            });
+
+        await fetch(`http://localhost:8090/api/rentCars/rentals/${this.state.rentalAnnouncement["car"]["id"]}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => this.setState({carRentals: data}));
+
+        await fetch(`http://localhost:8090/api/rentCars/myRentals`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => this.setState({userRentals: data}));
+
+        this.setState({excludedDates: this.getUnavailableDates()});
+
+        this.setState({loading: false});
+    }
+
+    async handleSubmit(e) {
+        if(this.state.startDate !== null && this.state.startDate !== ""
+            && this.state.endDate !== null && this.state.endDate !== "") {
+
+            e.preventDefault();
+
+            this.setState({loading: true});
+
+            const year = this.state.startDate.getFullYear();
+            const month = (this.state.startDate.getMonth() + 1) < 10 ? "0" + (this.state.startDate.getMonth() + 1) : (this.state.startDate.getMonth() + 1);
+            const day = this.state.startDate.getDate() < 10 ? "0" + this.state.startDate.getDate() : this.state.startDate.getDate();
+            const start = year + "-" + month + "-" + day;
+
+            const y = this.state.endDate.getFullYear();
+            const m = (this.state.endDate.getMonth() + 1) < 10 ? "0" + (this.state.endDate.getMonth() + 1) : (this.state.endDate.getMonth() + 1);
+            const d = this.state.endDate.getDate() < 10 ? "0" + this.state.endDate.getDate() : this.state.endDate.getDate();
+            const end = y + "-" + m + "-" + d;
+
+            const formData = new FormData();
+            formData.append("startDate", start);
+            formData.append("endDate", end);
+            formData.append("announcement", this.state.rentalAnnouncement["id"])
+
+            await axios.post(`http://localhost:8090/api/rentCars/rent/${this.state.rentalAnnouncement["car"]["id"]}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: authHeader().Authorization
+                }
+            })
+                .then(() => {
+                    localStorage.setItem("infoMessage", "Programarea a fost efectuată cu succes!");
+                    this.props.history.push("/news");
+                })
+                .catch((error) => {
+                    alert(error);
+                    window.location.reload();
+                });
+        }
     }
 
     async deleteRentalAnnouncement(id) {
@@ -94,10 +183,94 @@ export default class RentalAnnouncement extends Component {
     }
 
     handleChange(update) {
-        this.setState({
-            dateRange: update
-        });
-        [this.state.startDate, this.state.endDate] = update;
+
+        const excludedDates = this.state.excludedDates;
+        let ok = true;
+        for(let i in excludedDates) {
+            const s = excludedDates[i]["start"];
+            const e = excludedDates[i]["end"];
+
+            if(e >= update[0] && s <= update[1]) {
+                ok = false;
+                break;
+            }
+        }
+
+        if(ok) {
+            this.setState({
+                dateRange: update
+            });
+            [this.state.startDate, this.state.endDate] = update;
+        } else {
+            alert("Toate zilele din intervalul ales trebuie să fie disponibile!");
+            window.location.reload();
+        }
+    }
+
+    getUnavailableDates() {
+        const excludedDates = [];
+
+        const userRentals = this.state.userRentals;
+        for(let i in userRentals) {
+            let start = new Date(userRentals[i]["id"]["startDate"]);
+            const day = start.getDate();
+            start = start.setDate(day - 1);
+            const end = new Date(userRentals[i]["endDate"]);
+            excludedDates.push({start: start, end: end});
+        }
+
+        const carRentals = this.state.carRentals;
+        for(let i in carRentals) {
+            let start = new Date(carRentals[i]["id"]["startDate"]);
+            const day = start.getDate();
+            start = start.setDate(day - 1);
+            const end = new Date(carRentals[i]["endDate"]);
+            excludedDates.push({start: start, end: end});
+        }
+
+        return excludedDates;
+    }
+
+    addToFavorites(id) {
+        fetch(`http://localhost:8090/api/favoriteRentalAnnouncements/add/${id}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => {})
+            .then((data) => {
+                this.setState({loading: true});
+                sessionStorage.setItem("favoriteRentalStatus", "Anunțul a fost adăugat la favorite!");
+                window.location.reload();
+            })
+            .catch((error) => console.log(error));
+    }
+
+    removeFromFavorites(id) {
+        fetch(`http://localhost:8090/api/favoriteRentalAnnouncements/remove/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => {})
+            .then((data) => {
+                this.setState({loading: true});
+                sessionStorage.setItem("favoriteRentalStatus", "Anunțul a fost eliminat de la favorite!");
+                window.location.reload();
+            })
+            .catch((error) => console.log(error));
+    }
+
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        sessionStorage.setItem("favoriteRentalStatus", "");
     }
 
     render() {
@@ -139,6 +312,25 @@ export default class RentalAnnouncement extends Component {
 
         return (
             <div className={"rs-col-md-12"}>
+                {sessionStorage.getItem("favoriteRentalStatus") !== null && sessionStorage.getItem("favoriteRentalStatus") !== "" && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {sessionStorage.getItem("favoriteRentalStatus")}
+                    </div>
+                )}
+
                 <div className={"row"}>
                     <div className={"column"} style={{width: "50%"}}>
                         <Carousel fade indicators={false} variant={"dark"} nextLabel={""} prevLabel={""} rows={1} cols={1}>
@@ -164,9 +356,42 @@ export default class RentalAnnouncement extends Component {
                     <div style={{width: "5%"}} />
 
                     <div className={"column"} style={{width: "45%"}}>
-                        <h1>
-                            <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
-                        </h1>
+                        <div className={"row"}>
+                            <div style={{width: "60%"}}>
+                                <h1>
+                                    <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
+                                </h1>
+                            </div>
+
+                            {
+                                // this.isOwner(user, sellingAnnouncement) ?
+                                // (
+                                //     <div>
+                                //         <Button color={"warning"} tag={Link}
+                                //                 to={`/sellingAnnouncements/edit/${sellingAnnouncement["id"]}`}>
+                                //             Editează anunțul <AiIcons.AiFillEdit/>
+                                //         </Button>
+                                //         &nbsp;&nbsp;&nbsp;
+                                //         <Button color={"danger"}
+                                //                 onClick={() => this.deleteSellingAnnouncement(sellingAnnouncement["id"])}>
+                                //             Șterge anunțul <MdIcons.MdDeleteForever/>
+                                //         </Button>
+                                //     </div>
+                                // )
+                                // :
+                                    (!this.state.favorites.includes(rentalAnnouncement["id"]) ?
+                                        (
+                                            <div>
+                                                <Button color={"primary"} onClick={() => this.addToFavorites(rentalAnnouncement["id"])}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <Button color={"primary"} onClick={() => this.removeFromFavorites(rentalAnnouncement["id"])}>Elimină de la favorite <AiIcons.AiFillCloseCircle/></Button>
+                                            </div>
+                                        )
+                                )
+                            }
+                        </div>
 
                         <br/>
 
@@ -200,7 +425,7 @@ export default class RentalAnnouncement extends Component {
 
                         <div className={"row"} style={{display: "block"}}>
                             <div style={{float: "left"}}>
-                                <h3>Preț: {car["price"]} lei / zi</h3>
+                                <h3>Preț: {car["price"]} € / zi</h3>
                             </div>
 
                             <div  style={{float: "right"}}>
@@ -214,8 +439,7 @@ export default class RentalAnnouncement extends Component {
                         <br/>
                         <br/>
 
-                        {/*todo: dezactiveaza datele ocupate */}
-                        <Form>
+                        <Form onSubmit={this.handleSubmit}>
                         {this.state.button === 1 &&
                             (<div style={{textAlign: "center"}} className={"row"}>
                                 <DatePicker
@@ -229,6 +453,7 @@ export default class RentalAnnouncement extends Component {
                                     onChange={this.handleChange}
                                     minDate={new Date()}
                                     maxDate={addDays(new Date(), 60)}
+                                    excludeDateIntervals={this.state.excludedDates}
                                     selectsRange={true}
                                     renderCustomHeader={({
                                                              monthDate,
@@ -242,6 +467,7 @@ export default class RentalAnnouncement extends Component {
                                                 className={
                                                     "react-datepicker__navigation react-datepicker__navigation--previous"
                                                 }
+                                                type={"button"}
                                                 style={customHeaderCount === 1 ? { visibility: "hidden" } : null}
                                                 onClick={decreaseMonth}
                                             >
@@ -264,6 +490,7 @@ export default class RentalAnnouncement extends Component {
                                                 className={
                                                     "react-datepicker__navigation react-datepicker__navigation--next"
                                                 }
+                                                type={"button"}
                                                 style={customHeaderCount === 0 ? { visibility: "hidden" } : null}
                                                 onClick={increaseMonth}
                                             >
@@ -289,8 +516,8 @@ export default class RentalAnnouncement extends Component {
                                 <br/>
                                 <h5>
                                     Ați selectat o perioadă de&nbsp;
-                                    {(this.state.endDate.getTime() - this.state.startDate.getTime()) / (1000 * 3600 * 24)} zile.
-                                    Cost total: {(this.state.endDate.getTime() - this.state.startDate.getTime()) / (1000 * 3600 * 24) * car["price"]} lei
+                                    {(this.state.endDate.getTime() - this.state.startDate.getTime()) / (1000 * 3600 * 24) + 1} zile.
+                                    Cost total: {((this.state.endDate.getTime() - this.state.startDate.getTime()) / (1000 * 3600 * 24) + 1) * car["price"]} €
                                 </h5>
                                 <p>
                                     <span style={{fontStyle: "italic"}}>
@@ -299,7 +526,19 @@ export default class RentalAnnouncement extends Component {
                                     </span>
                                 </p>
                                 <br/>
-                                <Button color={"success"}>Confirmă cererea de închiriere</Button>
+
+                                <div className={"form-group"}>
+                                    <Button
+                                        color={"success"}
+                                        className="btn btn-primary btn-block"
+                                        disabled={this.state.loading}
+                                    >
+                                        {this.state.loading && (
+                                            <span className="spinner-border spinner-border-sm"/>
+                                        )}
+                                        <span>Confirmă cererea de închirirere</span>
+                                    </Button>
+                                </div>
                             </div>)
                         }
                         </Form>

@@ -177,7 +177,7 @@ export default class AddRentalAnnouncement extends Component {
             // newArticle["title"] = this.state.title.trim()
             // newArticle["content"] = this.state.content.trim()
 
-            await axios.post("http://localhost:8090/api/news/add", newArticle, {
+            await axios.post("http://localhost:8090/api/rentalCenters/add", newArticle, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',

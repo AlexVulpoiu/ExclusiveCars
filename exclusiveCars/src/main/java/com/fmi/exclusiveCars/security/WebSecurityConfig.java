@@ -67,8 +67,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/carModels/add").authenticated()
                 .antMatchers("/api/cars/**").authenticated()
                 .antMatchers("/api/rentalAnnouncements/**").authenticated()
-                .antMatchers("/api/sellingAnnouncements/**").authenticated()
+                .antMatchers("/api/sellingAnnouncements", "/api/sellingAnnouncements/**").authenticated()
                 .antMatchers("/api/images/**").authenticated()
+                .antMatchers("/api/favoriteSellingAnnouncements", "/api/favoriteSellingAnnouncements/**").authenticated()
+                .antMatchers("/api/rentCars/**").authenticated()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

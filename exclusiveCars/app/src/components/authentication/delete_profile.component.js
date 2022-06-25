@@ -23,12 +23,14 @@ export default class DeleteProfile extends Component {
         super(props);
 
         this.state = {
+            password: "",
             captcha: false
         }
 
         this.user = AuthService.getCurrentUser();
 
         this.onChange = this.onChange.bind(this);
+        this.onChangePassword = this.onChangePassword.bind(this);
         this.onRefresh = this.onRefresh.bind(this);
     }
 
@@ -37,23 +39,42 @@ export default class DeleteProfile extends Component {
         if(!this.state.captcha) {
             alert("Pentru a efectua acțiunea, este necesar să completezi corect captcha-ul");
         } else {
-            // todo: verifica parola
-            await axios.delete(`http://localhost:8090/api/users/delete/${this.user.id}`, {
+            await fetch(`http://localhost:8090/api/users/checkPassword/${this.state.password}`, {
                 headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     Authorization: authHeader().Authorization
                 }
             })
-                .then(() => {
-                    localStorage.setItem("infoMessage", "Ați șters contul cu succes!");
-                    AuthService.logout();
-                    this.props.history.push("/news");
-                    window.location.reload();
+                .then((response) => response.json())
+                .then((data) => {
+                    if(!data) {
+                        alert("Parola este incorectă!");
+                        window.location.reload();
+                    } else {
+                        axios.delete(`http://localhost:8090/api/users/delete/${this.user.id}`, {
+                            headers: {
+                                Authorization: authHeader().Authorization
+                            }
+                        })
+                            .then(() => {
+                                localStorage.setItem("infoMessage", "Ați șters contul cu succes!");
+                                AuthService.logout();
+                                this.props.history.push("/news");
+                                window.location.reload();
+                            })
+                            .catch((error) => {
+                                alert("A apărut o eroare la procesarea cererii!");
+                                window.location.reload();
+                            });
+                    }
                 })
-                .catch((error) => {
-                    alert("A apărut o eroare la procesarea cererii!");
-                    window.location.reload();
-                });
+                .catch((error) => alert(error));
         }
+    }
+
+    onChangePassword(e) {
+        this.setState({password: e.target.value});
     }
 
     onChange(value) {
@@ -93,6 +114,7 @@ export default class DeleteProfile extends Component {
                                 type="password"
                                 className="form-control"
                                 name="password"
+                                onChange={this.onChangePassword}
                                 validations={[required]}
                             />
                         </div>

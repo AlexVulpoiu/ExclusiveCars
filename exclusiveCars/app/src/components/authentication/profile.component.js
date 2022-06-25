@@ -30,6 +30,12 @@ export default class Profile extends Component {
             .then((data) => this.setState({userInfo: data, loading: false}));
     }
 
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        localStorage.setItem("infoMessage", "");
+    }
+
     render() {
         if(this.state.currentUser === null) {
             setTimeout(() => {
@@ -57,6 +63,25 @@ export default class Profile extends Component {
             <div className="container">
                 <br/>
 
+                {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {localStorage.getItem("infoMessage")}
+                    </div>
+                )}
+
                 <h1>
                     <strong>Salut, {userInfo["firstName"] + " " + userInfo["lastName"]}!</strong>
                 </h1>
@@ -67,7 +92,7 @@ export default class Profile extends Component {
                 <div>
                     <h3 style={{float: "left"}}>Ce dorești să faci astăzi în aplicație?</h3>
                     <div style={{float: "right"}}>
-                        <Button color={"warning"}>Editează detaliile contului <FaIcons.FaUserEdit/></Button>
+                        <Button color={"warning"} tag={Link} to={"/profile/edit"}>Editează detaliile contului <FaIcons.FaUserEdit/></Button>
                         &nbsp;&nbsp;&nbsp;
                         <Button color={"danger"} tag={Link} to={"/profile/delete"}>Șterge contul <BsIcons.BsFillTrashFill/></Button>
                     </div>
@@ -81,18 +106,18 @@ export default class Profile extends Component {
                     <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link> </h4>
                     {currentUser.roles.includes("ROLE_ORGANISATION") ?
                         (<h4>
-                            <FaIcons.FaArrowRight/> <Link to={"/news"}>Organizația mea</Link>
+                            <FaIcons.FaArrowRight/> <Link to={"/organisations/myOrganisation"}>Organizația mea</Link>
                         </h4>)
                         : (<h4>
-                            <FaIcons.FaArrowRight/> <Link to={"/news"}>Creează o organizație</Link>
+                            <FaIcons.FaArrowRight/> <Link to={"/organisations/add"}>Creează o organizație</Link>
                         </h4>)
                     }
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Programările mele</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Anunțurile mele</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Postează un anunț</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Anunțuri de vânzare</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Anunțuri favorite</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Închiriază o mașină</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/serviceAppointments"}>Programările mele</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/mySellingAnnouncements"}>Anunțurile mele</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements/add"}>Postează un anunț</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/favoriteAnnouncements"}>Anunțuri favorite</Link> </h4>
+                    <h4><FaIcons.FaArrowRight/> <Link to={"/rentalCenters"}>Închiriază o mașină</Link> </h4>
                 </div>
 
             </div>

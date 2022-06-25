@@ -17,18 +17,17 @@ const vQuery = value => {
     return true;
 }
 
-function AutoServiceRepresentation(props) {
-    const {id, name, city, address, startHour, endHour, numberOfStations, email, phone, organisation} = props.data
+function RentalCenterRepresentation(props) {
+    const {id, name, city, address, email, phone, organisation} = props.data
     return (
         <Card style={{padding: "0px"}}>
             <CardHeader style={{backgroundColor: "#e6f3ff"}} component="h5">{name}</CardHeader>
             <CardBody>
                 <CardTitle><GrIcons.GrMapLocation/>&nbsp;{city + ", " + address}</CardTitle>
-                <CardText><BsIcons.BsFillClockFill/>&nbsp;{startHour.substring(0, 5) + " - " + endHour.substring(0, 5)}</CardText>
                 <CardText><IoIcons.IoMdMail/>&nbsp;{email}</CardText>
                 <CardText><ImIcons.ImPhone/>&nbsp;{phone}</CardText>
                 <br/>
-                <Button color={"primary"} tag={Link} to={`/autoServices/${id}`}>Accesează pagina service-ului</Button>
+                <Button color={"primary"} tag={Link} to={`/rentalCenters/${id}`}>Accesează pagina centrului de închirieri</Button>
             </CardBody>
         </Card>
     );
@@ -123,28 +122,30 @@ function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
     );
 }
 
-export default class AllAutoServices extends Component {
+export default class AllRentalCenters extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            autoServices: [],
-            serviceName: sessionStorage.getItem("serviceName"),
+            rentalCenters: [],
+            centerName: sessionStorage.getItem("centerName"),
             loading: true
         }
 
-        sessionStorage.setItem("serviceName", "");
+        sessionStorage.setItem("centerName", "");
 
         this.currentUser = AuthService.getCurrentUser();
 
-        this.onChangeServiceName = this.onChangeServiceName.bind(this);
+        this.onChangeRentalCenterName = this.onChangeRentalCenterName.bind(this);
     }
 
     componentDidMount() {
-        document.title = "Service-uri auto";
+        document.title = "Centre de închiriere";
+
         this.setState({loading: true});
-        fetch("http://localhost:8090/api/autoServices", {
+
+        fetch("http://localhost:8090/api/rentalCenters", {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -154,16 +155,16 @@ export default class AllAutoServices extends Component {
             .then((response) => response.json())
             .then((data) => {
 
-                const filter = sessionStorage.getItem("filterAutoServices");
-                let filteredAutoServices = data;
+                const filter = sessionStorage.getItem("filterRentalCenters");
+                let filteredRentalCenters = data;
 
-                if(filter === "services") {
-                    filteredAutoServices = JSON.parse(sessionStorage.getItem("filteredAutoServices"));
-                    sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
-                    sessionStorage.setItem("filterAutoServices", "");
+                if(filter === "centers") {
+                    filteredRentalCenters = JSON.parse(sessionStorage.getItem("filteredRentalCenters"));
+                    sessionStorage.setItem("filteredRentalCenters", JSON.stringify([]));
+                    sessionStorage.setItem("filterRentalCenters", "");
                 }
 
-                this.setState({autoServices: filteredAutoServices, loading: false});
+                this.setState({rentalCenters: filteredRentalCenters, loading: false});
             })
             .catch((error) => console.log(error));
     }
@@ -172,16 +173,17 @@ export default class AllAutoServices extends Component {
         return user !== null;
     }
 
-    onChangeServiceName = (e) => {
-        this.setState({serviceName: e.target.value});
+    onChangeRentalCenterName = (e) => {
+        this.setState({centerName: e.target.value});
     };
 
-    filterAutoServices = () => {
-        if(this.state.serviceName !== null && this.state.serviceName !== "") {
-            const check = vQuery(this.state.serviceName);
+    filterRentalCenters = () => {
+        if(this.state.centerName !== null && this.state.centerName !== "") {
+
+            const check = vQuery(this.state.centerName);
 
             if(check) {
-                fetch(`http://localhost:8090/api/autoServices/filter?filter=${this.state.serviceName}`, {
+                fetch(`http://localhost:8090/api/rentalCenters/filter?filter=${this.state.centerName}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -191,12 +193,12 @@ export default class AllAutoServices extends Component {
                     .then((response) => response.json())
                     .then((data) => {
                         if (typeof (data) === "string") {
-                            sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
+                            sessionStorage.setItem("filteredRentalCenters", JSON.stringify([]));
                         } else {
-                            sessionStorage.setItem("filteredAutoServices", JSON.stringify(data));
+                            sessionStorage.setItem("filteredRentalCenters", JSON.stringify(data));
                         }
-                        sessionStorage.setItem("filterAutoServices", "services");
-                        sessionStorage.setItem("serviceName", this.state.serviceName);
+                        sessionStorage.setItem("filterRentalCenters", "centers");
+                        sessionStorage.setItem("centerName", this.state.centerName);
                         window.location.reload();
                     })
                     .catch((error) => console.log(error));
@@ -232,7 +234,8 @@ export default class AllAutoServices extends Component {
         return (
             <div className={"col-md-12"}>
                 <div style={{height: "50px"}}>
-                    <h1 style={{float: "left"}}>Service-uri auto</h1>
+                    <h1 style={{float: "left"}}>Centre de închiriere</h1>
+                    <Button style={{float: "right"}} color={"success"} tag={Link} to={"/myRentals"}>Închirierile mele</Button>
                 </div>
                 <br/>
                 <br/>
@@ -242,14 +245,14 @@ export default class AllAutoServices extends Component {
                         type="text"
                         className="form-control"
                         placeholder="Căutare după nume și locație"
-                        value={this.state.serviceName}
-                        onChange={this.onChangeServiceName}
+                        value={this.state.centerName}
+                        onChange={this.onChangeRentalCenterName}
                     />
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-secondary"
                             type="button"
-                            onClick={this.filterAutoServices}
+                            onClick={this.filterRentalCenters}
                         >
                             Căutare &nbsp;<BsIcons.BsSearch/>
                         </button>
@@ -257,15 +260,15 @@ export default class AllAutoServices extends Component {
                 </div>
 
                 <div>
-                    {this.state.autoServices.length > 0 ? (
+                    {this.state.rentalCenters.length > 0 ? (
                         <>
                             <Pagination
-                                data={this.state.autoServices}
-                                RenderComponent={AutoServiceRepresentation}
-                                title="Service-uri auto"
+                                data={this.state.rentalCenters}
+                                RenderComponent={RentalCenterRepresentation}
+                                title="Centre de închiriere"
                                 pageLimit={5}
                                 dataLimit={5}
-                                tabName={"auto services"}
+                                tabName={"rental centers"}
                             />
                             <br/>
                             <br/>
@@ -273,7 +276,7 @@ export default class AllAutoServices extends Component {
                         </>
                     ) : (
                         <div>
-                            <h2 style={{float: "left"}}>Nu există niciun service cu aceste informații!</h2>
+                            <h2 style={{float: "left"}}>Nu există niciun centru cu aceste informații!</h2>
                         </div>
                     )}
                 </div>

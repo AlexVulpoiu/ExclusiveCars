@@ -1,12 +1,9 @@
 import React, {Component, useEffect, useState} from "react";
-import authHeader from "../../services/auth-header";
-import AuthService from "../../services/auth.service";
-import {Button, Card, CardBody, CardHeader, CardText, CardTitle} from "reactstrap";
-import * as GrIcons from "react-icons/gr";
-import * as BsIcons from "react-icons/bs";
-import * as IoIcons from "react-icons/io";
-import * as ImIcons from "react-icons/im";
+import {Button} from "reactstrap";
 import {Link} from "react-router-dom";
+import AuthService from "../../services/auth.service";
+import authHeader from "../../services/auth-header";
+import * as BsIcons from "react-icons/bs";
 
 const vQuery = value => {
     const re = new RegExp("^[A-Za-z0-9\\s-]*$");
@@ -15,33 +12,6 @@ const vQuery = value => {
         return false;
     }
     return true;
-}
-
-function AutoServiceRepresentation(props) {
-    const {id, name, city, address, startHour, endHour, numberOfStations, email, phone, organisation} = props.data
-    return (
-        <Card style={{padding: "0px"}}>
-            <CardHeader style={{backgroundColor: "#e6f3ff"}} component="h5">{name}</CardHeader>
-            <CardBody>
-                <CardTitle><GrIcons.GrMapLocation/>&nbsp;{city + ", " + address}</CardTitle>
-                <CardText><BsIcons.BsFillClockFill/>&nbsp;{startHour.substring(0, 5) + " - " + endHour.substring(0, 5)}</CardText>
-                <CardText><IoIcons.IoMdMail/>&nbsp;{email}</CardText>
-                <CardText><ImIcons.ImPhone/>&nbsp;{phone}</CardText>
-                <br/>
-                <Button color={"primary"} tag={Link} to={`/autoServices/${id}`}>Accesează pagina service-ului</Button>
-            </CardBody>
-        </Card>
-    );
-}
-
-function compare(a, b) {
-    if(a.name < b.name) {
-        return -1;
-    }
-    if(a.name > b.name) {
-        return 1;
-    }
-    return 0;
 }
 
 function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
@@ -123,28 +93,67 @@ function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
     );
 }
 
-export default class AllAutoServices extends Component {
+function SellingAnnouncementRepresentation(props) {
+    const {id, car, user, location} = props.data;
+    return (
+        <div className="jumbotron" style={{paddingTop: "20px", paddingBottom: "20px"}}>
+            <div className={"row"}>
+                <div className={"column"} style={{width: "35%"}}>
+                    <img height={"220px"} width={"300px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
+                </div>
+
+                <div className={"column"}>
+                    <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
+                    <div className={"row"}>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Categoria: {car["model"]["category"]}</li>
+                                <li>Kilometraj: {car["kilometers"]}</li>
+                                <li>Preț: {car["price"]} €</li>
+                                <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
+                                <li>Putere motor: {car["power"]} CP</li>
+                            </ul>
+                        </div>
+
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Nume: {user["firstName"] + " " + user["lastName"]}</li>
+                                <li>Localitate: {location}</li>
+                                <li>Telefon: {user["phone"]}</li>
+                                <li>Email: {user["email"]}</li>
+                            </ul>
+                        </div>
+
+                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/sellingAnnouncements/${id}`}>Deschide anunțul</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default class SellingAnnouncements extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            autoServices: [],
-            serviceName: sessionStorage.getItem("serviceName"),
+            sellingAnnouncements: [],
+            searchQuery: sessionStorage.getItem("carSellQuery"),
             loading: true
-        }
+        };
 
-        sessionStorage.setItem("serviceName", "");
+        sessionStorage.setItem("carSellQuery", "");
+
+        this.onChangeSearchQuery = this.onChangeSearchQuery.bind(this);
 
         this.currentUser = AuthService.getCurrentUser();
-
-        this.onChangeServiceName = this.onChangeServiceName.bind(this);
     }
 
     componentDidMount() {
-        document.title = "Service-uri auto";
+        document.title = "Anunțuri de vânzare";
         this.setState({loading: true});
-        fetch("http://localhost:8090/api/autoServices", {
+        fetch("http://localhost:8090/api/sellingAnnouncements", {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -154,34 +163,33 @@ export default class AllAutoServices extends Component {
             .then((response) => response.json())
             .then((data) => {
 
-                const filter = sessionStorage.getItem("filterAutoServices");
-                let filteredAutoServices = data;
+                const filter = sessionStorage.getItem("filterSellingAnnouncements");
+                let filteredSellingAnnouncements = data;
 
-                if(filter === "services") {
-                    filteredAutoServices = JSON.parse(sessionStorage.getItem("filteredAutoServices"));
-                    sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
-                    sessionStorage.setItem("filterAutoServices", "");
+                if(filter === "true") {
+                    filteredSellingAnnouncements = JSON.parse(sessionStorage.getItem("filteredSellingAnnouncements"));
+                    sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify([]));
+                    sessionStorage.setItem("filterSellingAnnouncements", "");
                 }
 
-                this.setState({autoServices: filteredAutoServices, loading: false});
-            })
-            .catch((error) => console.log(error));
+                this.setState({sellingAnnouncements: filteredSellingAnnouncements, loading: false});
+            });
     }
 
     hasAccess(user) {
         return user !== null;
     }
 
-    onChangeServiceName = (e) => {
-        this.setState({serviceName: e.target.value});
-    };
+    onChangeSearchQuery = (e) => {
+        this.setState({searchQuery: e.target.value});
+    }
 
-    filterAutoServices = () => {
-        if(this.state.serviceName !== null && this.state.serviceName !== "") {
-            const check = vQuery(this.state.serviceName);
+    filterSellingAnnouncements = () => {
+        if(this.state.searchQuery !== null && this.state.searchQuery !== "") {
+            const check = vQuery(this.state.searchQuery);
 
             if(check) {
-                fetch(`http://localhost:8090/api/autoServices/filter?filter=${this.state.serviceName}`, {
+                fetch(`http://localhost:8090/api/sellingAnnouncements/filter?filter=${this.state.searchQuery}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -191,12 +199,12 @@ export default class AllAutoServices extends Component {
                     .then((response) => response.json())
                     .then((data) => {
                         if (typeof (data) === "string") {
-                            sessionStorage.setItem("filteredAutoServices", JSON.stringify([]));
+                            sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify([]));
                         } else {
-                            sessionStorage.setItem("filteredAutoServices", JSON.stringify(data));
+                            sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify(data));
                         }
-                        sessionStorage.setItem("filterAutoServices", "services");
-                        sessionStorage.setItem("serviceName", this.state.serviceName);
+                        sessionStorage.setItem("filterSellingAnnouncements", "true")
+                        sessionStorage.setItem("carSellQuery", this.state.searchQuery);
                         window.location.reload();
                     })
                     .catch((error) => console.log(error));
@@ -230,9 +238,9 @@ export default class AllAutoServices extends Component {
         }
 
         return (
-            <div className={"col-md-12"}>
+            <>
                 <div style={{height: "50px"}}>
-                    <h1 style={{float: "left"}}>Service-uri auto</h1>
+                    <h1 style={{float: "left"}}>Anunțuri de vânzare</h1>
                 </div>
                 <br/>
                 <br/>
@@ -241,31 +249,33 @@ export default class AllAutoServices extends Component {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Căutare după nume și locație"
-                        value={this.state.serviceName}
-                        onChange={this.onChangeServiceName}
+                        placeholder="Căutare după marca și modelul mașinii"
+                        value={this.state.searchQuery}
+                        onChange={this.onChangeSearchQuery}
                     />
                     <div className="input-group-append">
                         <button
                             className="btn btn-outline-secondary"
                             type="button"
-                            onClick={this.filterAutoServices}
+                            onClick={this.filterSellingAnnouncements}
                         >
                             Căutare &nbsp;<BsIcons.BsSearch/>
                         </button>
                     </div>
                 </div>
 
+                <br/>
+
                 <div>
-                    {this.state.autoServices.length > 0 ? (
+                    {this.state.sellingAnnouncements.length > 0 ? (
                         <>
                             <Pagination
-                                data={this.state.autoServices}
-                                RenderComponent={AutoServiceRepresentation}
-                                title="Service-uri auto"
+                                data={this.state.sellingAnnouncements}
+                                RenderComponent={SellingAnnouncementRepresentation}
+                                title="Anunțuri de vânzare"
                                 pageLimit={5}
                                 dataLimit={5}
-                                tabName={"auto services"}
+                                tabName={"selling announcements"}
                             />
                             <br/>
                             <br/>
@@ -273,11 +283,11 @@ export default class AllAutoServices extends Component {
                         </>
                     ) : (
                         <div>
-                            <h2 style={{float: "left"}}>Nu există niciun service cu aceste informații!</h2>
+                            <h2 style={{float: "left"}}>Nu a fost postat niciun anunț cu acest conținut!</h2>
                         </div>
                     )}
                 </div>
-            </div>
+            </>
         );
     }
 }

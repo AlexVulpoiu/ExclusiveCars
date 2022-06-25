@@ -37,6 +37,11 @@ public class RentalAnnouncementController {
         return rentalAnnouncementService.getRentalAnnouncement(id);
     }
 
+    @GetMapping("/filter/{id}")
+    public ResponseEntity<?> getRentalAnnouncementsByCar(@RequestParam(required = false) String filter, @PathVariable Long id) {
+        return rentalAnnouncementService.getRentalAnnouncementsByCar(filter, id);
+    }
+
     @GetMapping("/fromRentalCenter/{rentalCenterId}")
     public ResponseEntity<?> getRentalAnnouncementsFromRentalCenter(@PathVariable Long rentalCenterId) {
         return rentalAnnouncementService.getRentalAnnouncementsFromRentalCenter(rentalCenterId);

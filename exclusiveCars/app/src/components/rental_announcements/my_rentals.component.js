@@ -1,20 +1,10 @@
 import React, {Component, useEffect, useState} from "react";
-import {
-    Button,
-    Card,
-    CardBody, CardHeader,
-    CardText,
-    Nav,
-    NavItem,
-    NavLink,
-    TabContent,
-    TabPane
-} from 'reactstrap';
+import {Button, Card, CardBody, CardHeader, Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import classnames from 'classnames';
 
-import * as GoIcons from "react-icons/go";
 import * as BsIcons from "react-icons/bs";
 import * as ImIcons from "react-icons/im";
+import * as MdIcons from "react-icons/md";
 
 import {Link} from "react-router-dom";
 
@@ -26,11 +16,11 @@ import axios from "axios";
 const formatDate = value => {
     const dateString = String(value);
     const values = dateString.split("-");
-    return values.reverse().join("-");
+    return values.reverse().join(".");
 };
 
-async function deleteServiceAppointment(id) {
-    await fetch(`/api/serviceAppointments/deleteAppointment/${id}`, {
+async function cancelRental(id) {
+    await fetch(`http://localhost:8090/api/rentCars/cancel/${id}`, {
         method: 'DELETE',
         headers: {
             Accept: 'application/json',
@@ -38,65 +28,58 @@ async function deleteServiceAppointment(id) {
             Authorization: authHeader().Authorization
         },
     }).then(() => {
-        localStorage.setItem("infoMessage", "Programarea a fost anulată cu succes!");
+        localStorage.setItem("infoMessage", "Cererea de închiriere a fost anulată cu succes!");
         window.location.reload();
     });
 }
 
-function ServiceAppointmentRepresentation(props) {
-    const {user, user_id, phone, service_id, auto_service, problem_description, date, hour, station_number} = props.data
+function RentalRepresentation(props) {
+    const {id, user, car, endDate, rentalAnnouncementForCar} = props.data;
     return (
         <Card body style={{padding: "0px"}}>
             <CardHeader>
                 <div>
-                    <Button style={{float: "left", width: "220px"}} color={"primary"} href={`/autoServices/${service_id}`} target={"_blank"}>
-                        <ImIcons.ImLocation/>&nbsp;{auto_service}
+                    <Button style={{float: "left", width: "300px"}} color={"primary"} href={`/rentalAnnouncements/${rentalAnnouncementForCar[car["id"]]}`} target={"_blank"}>
+                        <BsIcons.BsEyeFill/>&nbsp;Vizualizează anunțul de închiriere
                     </Button>
 
-                    <Button style={{float: "right", width: "220px"}} color={"danger"}
+                    <Button style={{float: "right", width: "300px"}} color={"danger"}
                             onClick={() => {
-                                const userId = user_id;
-                                const appointmentId = userId + "_" + service_id + "_" + date;
-                                deleteServiceAppointment(appointmentId);
+                                const userId = user["id"];
+                                const rentalId = userId + "_" + car["id"] + "_" + id["startDate"];
+                                cancelRental(rentalId);
                             }}
                     >
-                        Anulează programarea&nbsp;<ImIcons.ImCancelCircle/>
+                        Anulează cererea de închiriere&nbsp;<ImIcons.ImCancelCircle/>
                     </Button>
                 </div>
             </CardHeader>
 
             <CardBody>
-                <div className={"row"}>
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillCalendarDateFill/>&nbsp;{formatDate(date)}
-                    </CardText>
+                <div className={"row"} style={{marginLeft: "10px"}}>
+                    <div className={"column"} style={{width: "270px"}}>
+                        <img height={"150px"} width={"250px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
+                    </div>
 
-                    <div style={{width: "5%"}}/>
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillClockFill/>&nbsp;{hour.substring(0, 5)}
-                    </CardText>
-
-                    <div style={{width: "5%"}}/>
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillPinFill/>&nbsp;Stația {station_number}
-                    </CardText>
+                    <div className={"column"}>
+                        <ul>
+                            <li>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</li>
+                            <li>Consum: {car["consumption"]} litri / 100 km</li>
+                            <li>Perioada: {formatDate(id["startDate"])} - {formatDate(endDate)}</li>
+                            <li>Preț: {car["price"]} € / zi</li>
+                        </ul>
+                    </div>
                 </div>
-
-                <CardText style={{textAlign: "center"}}>
-                    <GoIcons.GoIssueOpened/>&nbsp;{problem_description}
-                </CardText>
             </CardBody>
         </Card>
     );
 }
 
 function compare(a, b) {
-    if(a.date > b.date) {
+    if(a.id.startDate > b.id.startDate) {
         return -1;
     }
-    if(a.date < b.date) {
+    if(a.id.startDate < b.id.startDate) {
         return 1;
     }
     return 0;
@@ -146,22 +129,13 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
 
     return (
         <div>
-
-
-            {/* show the posts, 10 posts at a time */}
             <div className="dataContainer">
                 {getPaginatedData().map((d, idx) => (
                     <RenderComponent key={idx} data={d} />
                 ))}
             </div>
 
-            {/* show the pagiantion
-                it consists of next and previous buttons
-                along with page numbers, in our case, 5 page
-                numbers at a time
-            */}
             <div className="pagination" style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                {/* previous button */}
                 <button
                     onClick={goToPreviousPage}
                     className={`prev ${currentPage === 1 ? 'disabled' : ''}`}
@@ -169,7 +143,6 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
                     pagina anterioară
                 </button>
 
-                {/* show page numbers */}
                 {getPaginationGroup().map((item, index) => (
                     <button
                         key={index}
@@ -180,7 +153,6 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
                     </button>
                 ))}
 
-                {/* next button */}
                 <button
                     onClick={goToNextPage}
                     className={`next ${currentPage === pages ? 'disabled' : ''}`}
@@ -192,12 +164,13 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
     );
 }
 
-export default class MyServiceAppointments extends Component {
+export default class MyRentals extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            serviceAppointments: [],
+            rentals: [],
+            rentalAnnouncementForCar: {},
             activeTab: '1',
             loading: true
         };
@@ -208,9 +181,10 @@ export default class MyServiceAppointments extends Component {
     }
 
     componentDidMount() {
-        document.title = "Programările mele";
+        document.title = "Închirierile mele";
         this.setState({loading: true});
-        axios.get(`http://localhost:8090/api/serviceAppointments`, {
+
+        axios.get(`http://localhost:8090/api/rentCars/myRentals`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -218,13 +192,29 @@ export default class MyServiceAppointments extends Component {
             }
         })
             .then((data) => {
-                this.setState({serviceAppointments: data["data"], loading: false});
-                console.log(data);
-                console.log(data["data"]);
+                this.setState({rentals: data["data"]});
             })
             .catch((error) => {
                 console.log(error);
-            })
+            });
+
+        fetch("http://localhost:8090/api/rentalAnnouncements/all", {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const carAnnouncements = {};
+                for(let i in data) {
+                    carAnnouncements[data[i]["car"]["id"]] = data[i]["id"];
+                }
+                this.setState({rentalAnnouncementForCar: carAnnouncements});
+            });
+
+        this.setState({loading: false});
     }
 
     hasAccess(user) {
@@ -267,25 +257,28 @@ export default class MyServiceAppointments extends Component {
             );
         }
 
-        const serviceAppointments = this.state.serviceAppointments;
-        let oldServiceAppointments = [];
-        let futureServiceAppointments = [];
+        const rentals = this.state.rentals;
+        let oldRentals = [];
+        let futureRentals = [];
 
-        if(serviceAppointments !== [] && serviceAppointments !== "Nu ai efectuat nicio programare momentan!") {
+        if(rentals !== [] && rentals !== "Nu ai efectuat nicio programare momentan!") {
 
-            serviceAppointments.sort(compare);
+            rentals.sort(compare);
             const today = new Date();
 
-            for (let i = 0; i < serviceAppointments.length; i++) {
-                const currentDate = new Date(serviceAppointments[i]["date"]);
+            for (let i = 0; i < rentals.length; i++) {
+                const currentDate = new Date(rentals[i]["id"]["startDate"]);
+
+                const newRental = rentals[i];
+                newRental["rentalAnnouncementForCar"] = this.state.rentalAnnouncementForCar;
 
                 if (currentDate.getTime() > today.getTime()) {
-                    futureServiceAppointments.push(serviceAppointments[i]);
+                    futureRentals.push(newRental);
                 } else {
-                    oldServiceAppointments.push(serviceAppointments[i]);
+                    oldRentals.push(newRental);
                 }
             }
-            futureServiceAppointments.reverse();
+            futureRentals.reverse();
         }
 
         return (
@@ -310,8 +303,13 @@ export default class MyServiceAppointments extends Component {
                 )}
 
                 <div style={{height: "50px"}}>
-                    <h1>Programările mele</h1>
+                    <h1 style={{float: "left"}}>Închirierile mele</h1>
+
+                    <Button color={"success"} tag={Link} to={"/rentalCenters"} style={{float: "right"}}>
+                        Închiriază o mașină&nbsp;<MdIcons.MdCarRental/>
+                    </Button>
                 </div>
+
                 <br/>
                 <br/>
 
@@ -322,7 +320,7 @@ export default class MyServiceAppointments extends Component {
                                 className={classnames({ active: this.state.activeTab === '1' })}
                                 onClick={() => { this.toggle('1'); }}
                             >
-                                Programări viitoare
+                                Închirieri viitoare
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -330,47 +328,37 @@ export default class MyServiceAppointments extends Component {
                                 className={classnames({ active: this.state.activeTab === '2' })}
                                 onClick={() => { this.toggle('2'); }}
                             >
-                                Programări vechi
+                                Închirieri vechi
                             </NavLink>
                         </NavItem>
                     </Nav>
 
                     <br/>
 
-                    
+
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
-                            {futureServiceAppointments.length > 0 ? (
+                            {futureRentals.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări viitoare</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                        </Button>
+                                        <h1 style={{float: "left"}}>Închirieri viitoare</h1>
                                     </div>
 
-                                    <br/>
-
                                     <Pagination
-                                        data={futureServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări viitoare"
+                                        data={futureRentals}
+                                        RenderComponent={RentalRepresentation}
+                                        title="Închirieri viitoare"
                                         pageLimit={5}
                                         dataLimit={5}
-                                        tabName={"future appointments"}
+                                        tabName={"future rentals"}
                                     />
                                     <br/>
                                     <br/>
                                     <br/>
                                 </>) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare viitoare!</h2>
-
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                    </Button>
+                                    <h2 style={{float: "left"}}>Nu ai nicio închiriere viitoare!</h2>
                                 </div>
                             )}
                         </TabPane>
@@ -378,25 +366,19 @@ export default class MyServiceAppointments extends Component {
 
                         <TabPane tabId="2">
 
-                            {oldServiceAppointments.length > 0 ? (
+                            {oldRentals.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări vechi</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                        </Button>
+                                        <h1 style={{float: "left"}}>Închirieri vechi</h1>
                                     </div>
 
-                                    <br/>
-
                                     <Pagination
-                                        data={oldServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări vechi"
+                                        data={oldRentals}
+                                        RenderComponent={RentalRepresentation}
+                                        title="Închirieri vechi"
                                         pageLimit={5}
                                         dataLimit={5}
-                                        tabName={"old appointments"}
+                                        tabName={"old rentals"}
                                     />
                                     <br/>
                                     <br/>
@@ -404,11 +386,7 @@ export default class MyServiceAppointments extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare din trecut!</h2>
-
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                    </Button>
+                                    <h2 style={{float: "left"}}>Nu ai nicio închiriere din trecut!</h2>
                                 </div>
                             )}
                         </TabPane>

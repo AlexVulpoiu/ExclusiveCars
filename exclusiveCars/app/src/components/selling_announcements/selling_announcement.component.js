@@ -6,6 +6,7 @@ import {Carousel} from "react-bootstrap";
 import * as AiIcons from "react-icons/ai";
 import * as BsIcons from "react-icons/bs";
 import * as MdIcons from "react-icons/md";
+import {Link} from "react-router-dom";
 
 export default class SellingAnnouncement extends Component {
 
@@ -14,12 +15,30 @@ export default class SellingAnnouncement extends Component {
 
         this.state = {
             sellingAnnouncement: {},
+            favorites: [],
             loading: true
         };
     }
 
     componentDidMount() {
         this.setState({loading: true});
+
+        fetch(`http://localhost:8090/api/favoriteSellingAnnouncements`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const fav = [];
+                for(let i in data) {
+                    fav.push(data[i]["id"]);
+                }
+                this.setState({favorites: fav});
+            })
+
         fetch(`http://localhost:8090/api/sellingAnnouncements/${this.props.match.params.id}`, {
             headers: {
                 'Accept': 'application/json',
@@ -28,7 +47,10 @@ export default class SellingAnnouncement extends Component {
             }
         })
             .then((response) => response.json())
-            .then((data) => this.setState({sellingAnnouncement: data, loading: false}));
+            .then((data) => {
+                document.title = data["car"]["model"]["manufacturer"] + " " + data["car"]["model"]["model"];
+                this.setState({sellingAnnouncement: data, loading: false});
+            });
     }
 
     async deleteSellingAnnouncement(id) {
@@ -41,8 +63,7 @@ export default class SellingAnnouncement extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Anunțul de vânzare a fost șters cu succes!");
-            // todo schimbă redirect-ul
-            this.props.history.push("/news");
+            this.props.history.push("/mySellingAnnouncements");
         });
     }
 
@@ -82,6 +103,52 @@ export default class SellingAnnouncement extends Component {
         return "CONTINUU VARIABILĂ";
     }
 
+    isOwner(user, announcement) {
+        return user !== null && announcement["user"]["id"] === user["id"];
+    }
+
+    addToFavorites(id) {
+        fetch(`http://localhost:8090/api/favoriteSellingAnnouncements/add/${id}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => {})
+            .then((data) => {
+                this.setState({loading: true});
+                sessionStorage.setItem("favoriteSellingStatus", "Anunțul a fost adăugat la favorite!");
+                window.location.reload();
+            })
+            .catch((error) => console.log(error));
+    }
+
+    removeFromFavorites(id) {
+        fetch(`http://localhost:8090/api/favoriteSellingAnnouncements/remove/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => {})
+            .then((data) => {
+                this.setState({loading: true});
+                sessionStorage.setItem("favoriteSellingStatus", "Anunțul a fost eliminat de la favorite!");
+                window.location.reload();
+            })
+            .catch((error) => console.log(error));
+    }
+
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        sessionStorage.setItem("favoriteSellingStatus", "");
+    }
+
     render() {
         const sellingAnnouncement = this.state.sellingAnnouncement;
         let car = {};
@@ -90,7 +157,7 @@ export default class SellingAnnouncement extends Component {
             car = sellingAnnouncement["car"];
             owner = sellingAnnouncement["user"];
         }
-        console.log(sellingAnnouncement);
+
         const loading = this.state.loading;
         const user = AuthService.getCurrentUser();
 
@@ -121,6 +188,25 @@ export default class SellingAnnouncement extends Component {
 
         return (
             <div className={"rs-col-md-12"}>
+                {sessionStorage.getItem("favoriteSellingStatus") !== null && sessionStorage.getItem("favoriteSellingStatus") !== "" && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {sessionStorage.getItem("favoriteSellingStatus")}
+                    </div>
+                )}
+
                 <div className={"row"}>
                     <div className={"column"} style={{width: "50%"}}>
                         <Carousel fade indicators={false} variant={"dark"} nextLabel={""} prevLabel={""} rows={1} cols={1}>
@@ -138,9 +224,32 @@ export default class SellingAnnouncement extends Component {
                                 </h1>
                             </div>
 
-                            <div>
-                                <Button style={{backgroundColor: "#ffb833", color: "black", borderColor: "#ffb833"}}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
-                            </div>
+                            {this.isOwner(user, sellingAnnouncement) ?
+                                (
+                                    <div>
+                                        <Button color={"warning"} tag={Link}
+                                                to={`/sellingAnnouncements/edit/${sellingAnnouncement["id"]}`}>
+                                            Editează anunțul <AiIcons.AiFillEdit/>
+                                        </Button>
+                                        &nbsp;&nbsp;&nbsp;
+                                        <Button color={"danger"}
+                                                onClick={() => this.deleteSellingAnnouncement(sellingAnnouncement["id"])}>
+                                            Șterge anunțul <MdIcons.MdDeleteForever/>
+                                        </Button>
+                                    </div>
+                                )
+                                : (!this.state.favorites.includes(sellingAnnouncement["id"]) ?
+                                    (
+                                        <div>
+                                            <Button color={"primary"} onClick={() => this.addToFavorites(sellingAnnouncement["id"])}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <Button color={"primary"} onClick={() => this.removeFromFavorites(sellingAnnouncement["id"])}>Elimină de la favorite <AiIcons.AiFillCloseCircle/></Button>
+                                        </div>
+                                    )
+                                )
+                            }
                         </div>
 
                         <br/>
@@ -175,7 +284,7 @@ export default class SellingAnnouncement extends Component {
 
                         <br/>
 
-                        <h3>Preț: {car["price"]} € {car["negotiable"] ? "negociabil" : ""}</h3>
+                        <h3>Preț: {car["price"]} € {sellingAnnouncement["negotiable"] ? "negociabil" : ""}</h3>
 
                         <br/>
 
@@ -184,7 +293,7 @@ export default class SellingAnnouncement extends Component {
                             <div className={"column"}>
                                 <ul>
                                     <li><BsIcons.BsPersonFill/> {owner["firstName"] + " " + owner["lastName"]}</li>
-                                    <li><MdIcons.MdLocationOn/> {car["location"]}</li>
+                                    <li><MdIcons.MdLocationOn/> {sellingAnnouncement["location"]}</li>
                                 </ul>
                             </div>
 

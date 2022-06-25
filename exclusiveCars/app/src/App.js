@@ -29,21 +29,31 @@ import Navbar from "./components/side_menu/Navbar";
 import AutoService from "./components/auto_services/autoService.component";
 import AddAutoService from "./components/auto_services/add_autoService.component";
 import EditAutoService from "./components/auto_services/edit_autoService.component";
+import AllAutoServices from "./components/auto_services/autoServices.component";
 
 import RentalCenter from "./components/rental_centers/rentalCenter.component";
+import AllRentalCenters from "./components/rental_centers/rental_centers.component";
 
 import MakeServiceAppointment from "./components/service_appointments/make_service_appointment.component";
 import MyServiceAppointments from "./components/service_appointments/my_service_appointments.component";
 import ServiceAppointmentsForAutoService from "./components/service_appointments/service_appointments_for_autoService.component";
 
+import MyRentals from "./components/rental_announcements/my_rentals.component";
 import AddRentalAnnouncement from "./components/rental_announcements/add_rental_announcement.component";
 import RentalAnnouncement from "./components/rental_announcements/rental_announcement.component";
+import RentalAnnouncementsFromRentalCenter
+    from "./components/rental_announcements/rental_announcements_from_rental_center";
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
 import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
+import AddSellingAnnouncement from "./components/selling_announcements/add_selling_announcement.component";
+import SellingAnnouncements from "./components/selling_announcements/selling_announcements.component";
+import MySellingAnnouncements from "./components/selling_announcements/my_selling_announcements.component";
+import EditSellingAnnouncement from "./components/selling_announcements/edit_selling_announcement.component";
+import FavoriteAnnouncements from "./components/favorite_announcements/favorite_announcements.component";
 
 import UserReport from "./components/users/user_report.component";
-import AllAutoServices from "./components/auto_services/autoServices.component";
+import EditProfile from "./components/users/edit_profile.component";
 
 class App extends Component {
     constructor(props) {
@@ -131,6 +141,7 @@ class App extends Component {
                         <Route exact path="/login" component={Login} />
                         <Route exact path="/register" component={Register} />
                         <Route exact path="/profile" component={Profile} />
+                        <Route exact path={"/profile/edit"} component={EditProfile} />
                         <Route exact path="/profile/delete" component={DeleteProfile} />
 
                         <Route exact path={["/", "/news"]} component={News} />
@@ -150,14 +161,24 @@ class App extends Component {
                         <Route exact path={"/autoServices/edit/:id"} component={EditAutoService} />
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
 
+                        <Route exact path={"/rentalCenters"} component={AllRentalCenters} />
                         <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
 
+                        <Route exact path={"/myRentals"} component={MyRentals} />
+
+                        <Route exact path={"/rentalAnnouncements/fromRentalCenter/:id"} component={RentalAnnouncementsFromRentalCenter} />
                         <Route exact path={"/rentalAnnouncements/add/:rentalCenterId"} component={AddRentalAnnouncement} />
                         <Route exact path={"/rentalAnnouncements/:id"} component={RentalAnnouncement} />
 
                         <Route exact path={"/announcements/pending"} component={PendingAnnouncements} />
 
+                        <Route exact path={"/mySellingAnnouncements"} component={MySellingAnnouncements} />
+                        <Route exact path={"/sellingAnnouncements"} component={SellingAnnouncements} />
+                        <Route exact path={"/sellingAnnouncements/add"} component={AddSellingAnnouncement} />
+                        <Route exact path={"/sellingAnnouncements/edit/:id"} component={EditSellingAnnouncement} />
                         <Route exact path={"/sellingAnnouncements/:id"} component={SellingAnnouncement} />
+
+                        <Route exact path={"/favoriteAnnouncements"} component={FavoriteAnnouncements} />
 
                         <Route exact path={"/serviceAppointments"} component={MyServiceAppointments} />
                         <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />

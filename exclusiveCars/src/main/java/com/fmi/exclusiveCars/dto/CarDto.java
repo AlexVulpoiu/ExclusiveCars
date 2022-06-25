@@ -20,78 +20,74 @@ import javax.validation.constraints.*;
 @Builder
 public class CarDto {
 
-    @NotNull(message = "You should provide a valid model for this car!")
+    @NotNull(message = "Trebuie să alegi un model dintre cele existente!")
     @JsonProperty("car_model_id")
     private Long carModelId;
 
-    @NotNull(message = "You should provide a value for the price!")
-    @Min(value = 0, message = "The price must be a positive integer!")
+    @NotNull(message = "Trebuie să precizezi prețul!")
+    @Min(value = 0, message = "Prețul trebuie să fie un număr pozitiv!")
     private Integer price;
 
-    @NotNull(message = "You should provide a valid value for negotiable price feature!")
-    private Boolean negotiable;
-
-    @NotBlank(message = "You should provide a valid color for this car!")
-    @Pattern(regexp = "^[a-z][\\sa-z]{2,9}$")
+    @NotBlank(message = "Trebuie să specifici culoarea mașinii!")
+    @Pattern(regexp = "^[a-z][\\sa-z]{2,19}$", message = "Culoarea trebuie să aibă între 3 și 20 de litere!")
     private String color;
 
-    @NotNull(message = "You should provide a valid year for this car!")
-    @Min(value = 1950, message = "The year can't be older than 1950!")
+    @NotNull(message = "Trebuie să alegi anul fabricării mașinii!")
+    @Min(value = 1950, message = "Anul fabricării nu poate fi mai mic decât 1950!")
     private Integer year;
 
-    @NotBlank(message = "You should provide a valid country name!")
-    @Size(min = 4, max = 20, message = "Country name should have between 4 and 20 characters!")
+    @NotBlank(message = "Trebuie să specifici țara de origine!")
+    @Pattern(regexp = "^[A-Z][\\sA-Za-z-]{3,19}", message = "Numele țării trebuie să aibă între 4 și 20 de caractere!")
     private String country;
 
-    @NotBlank(message = "You should provide a valid location name!")
-    @Size(min = 3, max = 30, message = "Location name should have between 3 and 30 characters!")
-    private String location;
-
-    @NotNull(message = "You should provide a valid number of kilometers for this car!")
-    @Min(value = 0, message = "The number of kilometers must be a positive integer!")
+    @NotNull(message = "Trebuie să specifici numărul de kilometri pentru acest automobil!")
+    @Min(value = 0, message = "Numărul de kilometri trebuie să fie un număr pozitiv!")
     private Integer kilometers;
 
-    @NotNull(message = "You should provide a valid engine capacity for this car!")
-    @Min(value = 0, message = "The engine capacity must be a positive integer!")
+    @NotNull(message = "Trebuie să specifici capacitatea motorului!")
+    @Min(value = 0, message = "Capacitatea motorului trebuie să fie un număr pozitiv!")
     private Integer engine;
 
-    @NotNull(message = "You should provide a valid power value for this car!")
-    @Min(value = 0, message = "The power value must be a positive integer!")
+    @NotNull(message = "Trebuie să specifici puterea motorului!")
+    @Min(value = 0, message = "Puterea motorului trebuie să fie un număr pozitiv!")
     private Integer power;
 
-    @NotNull
+    @NotNull(message = "Trebuie să alegi tipul cutiei de viteze!")
     @Enumerated(EnumType.STRING)
     private EGearbox gearbox;
 
-    @NotNull
-    @Min(value = 4, message = "Number of gears can't be less than 4!")
-    @Max(value = 8, message = "Number of gears can't be more than 8!")
+    @NotNull(message = "Trebuie să specifici numărul de trepte de viteză!")
+    @Min(value = 4, message = "Numărul de trepte de viteză nu poate fi mai mic decât 4!")
+    @Max(value = 8, message = "Numărul de trepte de viteză nu poate fi mai mare decât 8!")
     private Integer gears;
 
+    @NotNull(message = "Trebuie să specifici tipul de transmisie!")
     @Enumerated(EnumType.STRING)
     private ETransmission transmission;
 
-    @NotNull
+    @NotNull(message = "Trebuie să specifici tipul de carburant!")
     @Enumerated(EnumType.STRING)
     @JsonProperty("fuel_type")
     private EFuelType fuelType;
 
-    @NotNull(message = "You should provide a valid consumption value for this car!")
-    @Min(value = 0, message = "The consumption value must be a positive float!")
+    @NotNull(message = "Trebuie să specifici valoarea consumului mediu!")
+    @Min(value = 0, message = "Consumul mediu trebuie să fie un număr pozitiv!")
     private Double consumption;
 
-    @NotNull(message = "You should provide a valid value for ac feature!")
+    @NotNull(message = "Trebuie să specifici dacă autovehiculul dispune de aer condiționat/climatronic!")
     private Boolean ac;
 
-    @NotNull(message = "You should provide a valid value for airbag feature!")
+    @NotNull(message = "Trebuie să specifici numărul de airbag-uri!")
+    @Min(value = 0, message = "Numărul de airbag-uri trebuie să fie un număr pozitiv!")
+    @Max(value = 6, message = "Numărul de airbag-uri trebuie să fie un număr pozitiv mai mic decât 6!")
     private Integer airbags;
 
-    @NotNull(message = "You should provide a valid option for emission standard!")
+    @NotNull(message = "Trebuie să specifici standardul de poluare!")
     @Enumerated(EnumType.STRING)
     @JsonProperty("emission_standard")
     private EStandard emissionStandard;
 
-    @NotNull(message = "You should provide a valid number of seats for this car!")
-    @Min(value = 2, message = "The number of seats should be at least 2!")
+    @NotNull(message = "Trebuie să specifici numărul de locuri!")
+    @Min(value = 2, message = "Numărul de locuri trebuie nu poate fi mai mic decât 2!")
     private Integer seats;
 }

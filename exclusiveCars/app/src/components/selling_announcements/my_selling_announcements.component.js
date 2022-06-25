@@ -1,108 +1,11 @@
 import React, {Component, useEffect, useState} from "react";
-import {
-    Button,
-    Card,
-    CardBody, CardHeader,
-    CardText,
-    Nav,
-    NavItem,
-    NavLink,
-    TabContent,
-    TabPane
-} from 'reactstrap';
-import classnames from 'classnames';
-
-import * as GoIcons from "react-icons/go";
-import * as BsIcons from "react-icons/bs";
-import * as ImIcons from "react-icons/im";
-
+import {Button, Nav, NavItem, NavLink, TabContent, TabPane} from "reactstrap";
 import {Link} from "react-router-dom";
-
-import "../../styles/pagination.css";
 import AuthService from "../../services/auth.service";
-import authHeader from '../../services/auth-header';
-import axios from "axios";
+import authHeader from "../../services/auth-header";
+import classnames from "classnames";
 
-const formatDate = value => {
-    const dateString = String(value);
-    const values = dateString.split("-");
-    return values.reverse().join("-");
-};
-
-async function deleteServiceAppointment(id) {
-    await fetch(`/api/serviceAppointments/deleteAppointment/${id}`, {
-        method: 'DELETE',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authHeader().Authorization
-        },
-    }).then(() => {
-        localStorage.setItem("infoMessage", "Programarea a fost anulată cu succes!");
-        window.location.reload();
-    });
-}
-
-function ServiceAppointmentRepresentation(props) {
-    const {user, user_id, phone, service_id, auto_service, problem_description, date, hour, station_number} = props.data
-    return (
-        <Card body style={{padding: "0px"}}>
-            <CardHeader>
-                <div>
-                    <Button style={{float: "left", width: "220px"}} color={"primary"} href={`/autoServices/${service_id}`} target={"_blank"}>
-                        <ImIcons.ImLocation/>&nbsp;{auto_service}
-                    </Button>
-
-                    <Button style={{float: "right", width: "220px"}} color={"danger"}
-                            onClick={() => {
-                                const userId = user_id;
-                                const appointmentId = userId + "_" + service_id + "_" + date;
-                                deleteServiceAppointment(appointmentId);
-                            }}
-                    >
-                        Anulează programarea&nbsp;<ImIcons.ImCancelCircle/>
-                    </Button>
-                </div>
-            </CardHeader>
-
-            <CardBody>
-                <div className={"row"}>
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillCalendarDateFill/>&nbsp;{formatDate(date)}
-                    </CardText>
-
-                    <div style={{width: "5%"}}/>
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillClockFill/>&nbsp;{hour.substring(0, 5)}
-                    </CardText>
-
-                    <div style={{width: "5%"}}/>
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillPinFill/>&nbsp;Stația {station_number}
-                    </CardText>
-                </div>
-
-                <CardText style={{textAlign: "center"}}>
-                    <GoIcons.GoIssueOpened/>&nbsp;{problem_description}
-                </CardText>
-            </CardBody>
-        </Card>
-    );
-}
-
-function compare(a, b) {
-    if(a.date > b.date) {
-        return -1;
-    }
-    if(a.date < b.date) {
-        return 1;
-    }
-    return 0;
-}
-
-function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabName}) {
+function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
     const [pages] = useState(Math.round(data.length / dataLimit));
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -192,39 +95,82 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
     );
 }
 
-export default class MyServiceAppointments extends Component {
+function SellingAnnouncementRepresentation(props) {
+    const {id, car, user, location} = props.data;
+    return (
+        <div className="jumbotron" style={{paddingTop: "20px", paddingBottom: "20px"}}>
+            <div className={"row"}>
+                <div className={"column"} style={{width: "35%"}}>
+                    <img height={"220px"} width={"300px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
+                </div>
+
+                <div className={"column"}>
+                    <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
+                    <div className={"row"}>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Categoria: {car["model"]["category"]}</li>
+                                <li>Kilometraj: {car["kilometers"]}</li>
+                                <li>Preț: {car["price"]} €</li>
+                                <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
+                                <li>Putere motor: {car["power"]} CP</li>
+                            </ul>
+                        </div>
+
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Nume: {user["firstName"] + " " + user["lastName"]}</li>
+                                <li>Localitate: {location}</li>
+                                <li>Telefon: {user["phone"]}</li>
+                                <li>Email: {user["email"]}</li>
+                            </ul>
+                        </div>
+
+                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/sellingAnnouncements/${id}`}>Deschide anunțul</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default class MySellingAnnouncements extends Component {
+
     constructor(props) {
         super(props);
 
         this.state = {
-            serviceAppointments: [],
-            activeTab: '1',
-            loading: true
+            sellingAnnouncements: [],
+            approvedAnnouncements: [],
+            unapprovedAnnouncements: [],
+            loading: true,
+            activeTab: '1'
         };
-
-        this.toggle = this.toggle.bind(this);
 
         this.currentUser = AuthService.getCurrentUser();
     }
 
     componentDidMount() {
-        document.title = "Programările mele";
+        document.title = "Anunțurile mele";
         this.setState({loading: true});
-        axios.get(`http://localhost:8090/api/serviceAppointments`, {
+        fetch("http://localhost:8090/api/sellingAnnouncements/mine", {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 Authorization: authHeader().Authorization
             }
         })
+            .then((response) => response.json())
             .then((data) => {
-                this.setState({serviceAppointments: data["data"], loading: false});
-                console.log(data);
-                console.log(data["data"]);
-            })
-            .catch((error) => {
-                console.log(error);
-            })
+                for(let i in data) {
+                    if(data[i]["state"] === "ACCEPTED") {
+                        this.state.approvedAnnouncements.push(data[i]);
+                    } else {
+                        this.state.unapprovedAnnouncements.push(data[i]);
+                    }
+                }
+                this.setState({sellingAnnouncements: data, loading: false});
+            });
     }
 
     hasAccess(user) {
@@ -247,13 +193,6 @@ export default class MyServiceAppointments extends Component {
 
     render() {
 
-        const loading = this.state.loading;
-        if(loading) {
-            return (
-                <h1>Se încarcă...</h1>
-            );
-        }
-
         if(!this.hasAccess(this.currentUser)) {
             setTimeout(() => {
                 this.props.history.push("/news");
@@ -267,29 +206,16 @@ export default class MyServiceAppointments extends Component {
             );
         }
 
-        const serviceAppointments = this.state.serviceAppointments;
-        let oldServiceAppointments = [];
-        let futureServiceAppointments = [];
+        const loading = this.state.loading;
 
-        if(serviceAppointments !== [] && serviceAppointments !== "Nu ai efectuat nicio programare momentan!") {
-
-            serviceAppointments.sort(compare);
-            const today = new Date();
-
-            for (let i = 0; i < serviceAppointments.length; i++) {
-                const currentDate = new Date(serviceAppointments[i]["date"]);
-
-                if (currentDate.getTime() > today.getTime()) {
-                    futureServiceAppointments.push(serviceAppointments[i]);
-                } else {
-                    oldServiceAppointments.push(serviceAppointments[i]);
-                }
-            }
-            futureServiceAppointments.reverse();
+        if(loading) {
+            return (
+                <h1>Se încarcă...</h1>
+            );
         }
 
         return (
-            <>
+            <div className={"col-md-12"}>
                 {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
                     <div
                         id={"notification"}
@@ -308,9 +234,8 @@ export default class MyServiceAppointments extends Component {
                         {localStorage.getItem("infoMessage")}
                     </div>
                 )}
-
                 <div style={{height: "50px"}}>
-                    <h1>Programările mele</h1>
+                    <h1 style={{float: "left"}}>Anunțurile mele</h1>
                 </div>
                 <br/>
                 <br/>
@@ -322,7 +247,7 @@ export default class MyServiceAppointments extends Component {
                                 className={classnames({ active: this.state.activeTab === '1' })}
                                 onClick={() => { this.toggle('1'); }}
                             >
-                                Programări viitoare
+                                Anunțuri aprobate
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -330,73 +255,33 @@ export default class MyServiceAppointments extends Component {
                                 className={classnames({ active: this.state.activeTab === '2' })}
                                 onClick={() => { this.toggle('2'); }}
                             >
-                                Programări vechi
+                                Anunțuri neaprobate
                             </NavLink>
                         </NavItem>
                     </Nav>
 
                     <br/>
 
-                    
+
+
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
-                            {futureServiceAppointments.length > 0 ? (
+                            {this.state.approvedAnnouncements.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări viitoare</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                        </Button>
+                                        <h1 style={{float: "left"}}>Anunțuri aprobate</h1>
                                     </div>
 
                                     <br/>
 
                                     <Pagination
-                                        data={futureServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări viitoare"
+                                        data={this.state.approvedAnnouncements}
+                                        RenderComponent={SellingAnnouncementRepresentation}
+                                        title="Anunțuri aprobate"
                                         pageLimit={5}
                                         dataLimit={5}
-                                        tabName={"future appointments"}
-                                    />
-                                    <br/>
-                                    <br/>
-                                    <br/>
-                                </>) : (
-                                <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare viitoare!</h2>
-
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                    </Button>
-                                </div>
-                            )}
-                        </TabPane>
-
-
-                        <TabPane tabId="2">
-
-                            {oldServiceAppointments.length > 0 ? (
-                                <>
-                                    <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări vechi</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                        </Button>
-                                    </div>
-
-                                    <br/>
-
-                                    <Pagination
-                                        data={oldServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări vechi"
-                                        pageLimit={5}
-                                        dataLimit={5}
-                                        tabName={"old appointments"}
+                                        tabName={"approved announcements"}
                                     />
                                     <br/>
                                     <br/>
@@ -404,17 +289,43 @@ export default class MyServiceAppointments extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai nicio programare din trecut!</h2>
+                                    <h2 style={{float: "left"}}>Nu există niciun anunț aprobat!</h2>
+                                </div>
+                            )}
+                        </TabPane>
 
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Efectuează o programare la service&nbsp;<BsIcons.BsFillCalendarCheckFill/>
-                                    </Button>
+
+                        <TabPane tabId="2">
+
+                            {this.state.unapprovedAnnouncements.length > 0 ? (
+                                <>
+                                    <div style={{height: "40px"}}>
+                                        <h1 style={{float: "left"}}>Anunțuri neaprobate</h1>
+                                    </div>
+
+                                    <br/>
+
+                                    <Pagination
+                                        data={this.state.unapprovedAnnouncements}
+                                        RenderComponent={SellingAnnouncementRepresentation}
+                                        title="Anunțuri neaprobate"
+                                        pageLimit={5}
+                                        dataLimit={5}
+                                        tabName={"unapproved announcements"}
+                                    />
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                </>
+                            ) : (
+                                <div>
+                                    <h2 style={{float: "left"}}>Nu există niciun anunț neaprobat!</h2>
                                 </div>
                             )}
                         </TabPane>
                     </TabContent>
                 </div>
-            </>
+            </div>
         );
     }
 }

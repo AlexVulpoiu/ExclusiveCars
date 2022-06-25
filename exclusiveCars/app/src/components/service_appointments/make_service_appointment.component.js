@@ -86,10 +86,14 @@ export default class MakeServiceAppointment extends Component  {
                 Authorization: authHeader().Authorization
             }
         })
-            .then((response) => response.json())
+            .then((response) => {
+                // console.log(response);
+                response.json()
+            })
             .then((data) => {
                 this.setState({appointments: data, loading: false});
-            });
+            })
+            .catch((error) => console.log(error));
     }
 
     handleDateChange(date) {
@@ -227,7 +231,7 @@ export default class MakeServiceAppointment extends Component  {
                     sessionStorage.setItem("appointmentDescription", "");
                     sessionStorage.setItem("appointmentDate", "");
                     sessionStorage.setItem("appointmentTime", "");
-                    this.props.history.push("/news");
+                    this.props.history.push("/serviceAppointments");
                 })
                 .catch((error) => {
                     this.props.history.push(`/serviceAppointments/makeAppointment/${this.props.match.params.serviceId}`);

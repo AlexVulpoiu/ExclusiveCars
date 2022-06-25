@@ -177,7 +177,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
     SidebarData = [
         {
             title: 'Acasă',
-            path: '/',
+            path: '/profile',
             icon: <AiIcons.AiFillHome/>,
             cName: 'nav-text'
         },
@@ -201,31 +201,31 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
         },
         {
             title: 'Anunțurile mele',
-            path: '/serviceAppointments',
+            path: '/mySellingAnnouncements',
             icon: <IoIcons.IoIosDocument/>,
             cName: 'nav-text'
         },
         {
             title: 'Postează anunț',
-            path: '/serviceAppointments',
+            path: '/sellingAnnouncements/add',
             icon: <AiIcons.AiFillFileAdd/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de vânzare',
-            path: '/serviceAppointments',
+            path: '/sellingAnnouncements',
             icon: <MdIcons.MdSell/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri favorite',
-            path: '/serviceAppointments',
+            path: '/favoriteAnnouncements',
             icon: <BsIcons.BsHeartFill/>,
             cName: 'nav-text'
         },
         {
             title: 'Închiriază o mașină',
-            path: '/serviceAppointments',
+            path: '/rentalCenters',
             icon: <MdIcons.MdCarRental/>,
             cName: 'nav-text'
         }

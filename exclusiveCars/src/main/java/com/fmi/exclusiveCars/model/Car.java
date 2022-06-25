@@ -25,9 +25,6 @@ public class Car {
     private Integer price;
 
     @NotNull
-    private Boolean negotiable;
-
-    @NotNull
     @Size(min = 3, max = 10)
     @Column(length = 10)
     private String color;
@@ -40,11 +37,6 @@ public class Car {
     @Size(min = 4, max = 20)
     @Column(length = 20)
     private String country;
-
-    @NotBlank
-    @Size(min = 3, max = 30)
-    @Column(length = 30)
-    private String location;
 
     @NotNull
     @Min(value = 0)
@@ -87,6 +79,8 @@ public class Car {
     private Boolean ac;
 
     @NotNull
+    @Min(value = 0)
+    @Max(value = 6)
     private Integer airbags;
 
     @NotNull

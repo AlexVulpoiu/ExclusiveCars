@@ -41,8 +41,6 @@ export default class RentalCenter extends Component {
             })
                 .then((data) => {
                     this.setState({currentOrganisation: data["data"]});
-                    console.log(data);
-                    console.log(data["data"]);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -59,6 +57,7 @@ export default class RentalCenter extends Component {
             .then((response) => response.json())
             .then((data) => {
                 this.setState({rentalCenter: data, loading: false});
+                document.title = data["name"];
             })
             .catch((error) => {
                 console.log(error);

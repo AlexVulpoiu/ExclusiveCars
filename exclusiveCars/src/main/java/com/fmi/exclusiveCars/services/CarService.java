@@ -35,11 +35,9 @@ public class CarService {
         CarModel currentCarModel = carModel.get();
         Car car = Car.builder()
                 .price(carDto.getPrice())
-                .negotiable(carDto.getNegotiable())
                 .color(carDto.getColor())
                 .year(carDto.getYear())
                 .country(carDto.getCountry())
-                .location(carDto.getLocation())
                 .kilometers(carDto.getKilometers())
                 .engine(carDto.getEngine())
                 .power(carDto.getPower())
@@ -74,11 +72,9 @@ public class CarService {
         Car currentCar = car.get();
 
         currentCar.setPrice(editCar.getPrice());
-        currentCar.setNegotiable(editCar.getNegotiable());
         currentCar.setColor(editCar.getColor());
         currentCar.setYear(editCar.getYear());
         currentCar.setCountry(editCar.getCountry());
-        currentCar.setLocation(editCar.getLocation());
         currentCar.setKilometers(editCar.getKilometers());
         currentCar.setEngine(editCar.getEngine());
         currentCar.setPower(editCar.getPower());

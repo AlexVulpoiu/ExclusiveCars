@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -23,17 +24,24 @@ public class SellingAnnouncement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Size(min = 20, max = 1000)
+    @Size(max = 1000)
     @Column(length = 1000)
     private String description;
+
+    @NotNull
+    private Boolean negotiable;
+
+    @NotBlank
+    @Size(min = 3, max = 30)
+    @Column(length = 30)
+    private String location;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(length = 8)
     private EState state;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "car_id")
     @JsonIgnoreProperties("rentalClients")
     private Car car;

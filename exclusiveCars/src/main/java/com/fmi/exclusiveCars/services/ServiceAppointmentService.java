@@ -259,7 +259,7 @@ public class ServiceAppointmentService {
 
         String toAddress = user.getEmail();
         String fromAddress = "exclusivecars22@outlook.com";
-        String senderName = "ExclusiveCars";
+        String senderName = "Exclusive Cars";
         String subject = "Confirmare programare la service";
         String content = "Salut [[name]],<br><br>"
                 + "Acesta este un mail de confirmare pentru programarea la service pe care tocmai ai efectuat-o.<br>"

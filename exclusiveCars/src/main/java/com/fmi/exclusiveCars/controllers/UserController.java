@@ -1,5 +1,6 @@
 package com.fmi.exclusiveCars.controllers;
 
+import com.fmi.exclusiveCars.dto.UserEditDto;
 import com.fmi.exclusiveCars.model.Role;
 import com.fmi.exclusiveCars.model.User;
 import com.fmi.exclusiveCars.repository.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -51,10 +53,20 @@ public class UserController {
         return userService.getUserReport(id);
     }
 
+    @PutMapping("/edit")
+    public ResponseEntity<?> editUser(@Valid @RequestBody UserEditDto userEditDto) {
+        return userService.editUser(userEditDto);
+    }
+
     @PutMapping("/editRole/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> editUserRoles(@PathVariable Long id, @RequestBody Collection<Role> roles) {
         return userService.editRoles(id, (Set<Role>) roles);
+    }
+
+    @GetMapping("/checkPassword/{password}")
+    public ResponseEntity<?> checkPassword(@PathVariable String password) {
+        return userService.checkPassword(password);
     }
 
     @DeleteMapping("/delete/{id}")

@@ -24,4 +24,9 @@ public class ImageController {
     public ResponseEntity<?> upload(@RequestParam("files") MultipartFile[] files, @RequestParam("carId") Long carId) throws IOException {
         return imageService.store(files, carId);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> delete(@PathVariable String id) {
+        return imageService.delete(id);
+    }
 }

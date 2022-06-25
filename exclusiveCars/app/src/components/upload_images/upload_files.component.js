@@ -12,8 +12,7 @@ export default class UploadFiles extends Component {
             selectedFiles: undefined,
             progressInfos: [],
             message: [],
-
-            fileInfos: [],
+            fileInfos: []
         };
     }
 
