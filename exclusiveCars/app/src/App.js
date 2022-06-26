@@ -54,6 +54,7 @@ import MyRentalAnnouncements from "./components/rental_announcements/my_rental_a
 import EditRentalAnnouncement from "./components/rental_announcements/edit_rental_announcement.component";
 import MyRentalRequests from "./components/rental_announcements/my_rental_requests.component";
 import RentalsForCar from "./components/rental_announcements/rentals_for_car.component";
+import RentalAnnouncements from "./components/rental_announcements/rental_announcements.component";
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
 import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
@@ -186,12 +187,13 @@ class App extends Component {
                         <Route exact path={"/myRentalRequests"} component={MyRentalRequests} />
 
                         <Route exact path={"/myRentalAnnouncements"} component={MyRentalAnnouncements} />
+                        <Route exact path={"/rentalAnnouncements"} component={RentalAnnouncements} />
                         <Route exact path={"/rentalAnnouncements/fromRentalCenter/:id"} component={RentalAnnouncementsFromRentalCenter} />
                         <Route exact path={"/rentalAnnouncements/add/:rentalCenterId"} component={AddRentalAnnouncement} />
                         <Route exact path={"/rentalAnnouncements/edit/:id"} component={EditRentalAnnouncement} />
                         <Route exact path={"/rentalAnnouncements/:id"} component={RentalAnnouncement} />
 
-                        <Route exact path={"/announcements/pending"} component={PendingAnnouncements} />
+                        <Route exact path={"/pendingAnnouncements"} component={PendingAnnouncements} />
 
                         <Route exact path={"/mySellingAnnouncements"} component={MySellingAnnouncements} />
                         <Route exact path={"/sellingAnnouncements"} component={SellingAnnouncements} />

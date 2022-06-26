@@ -93,8 +93,8 @@ function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
     );
 }
 
-function SellingAnnouncementRepresentation(props) {
-    const {id, car, user, location} = props.data;
+function RentalAnnouncementRepresentation(props) {
+    const {id, state, rentalCenter, car} = props.data;
     return (
         <div className="jumbotron" style={{paddingTop: "20px", paddingBottom: "20px"}}>
             <div className={"row"}>
@@ -117,14 +117,14 @@ function SellingAnnouncementRepresentation(props) {
 
                         <div className={"column"} style={{width: "50%"}}>
                             <ul>
-                                <li>Nume: {user["firstName"] + " " + user["lastName"]}</li>
-                                <li>Localitate: {location}</li>
-                                <li>Telefon: {user["phone"]}</li>
-                                <li>Email: {user["email"]}</li>
+                                <li>Centrul: {rentalCenter["name"]}</li>
+                                <li>Localitate: {rentalCenter["city"] + ", " + rentalCenter["address"]}</li>
+                                <li>Telefon: {rentalCenter["phone"]}</li>
+                                <li>Email: {rentalCenter["email"]}</li>
                             </ul>
                         </div>
 
-                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/sellingAnnouncements/${id}`}>Deschide anunțul</Button>
+                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/rentalAnnouncements/${id}`}>Deschide anunțul</Button>
                     </div>
                 </div>
             </div>
@@ -132,18 +132,18 @@ function SellingAnnouncementRepresentation(props) {
     );
 }
 
-export default class SellingAnnouncements extends Component {
+export default class RentalAnnouncements extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            sellingAnnouncements: [],
-            searchQuery: sessionStorage.getItem("carSellQuery"),
+            rentalAnnouncements: [],
+            searchQuery: sessionStorage.getItem("carRentQuery"),
             loading: true
         };
 
-        sessionStorage.setItem("carSellQuery", "");
+        sessionStorage.setItem("carRentQuery", "");
 
         this.onChangeSearchQuery = this.onChangeSearchQuery.bind(this);
 
@@ -151,9 +151,9 @@ export default class SellingAnnouncements extends Component {
     }
 
     componentDidMount() {
-        document.title = "Anunțuri de vânzare";
+        document.title = "Anunțuri de închiriere";
         this.setState({loading: true});
-        fetch("http://localhost:8090/api/sellingAnnouncements", {
+        fetch("http://localhost:8090/api/rentalAnnouncements/all", {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -163,16 +163,16 @@ export default class SellingAnnouncements extends Component {
             .then((response) => response.json())
             .then((data) => {
 
-                const filter = sessionStorage.getItem("filterSellingAnnouncements");
-                let filteredSellingAnnouncements = data;
+                const filter = sessionStorage.getItem("filterRentalAnnouncements");
+                let filteredRentalAnnouncements = data;
 
                 if(filter === "true") {
-                    filteredSellingAnnouncements = JSON.parse(sessionStorage.getItem("filteredSellingAnnouncements"));
-                    sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify([]));
-                    sessionStorage.setItem("filterSellingAnnouncements", "");
+                    filteredRentalAnnouncements = JSON.parse(sessionStorage.getItem("filteredRentalAnnouncements"));
+                    sessionStorage.setItem("filteredRentalAnnouncements", JSON.stringify([]));
+                    sessionStorage.setItem("filterRentalAnnouncements", "");
                 }
 
-                this.setState({sellingAnnouncements: filteredSellingAnnouncements, loading: false});
+                this.setState({rentalAnnouncements: filteredRentalAnnouncements, loading: false});
             });
     }
 
@@ -183,19 +183,19 @@ export default class SellingAnnouncements extends Component {
     }
 
     hasAccess(user) {
-        return user !== null && !user.roles.includes("ROLE_ORGANISATION");
+        return user !== null && (user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN"));
     }
 
     onChangeSearchQuery = (e) => {
         this.setState({searchQuery: e.target.value});
     }
 
-    filterSellingAnnouncements = () => {
+    filterRentalAnnouncements = () => {
         if(this.state.searchQuery !== null && this.state.searchQuery !== "") {
             const check = vQuery(this.state.searchQuery);
 
             if(check) {
-                fetch(`http://localhost:8090/api/sellingAnnouncements/filter?filter=${this.state.searchQuery}`, {
+                fetch(`http://localhost:8090/api/rentalAnnouncements/filter/${this.props.match.params.id}?filter=${this.state.searchQuery}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
@@ -205,12 +205,12 @@ export default class SellingAnnouncements extends Component {
                     .then((response) => response.json())
                     .then((data) => {
                         if (typeof (data) === "string") {
-                            sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify([]));
+                            sessionStorage.setItem("filteredRentalAnnouncements", JSON.stringify([]));
                         } else {
-                            sessionStorage.setItem("filteredSellingAnnouncements", JSON.stringify(data));
+                            sessionStorage.setItem("filteredRentalAnnouncements", JSON.stringify(data));
                         }
-                        sessionStorage.setItem("filterSellingAnnouncements", "true")
-                        sessionStorage.setItem("carSellQuery", this.state.searchQuery);
+                        sessionStorage.setItem("filterRentalAnnouncements", "true")
+                        sessionStorage.setItem("carRentQuery", this.state.searchQuery);
                         window.location.reload();
                     })
                     .catch((error) => console.log(error));
@@ -264,7 +264,7 @@ export default class SellingAnnouncements extends Component {
                     </div>
                 )}
                 <div style={{height: "50px"}}>
-                    <h1 style={{float: "left"}}>Anunțuri de vânzare</h1>
+                    <h1 style={{float: "left"}}>Anunțuri de închiriere</h1>
                 </div>
                 <br/>
                 <br/>
@@ -281,7 +281,7 @@ export default class SellingAnnouncements extends Component {
                         <button
                             className="btn btn-outline-secondary"
                             type="button"
-                            onClick={this.filterSellingAnnouncements}
+                            onClick={this.filterRentalAnnouncements}
                         >
                             Căutare &nbsp;<BsIcons.BsSearch/>
                         </button>
@@ -291,15 +291,15 @@ export default class SellingAnnouncements extends Component {
                 <br/>
 
                 <div>
-                    {this.state.sellingAnnouncements.length > 0 ? (
+                    {this.state.rentalAnnouncements.length > 0 ? (
                         <>
                             <Pagination
-                                data={this.state.sellingAnnouncements}
-                                RenderComponent={SellingAnnouncementRepresentation}
-                                title="Anunțuri de vânzare"
+                                data={this.state.rentalAnnouncements}
+                                RenderComponent={RentalAnnouncementRepresentation}
+                                title="Anunțuri de închiriere"
                                 pageLimit={5}
                                 dataLimit={5}
-                                tabName={"selling announcements"}
+                                tabName={"rental announcements"}
                             />
                             <br/>
                             <br/>

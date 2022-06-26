@@ -127,6 +127,15 @@ export default class Profile extends Component {
                             <h4><FaIcons.FaArrowRight/> <Link to={"/organisations/myStats"}>Statistici</Link> </h4>
                         </div>)
                     }
+                    {this.state.currentUser.roles.includes("ROLE_MODERATOR") && !this.state.currentUser.roles.includes("ROLE_ADMIN") &&
+                        (<div>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news/add"}>Adaugă o știre</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/rentalAnnouncements"}>Anunțuri de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/pendingAnnouncements"}>Anunțuri de aprobat</Link> </h4>
+                        </div>)
+                    }
                 </div>
 
             </div>

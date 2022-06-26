@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,7 +45,7 @@ public class SellingAnnouncementService {
             }
 
             User currentUser = user.get();
-            if (currentUser.getRoles().size() != 1) {
+            if (userHasRole(currentUser, ERole.ROLE_ORGANISATION)) {
                 return new ResponseEntity<>("Nu poți efectua această acțiune!", HttpStatus.METHOD_NOT_ALLOWED);
             }
 
@@ -206,6 +205,20 @@ public class SellingAnnouncementService {
         }
 
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> changeState(Long id, EState state) {
+
+        Optional<SellingAnnouncement> sellingAnnouncement = sellingAnnouncementRepository.findById(id);
+        if(sellingAnnouncement.isEmpty()) {
+            return new ResponseEntity<>("Acest anunț de vânzare nu există!", HttpStatus.NOT_FOUND);
+        }
+
+        SellingAnnouncement currentSellingAnnouncement = sellingAnnouncement.get();
+        currentSellingAnnouncement.setState(state);
+        sellingAnnouncementRepository.save(currentSellingAnnouncement);
+
+        return new ResponseEntity<>("Starea anunțului a fost modificată cu succes!", HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteSellingAnnouncement(Long id) {

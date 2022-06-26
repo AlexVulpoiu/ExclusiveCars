@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.controllers;
 
 import com.fmi.exclusiveCars.dto.CarDto;
+import com.fmi.exclusiveCars.model.EState;
 import com.fmi.exclusiveCars.services.RentalAnnouncementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +63,12 @@ public class RentalAnnouncementController {
     @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> editRentalAnnouncement(@PathVariable Long id, @Valid @RequestBody CarDto carDto) {
         return rentalAnnouncementService.editRentalAnnouncement(id, carDto);
+    }
+
+    @PutMapping("/changeState/{id}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> changeState(@PathVariable Long id, @RequestBody EState state) {
+        return rentalAnnouncementService.changeState(id, state);
     }
 
     @DeleteMapping("/delete/{id}")

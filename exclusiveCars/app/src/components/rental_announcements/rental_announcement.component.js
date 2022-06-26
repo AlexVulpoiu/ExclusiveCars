@@ -40,6 +40,7 @@ export default class RentalAnnouncement extends Component {
 
     async componentDidMount() {
         this.setState({loading: true});
+        document.title = "Anunț de închiriere";
 
         if(this.currentUser.roles.length === 1) {
             fetch(`http://localhost:8090/api/favoriteRentalAnnouncements`, {
@@ -149,7 +150,12 @@ export default class RentalAnnouncement extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Anunțul de închiriere a fost șters cu succes!");
-            this.props.history.push("/myRentalAnnouncements");
+            const user = AuthService.getCurrentUser();
+            if(user.roles.length === 1) {
+                this.props.history.push("/myRentalAnnouncements");
+            } else {
+                this.props.history.push("/rentalAnnouncements");
+            }
         });
     }
 
@@ -274,6 +280,22 @@ export default class RentalAnnouncement extends Component {
             .catch((error) => console.log(error));
     }
 
+    changeAnnouncementState(id, state) {
+        axios.put(`http://localhost:8090/api/rentalAnnouncements/changeState/${id}`, state, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then(() => {
+                const message = state === "ACCEPTED" ? "aprobat" : "respins";
+                localStorage.setItem("infoMessage", "Anunțul de închiriere a fost " + message + "!");
+                this.props.history.push("/pendingAnnouncements")
+            })
+            .catch((error) => console.log(error));
+    }
+
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
@@ -390,8 +412,7 @@ export default class RentalAnnouncement extends Component {
                                         </Button>
                                     </div>
                                 )
-                                :
-                                    (!this.state.favorites.includes(rentalAnnouncement["id"]) ?
+                                : (user.roles.length === 1 ? (!this.state.favorites.includes(rentalAnnouncement["id"]) ?
                                         (
                                             <div>
                                                 <Button color={"primary"} onClick={() => this.addToFavorites(rentalAnnouncement["id"])}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
@@ -401,7 +422,12 @@ export default class RentalAnnouncement extends Component {
                                                 <Button color={"primary"} onClick={() => this.removeFromFavorites(rentalAnnouncement["id"])}>Elimină de la favorite <AiIcons.AiFillCloseCircle/></Button>
                                             </div>
                                         )
-                                )
+                                ) : (
+                                        <Button color={"danger"}
+                                                onClick={() => this.deleteRentalAnnouncement(rentalAnnouncement["id"])}>
+                                            Șterge anunțul <MdIcons.MdDeleteForever/>
+                                        </Button>
+                                ))
                             }
                         </div>
 
@@ -440,20 +466,36 @@ export default class RentalAnnouncement extends Component {
                                 <h3>Preț: {car["price"]} € / zi</h3>
                             </div>
 
-                            {!this.isOwner(user, rentalAnnouncement) ?
+                            {!this.isOwner(user, rentalAnnouncement) && user.roles.length === 1 ?
                                 (<div style={{float: "right"}}>
                                     <Button color={this.state.button === 0 ? "info" : "danger"}
                                             onClick={() => this.setState({button: 1 - this.state.button, dateRange: ""})}>
                                         <MdIcons.MdCarRental/> {this.state.button === 0 ? "Închiriază mașina" : "Anulează acțiunea"}
                                     </Button>
-                                </div>) : (
-                                    <div style={{float: "right"}}>
+                                </div>) : (this.isOwner(user, rentalAnnouncement) &&
+                                    (<div style={{float: "right"}}>
                                         <Button color={"info"} tag={Link} to={`/rentCars/rentals/${rentalAnnouncement["id"]}`}>
                                             <MdIcons.MdCarRental/> Vizualizează cererile de închiriere
                                         </Button>
-                                    </div>
+                                    </div>)
                                 )
                             }
+                        </div>
+
+                        <div className={"row"} style={{float: "right"}}>
+                            {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN")) && (
+                                <div>
+                                    <Button color={"success"}
+                                            onClick={() => this.changeAnnouncementState(rentalAnnouncement["id"], "ACCEPTED")}>
+                                        Aprobă anunțul <BsIcons.BsCheckLg/>
+                                    </Button>
+                                    &nbsp;&nbsp;&nbsp;
+                                    <Button color={"danger"}
+                                            onClick={() => this.changeAnnouncementState(rentalAnnouncement["id"], "REJECTED")}>
+                                        Respinge anunțul <MdIcons.MdOutlineClose/>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
                         <br/>

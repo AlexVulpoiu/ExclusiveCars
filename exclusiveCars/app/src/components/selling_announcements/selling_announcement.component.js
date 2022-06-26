@@ -7,6 +7,7 @@ import * as AiIcons from "react-icons/ai";
 import * as BsIcons from "react-icons/bs";
 import * as MdIcons from "react-icons/md";
 import {Link} from "react-router-dom";
+import axios from "axios";
 
 export default class SellingAnnouncement extends Component {
 
@@ -63,7 +64,12 @@ export default class SellingAnnouncement extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Anunțul de vânzare a fost șters cu succes!");
-            this.props.history.push("/mySellingAnnouncements");
+            const user = AuthService.getCurrentUser();
+            if(user.roles.length === 1) {
+                this.props.history.push("/mySellingAnnouncements");
+            } else {
+                this.props.history.push("/sellingAnnouncements");
+            }
         });
     }
 
@@ -139,6 +145,22 @@ export default class SellingAnnouncement extends Component {
                 this.setState({loading: true});
                 sessionStorage.setItem("favoriteSellingStatus", "Anunțul a fost eliminat de la favorite!");
                 window.location.reload();
+            })
+            .catch((error) => console.log(error));
+    }
+
+    changeAnnouncementState(id, state) {
+        axios.put(`http://localhost:8090/api/sellingAnnouncements/changeState/${id}`, state, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then(() => {
+                const message = state === "ACCEPTED" ? "aprobat" : "respins";
+                localStorage.setItem("infoMessage", "Anunțul de vânzare a fost " + message + "!");
+                this.props.history.push("/pendingAnnouncements")
             })
             .catch((error) => console.log(error));
     }
@@ -238,7 +260,7 @@ export default class SellingAnnouncement extends Component {
                                         </Button>
                                     </div>
                                 )
-                                : (!this.state.favorites.includes(sellingAnnouncement["id"]) ?
+                                : (user.roles.length === 1 ? (!this.state.favorites.includes(sellingAnnouncement["id"]) ?
                                     (
                                         <div>
                                             <Button color={"primary"} onClick={() => this.addToFavorites(sellingAnnouncement["id"])}>Adaugă la favorite <BsIcons.BsHeartFill/></Button>
@@ -248,7 +270,12 @@ export default class SellingAnnouncement extends Component {
                                             <Button color={"primary"} onClick={() => this.removeFromFavorites(sellingAnnouncement["id"])}>Elimină de la favorite <AiIcons.AiFillCloseCircle/></Button>
                                         </div>
                                     )
-                                )
+                                ) : (
+                                    <Button color={"danger"}
+                                            onClick={() => this.deleteSellingAnnouncement(sellingAnnouncement["id"])}>
+                                        Șterge anunțul <MdIcons.MdDeleteForever/>
+                                    </Button>
+                                ))
                             }
                         </div>
 
@@ -304,6 +331,25 @@ export default class SellingAnnouncement extends Component {
                                 </ul>
                             </div>
                         </div>
+
+                        <br/>
+                        <br/>
+
+                        <div className={"row"} style={{float: "right"}}>
+                        {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN")) && (
+                            <div>
+                                <Button color={"success"}
+                                        onClick={() => this.changeAnnouncementState(sellingAnnouncement["id"], "ACCEPTED")}>
+                                    Aprobă anunțul <BsIcons.BsCheckLg/>
+                                </Button>
+                                &nbsp;&nbsp;&nbsp;
+                                <Button color={"danger"}
+                                        onClick={() => this.changeAnnouncementState(sellingAnnouncement["id"], "REJECTED")}>
+                                    Respinge anunțul <MdIcons.MdOutlineClose/>
+                                </Button>
+                            </div>
+                        )}
+                    </div>
 
                     </div>
                 </div>

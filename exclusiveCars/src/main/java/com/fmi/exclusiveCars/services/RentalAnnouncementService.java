@@ -202,6 +202,20 @@ public class RentalAnnouncementService {
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
+    public ResponseEntity<?> changeState(Long id, EState state) {
+
+        Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);
+        if(rentalAnnouncement.isEmpty()) {
+            return new ResponseEntity<>("Acest anunț de închiriere nu există!", HttpStatus.NOT_FOUND);
+        }
+
+        RentalAnnouncement currentRentalAnnouncement = rentalAnnouncement.get();
+        currentRentalAnnouncement.setState(state);
+        rentalAnnouncementRepository.save(currentRentalAnnouncement);
+
+        return new ResponseEntity<>("Starea anunțului a fost modificată cu succes!", HttpStatus.OK);
+    }
+
     public ResponseEntity<?> deleteRentalAnnouncement(Long id) {
 
         Optional<RentalAnnouncement> rentalAnnouncement = rentalAnnouncementRepository.findById(id);

@@ -81,7 +81,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
     SidebarData = [
         {
             title: 'Acasă',
-            path: '/',
+            path: '/profile',
             icon: <AiIcons.AiFillHome/>,
             cName: 'nav-text'
         },
@@ -93,25 +93,25 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
         },
         {
             title: 'Adaugă o știre',
-            path: '/organisations/add',
+            path: '/news/add',
             icon: <AiIcons.AiFillFileAdd/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de vânzare',
-            path: '/organisations/add',
+            path: '/sellingAnnouncements',
             icon: <MdIcons.MdSell/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de închiriere',
-            path: '/serviceAppointments',
+            path: '/rentalAnnouncements',
             icon: <MdIcons.MdCarRental/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de aprobat',
-            path: '/organisations/add',
+            path: '/pendingAnnouncements',
             icon: <MdIcons.MdPendingActions/>,
             cName: 'nav-text'
         }
@@ -120,7 +120,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
     SidebarData = [
         {
             title: 'Acasă',
-            path: '/',
+            path: '/profile',
             icon: <AiIcons.AiFillHome/>,
             cName: 'nav-text'
         },

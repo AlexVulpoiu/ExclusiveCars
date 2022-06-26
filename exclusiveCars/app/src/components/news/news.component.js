@@ -5,6 +5,7 @@ import {Link} from "react-router-dom";
 
 import "../../styles/pagination.css";
 import AuthService from "../../services/auth.service";
+import * as AiIcons from "react-icons/ai";
 
 const formatDate = value => {
     const dateString = String(value);
@@ -73,7 +74,7 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit }) {
                 <h1 style={{float: "left"}}>{title}</h1>
 
                 {user != null && (user.roles.includes('ROLE_MODERATOR') || user.roles.includes('ROLE_ADMIN')) &&
-                    (<Button color={"success"} tag={Link} to={`/news/add`} style={{float: "right"}}>Adaugă o știre</Button>)}
+                    (<Button color={"success"} tag={Link} to={`/news/add`} style={{float: "right"}}><AiIcons.AiFillFileAdd/> Adaugă o știre</Button>)}
             </div>
             <br/>
 

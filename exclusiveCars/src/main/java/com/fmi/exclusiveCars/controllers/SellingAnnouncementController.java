@@ -1,6 +1,7 @@
 package com.fmi.exclusiveCars.controllers;
 
 import com.fmi.exclusiveCars.dto.SellingAnnouncementDto;
+import com.fmi.exclusiveCars.model.EState;
 import com.fmi.exclusiveCars.services.SellingAnnouncementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,12 @@ public class SellingAnnouncementController {
     @PutMapping("/edit/{id}")
     public ResponseEntity<?> editSellingAnnouncement(@PathVariable Long id, @Valid @RequestBody SellingAnnouncementDto sellingAnnouncementDto) {
         return sellingAnnouncementService.editSellingAnnouncement(id, sellingAnnouncementDto);
+    }
+
+    @PutMapping("/changeState/{id}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> changeState(@PathVariable Long id, @RequestBody EState state) {
+        return sellingAnnouncementService.changeState(id, state);
     }
 
     @DeleteMapping("/delete/{id}")

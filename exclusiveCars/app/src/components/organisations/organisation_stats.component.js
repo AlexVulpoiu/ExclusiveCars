@@ -21,6 +21,8 @@ export default class OrganisationStats extends Component {
     componentDidMount() {
         this.setState({loading: true});
 
+        document.title = "Statistici organizație";
+
         axios.get(`http://localhost:8090/api/organisations/myStats`, {
             headers: {
                 'Accept': 'application/json',

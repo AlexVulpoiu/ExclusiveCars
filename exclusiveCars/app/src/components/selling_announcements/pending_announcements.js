@@ -110,7 +110,7 @@ function RentalAnnouncementRepresentation(props) {
                         <ul>
                             <li>Categoria: {car["model"]["category"]}</li>
                             <li>Kilometraj: {car["kilometers"]}</li>
-                            <li>Preț: {car["price"]}</li>
+                            <li>Preț: {car["price"]} €</li>
                             <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
                             <li>Putere motor: {car["power"]} CP</li>
                         </ul>
@@ -190,6 +190,7 @@ export default class PendingAnnouncements extends Component {
 
     componentDidMount() {
         this.setState({loading: true});
+        document.title = "Anunțuri de aprobat";
         fetch("http://localhost:8090/api/sellingAnnouncements/pending", {
             headers: {
                 'Accept': 'application/json',
@@ -223,6 +224,12 @@ export default class PendingAnnouncements extends Component {
         }
     }
 
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        localStorage.setItem("infoMessage", "");
+    }
+
     render() {
 
         if(!this.hasAccess(this.currentUser)) {
@@ -240,6 +247,24 @@ export default class PendingAnnouncements extends Component {
 
         return (
             <>
+                {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {localStorage.getItem("infoMessage")}
+                    </div>
+                )}
                 <div style={{height: "50px"}}>
                     <h1 style={{float: "left"}}>Anunțuri de aprobat</h1>
                 </div>
