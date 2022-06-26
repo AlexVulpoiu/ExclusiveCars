@@ -21,4 +21,6 @@ public class UserEditDto {
 
     @Pattern(regexp = "^07[0-9]{8}$", message = "Numărul de telefon trebuie să aibă 10 cifre și să înceapă cu '07'!")
     private String phone;
+
+    private String newPassword;
 }

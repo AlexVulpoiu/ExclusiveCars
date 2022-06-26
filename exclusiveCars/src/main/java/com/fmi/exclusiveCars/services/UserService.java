@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,6 +69,11 @@ public class UserService {
             currentUser.setFirstName(userEditDto.getFirstName());
             currentUser.setLastName(userEditDto.getLastName());
             currentUser.setPhone(userEditDto.getPhone());
+
+            String newPassword = userEditDto.getNewPassword();
+            if(newPassword != null && !Objects.equals(newPassword, "")) {
+                currentUser.setPassword(passwordEncoder.encode(newPassword));
+            }
             userRepository.save(currentUser);
 
             return new ResponseEntity<>("Editarea contului a fost realizată cu succes!", HttpStatus.OK);

@@ -40,12 +40,23 @@ const vPhone = value => {
     }
 }
 
+const vPassword = value => {
+    if(value !== null && value !== undefined && value !== "" && value.length < 8) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                Noua parolă trebuie să aibă minim 8 caractere!
+            </div>
+        );
+    }
+}
+
 export default class EditProfile extends Component {
 
     userEdit = {
         firstName: "",
         lastName: "",
-        phone: ""
+        phone: "",
+        newPassword: ""
     }
 
     constructor(props) {
@@ -55,6 +66,8 @@ export default class EditProfile extends Component {
         this.onChangeFirstName = this.onChangeFirstName.bind(this);
         this.onChangeLastName = this.onChangeLastName.bind(this);
         this.onChangePhone = this.onChangePhone.bind(this);
+        this.onChangePassword = this.onChangePassword.bind(this);
+        this.onChangeNewPassword = this.onChangeNewPassword.bind(this);
 
         this.currentUser = AuthService.getCurrentUser();
 
@@ -63,6 +76,8 @@ export default class EditProfile extends Component {
             firstName: "",
             lastName: "",
             phone: "",
+            password: "",
+            newPassword: "",
             loading: true,
             message: ""
         }
@@ -131,6 +146,18 @@ export default class EditProfile extends Component {
         })
     }
 
+    onChangePassword(e) {
+        this.setState({
+            password: e.target.value
+        })
+    }
+
+    onChangeNewPassword(e) {
+        this.setState({
+            newPassword: e.target.value
+        })
+    }
+
     hasAccess(user) {
         return user !== null;
     }
@@ -150,27 +177,51 @@ export default class EditProfile extends Component {
             newUser["firstName"] = this.state.firstName;
             newUser["lastName"] = this.state.lastName;
             newUser["phone"] = this.state.phone;
+            newUser["newPassword"] = this.state.newPassword;
 
-            await axios.put("http://localhost:8090/api/users/edit", newUser, {
+            await fetch(`http://localhost:8090/api/users/checkPassword/${this.state.password}`, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     Authorization: authHeader().Authorization
                 }
             })
-                .then(() => {
-                    localStorage.setItem("infoMessage", "Profilul a fost editat cu succes!");
-                    this.props.history.push("/profile");
-                })
-                .catch((error) => {
-                    console.log(error);
-                    sessionStorage.setItem("userFirstNameEdit", newUser["firstName"]);
-                    sessionStorage.setItem("userLastNameEdit", newUser["lastName"]);
-                    sessionStorage.setItem("userPhoneEdit", newUser["phone"]);
+                .then((response) => response.json())
+                .then((data) => {
+                    if(!data) {
+                        alert("Parola curentă este incorectă!");
+                        window.location.reload();
+                    } else {
+                        axios.put("http://localhost:8090/api/users/edit", newUser, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                Authorization: authHeader().Authorization
+                            }
+                        })
+                            .then(() => {
+                                if(this.state.newPassword === "") {
+                                    localStorage.setItem("infoMessage", "Profilul a fost editat cu succes!");
+                                    this.props.history.push("/profile");
+                                } else {
+                                    localStorage.setItem("infoMessage", "Profilul a fost editat cu succes! Te rugăm să te loghezi din nou!");
+                                    AuthService.logout();
+                                    this.props.history.push("/news");
+                                    window.location.reload();
+                                }
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                                sessionStorage.setItem("userFirstNameEdit", newUser["firstName"]);
+                                sessionStorage.setItem("userLastNameEdit", newUser["lastName"]);
+                                sessionStorage.setItem("userPhoneEdit", newUser["phone"]);
 
-                    this.props.history.push("/profile/edit");
-                    window.location.reload();
-                });
+                                this.props.history.push("/profile/edit");
+                                window.location.reload();
+                            });
+                    }
+                })
+                .catch((error) => console.log(error));
         } else {
             this.setState({
                 loading: false
@@ -268,6 +319,28 @@ export default class EditProfile extends Component {
                                 value={this.state.phone}
                                 onChange={this.onChangePhone}
                                 validations={[required, vPhone]}
+                            />
+                        </div>
+
+                        <div className={"form-group"}>
+                            <label htmlFor={"newPassword"}>Parolă nouă (opțional):</label>
+                            <Input
+                                type="password"
+                                className="form-control"
+                                name="newPassword"
+                                onChange={this.onChangeNewPassword}
+                                validations={[vPassword]}
+                            />
+                        </div>
+
+                        <div className={"form-group"}>
+                            <label htmlFor={"password"}>Te rugăm să introduci parola curentă pentru a putea efectua modificările</label>
+                            <Input
+                                type="password"
+                                className="form-control"
+                                name="password"
+                                onChange={this.onChangePassword}
+                                validations={[required]}
                             />
                         </div>
 
