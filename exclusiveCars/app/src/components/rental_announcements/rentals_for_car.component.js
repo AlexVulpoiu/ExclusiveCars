@@ -1,75 +1,76 @@
 import React, {Component, useEffect, useState} from "react";
-import authHeader from "../../services/auth-header";
-import {Button, Card, CardBody, CardHeader, CardText, Nav, NavItem, NavLink, TabContent, TabPane} from "reactstrap";
-import * as ImIcons from "react-icons/im";
-import AuthService from "../../services/auth.service";
+import {Button, Card, CardBody, CardHeader, Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
+import classnames from 'classnames';
+
 import * as BsIcons from "react-icons/bs";
-import * as GoIcons from "react-icons/go";
-import classnames from "classnames";
+import * as ImIcons from "react-icons/im";
+import * as MdIcons from "react-icons/md";
+
 import {Link} from "react-router-dom";
+
+import "../../styles/pagination.css";
+import AuthService from "../../services/auth.service";
+import authHeader from '../../services/auth-header';
+import axios from "axios";
 
 const formatDate = value => {
     const dateString = String(value);
     const values = dateString.split("-");
-    return values.reverse().join("-");
+    return values.reverse().join(".");
 };
 
-function ServiceAppointmentRepresentation(props) {
-    const {user, user_id, phone, service_id, auto_service, problem_description, date, hour, station_number} = props.data
+async function cancelRental(id) {
+    await fetch(`http://localhost:8090/api/rentCars/cancel/${id}`, {
+        method: 'DELETE',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: authHeader().Authorization
+        },
+    }).then(() => {
+        localStorage.setItem("infoMessage", "Cererea de închiriere a fost anulată cu succes!");
+        window.location.reload();
+    });
+}
+
+function RentalRepresentation(props) {
+    const {id, user, car, endDate, rentalAnnouncement} = props.data;
     return (
         <Card body style={{padding: "0px"}}>
             <CardHeader>
                 <div>
-                    <Button style={{float: "left", width: "220px"}} color={"primary"} href={`/autoServices/${service_id}`} target={"_blank"}>
-                        <ImIcons.ImLocation/>&nbsp;{auto_service}
+                    <Button style={{float: "left", width: "300px"}} color={"primary"} href={`/rentalAnnouncements/${rentalAnnouncement["id"]}`} target={"_blank"}>
+                        <BsIcons.BsEyeFill/>&nbsp;Vizualizează anunțul de închiriere
                     </Button>
 
-                    <Button style={{float: "right", width: "220px"}} color={"danger"}
+                    <Button style={{float: "right", width: "300px"}} color={"danger"}
                             onClick={() => {
-                                const appointmentId = user_id + "_" + service_id + "_" + date;
-                                deleteServiceAppointment(appointmentId);
+                                const userId = user["id"];
+                                const rentalId = userId + "_" + car["id"] + "_" + id["startDate"];
+                                cancelRental(rentalId);
                             }}
                     >
-                        Anulează programarea&nbsp;<ImIcons.ImCancelCircle/>
+                        Anulează cererea de închiriere&nbsp;<ImIcons.ImCancelCircle/>
                     </Button>
                 </div>
             </CardHeader>
 
             <CardBody>
-                <div className={"row"}>
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillPersonFill/>&nbsp;{user}
-                    </CardText>
+                <div className={"row"} style={{marginLeft: "10px"}}>
+                    <div className={"column"} style={{width: "270px"}}>
+                        <img height={"150px"} width={"250px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
+                    </div>
 
-                    <div style={{width: "5%"}}/>
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsTelephoneFill />&nbsp;{phone}
-                    </CardText>
-
-                    <div style={{width: "5%"}}/>
-
-                    <CardText style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillPinFill/>&nbsp;Stația {station_number}
-                    </CardText>
-                </div>
-
-                <div className={"row"}>
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillCalendarDateFill/>&nbsp;{formatDate(date)}
-                    </CardText>
-
-                    <div style={{width: "5%"}} />
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <BsIcons.BsFillClockFill/>&nbsp;{hour.substring(0, 5)}
-                    </CardText>
-
-                    <div style={{width: "5%"}} />
-
-                    <CardText className={"column"} style={{width: "30%", textAlign: "center"}}>
-                        <GoIcons.GoIssueOpened/>&nbsp;{problem_description}
-                    </CardText>
+                    <div className={"column"}>
+                        <ul>
+                            <li>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</li>
+                            <li>Client: {user["firstName"] + " " + user["lastName"]}</li>
+                            <li>Telefon: {user["phone"]}</li>
+                            <li>Email: {user["email"]}</li>
+                            <li>Perioada: {formatDate(id["startDate"])} - {formatDate(endDate)}</li>
+                            <li>Preț: {car["price"]} € / zi</li>
+                        </ul>
+                    </div>
                 </div>
             </CardBody>
         </Card>
@@ -77,10 +78,10 @@ function ServiceAppointmentRepresentation(props) {
 }
 
 function compare(a, b) {
-    if(a.date > b.date) {
+    if(a.id.startDate > b.id.startDate) {
         return -1;
     }
-    if(a.date < b.date) {
+    if(a.id.startDate < b.id.startDate) {
         return 1;
     }
     return 0;
@@ -130,22 +131,13 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
 
     return (
         <div>
-
-
-            {/* show the posts, 10 posts at a time */}
             <div className="dataContainer">
                 {getPaginatedData().map((d, idx) => (
                     <RenderComponent key={idx} data={d} />
                 ))}
             </div>
 
-            {/* show the pagiantion
-                it consists of next and previous buttons
-                along with page numbers, in our case, 5 page
-                numbers at a time
-            */}
             <div className="pagination" style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                {/* previous button */}
                 <button
                     onClick={goToPreviousPage}
                     className={`prev ${currentPage === 1 ? 'disabled' : ''}`}
@@ -153,7 +145,6 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
                     pagina anterioară
                 </button>
 
-                {/* show page numbers */}
                 {getPaginationGroup().map((item, index) => (
                     <button
                         key={index}
@@ -164,7 +155,6 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
                     </button>
                 ))}
 
-                {/* next button */}
                 <button
                     onClick={goToNextPage}
                     className={`next ${currentPage === pages ? 'disabled' : ''}`}
@@ -176,42 +166,27 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit, tabNam
     );
 }
 
-async function deleteServiceAppointment(id) {
-
-    await fetch(`http://localhost:8090/api/serviceAppointments/deleteAppointment/${id}`, {
-        method: 'DELETE',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: authHeader().Authorization
-        },
-    }).then(() => {
-        localStorage.setItem("infoMessage", "Programarea a fost anulată cu succes!");
-        window.location.reload();
-    });
-}
-
-export default class ServiceAppointmentsForAutoService extends Component {
-
+export default class RentalsForCar extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            autoService: null,
-            myAutoServices: [],
-            serviceAppointments: [],
+            rentals: [],
+            rentalAnnouncement: null,
             activeTab: '1',
             loading: true
         };
 
+        this.toggle = this.toggle.bind(this);
+
         this.currentUser = AuthService.getCurrentUser();
     }
 
-    componentDidMount() {
-
+    async componentDidMount() {
+        document.title = "Închirieri";
         this.setState({loading: true});
 
-        fetch("http://localhost:8090/api/organisations/myOrganisation", {
+        await fetch(`http://localhost:8090/api/rentalAnnouncements/${this.props.match.params.rentalAnnouncementId}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -220,43 +195,29 @@ export default class ServiceAppointmentsForAutoService extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
-                const serviceIds = [];
-                for(let i in data["auto_services"]) {
-                    serviceIds.push(data["auto_services"][i]["id"]);
-                }
-                this.setState({myAutoServices: serviceIds});
+                this.setState({rentalAnnouncement: data});
+            });
+
+        await axios.get(`http://localhost:8090/api/rentCars/rentals/${this.state.rentalAnnouncement["car"]["id"]}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((data) => {
+                this.setState({rentals: data["data"]});
             })
-            .catch((error) => console.log(error));
-
-        fetch(`http://localhost:8090/api/autoServices/${this.props.match.params.serviceId}`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                this.setState({autoService: data});
-                document.title = "Programări " + data["name"];
+            .catch((error) => {
+                console.log(error);
             });
 
-        fetch(`http://localhost:8090/api/serviceAppointments/${this.props.match.params.serviceId}`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                this.setState({serviceAppointments: data, loading: false})
-            });
+        this.setState({loading: false});
     }
 
     hasAccess(user) {
         return user !== null && user.roles.includes("ROLE_ORGANISATION")
-            && this.state.myAutoServices.includes(Number(this.props.match.params.serviceId));
+            && user["id"] === this.state.rentalAnnouncement["rentalCenter"]["organisation"]["owner"]["id"];
     }
 
     toggle(tab) {
@@ -295,30 +256,29 @@ export default class ServiceAppointmentsForAutoService extends Component {
             );
         }
 
-        const serviceAppointments = this.state.serviceAppointments;
-        if(serviceAppointments === [] || serviceAppointments === "Nu au fost făcute programări la acest service!") {
-            return (
-                <div className={"col-md-12"}>
-                    <h2>Nu au fost făcute programări la acest service!</h2>
-                </div>
-            );
-        }
-        serviceAppointments.sort(compare);
-        let oldServiceAppointments = [];
-        let futureServiceAppointments = [];
+        const rentals = this.state.rentals;
+        let oldRentals = [];
+        let futureRentals = [];
 
-        const today = new Date();
+        if(rentals !== []) {
 
-        for(let i = 0; i < serviceAppointments.length; i++) {
-            const currentDate = new Date(serviceAppointments[i]["date"]);
+            rentals.sort(compare);
+            const today = new Date();
 
-            if(currentDate.getTime() >= today.getTime()) {
-                futureServiceAppointments.push(serviceAppointments[i]);
-            } else {
-                oldServiceAppointments.push(serviceAppointments[i]);
+            for (let i = 0; i < rentals.length; i++) {
+                const currentDate = new Date(rentals[i]["id"]["startDate"]);
+
+                const newRental = rentals[i];
+                newRental["rentalAnnouncement"] = this.state.rentalAnnouncement;
+
+                if (currentDate.getTime() > today.getTime()) {
+                    futureRentals.push(newRental);
+                } else {
+                    oldRentals.push(newRental);
+                }
             }
+            futureRentals.reverse();
         }
-        futureServiceAppointments.reverse();
 
         return (
             <>
@@ -342,8 +302,9 @@ export default class ServiceAppointmentsForAutoService extends Component {
                 )}
 
                 <div style={{height: "50px"}}>
-                    <h1>Programări <a href={`/autoServices/${this.state.autoService["id"]}`} target={"_blank"}>{this.state.autoService["name"]}</a></h1>
+                    <h1 style={{float: "left"}}>Închirieri</h1>
                 </div>
+
                 <br/>
                 <br/>
 
@@ -354,7 +315,7 @@ export default class ServiceAppointmentsForAutoService extends Component {
                                 className={classnames({ active: this.state.activeTab === '1' })}
                                 onClick={() => { this.toggle('1'); }}
                             >
-                                Programări viitoare
+                                Închirieri viitoare
                             </NavLink>
                         </NavItem>
                         <NavItem>
@@ -362,7 +323,7 @@ export default class ServiceAppointmentsForAutoService extends Component {
                                 className={classnames({ active: this.state.activeTab === '2' })}
                                 onClick={() => { this.toggle('2'); }}
                             >
-                                Programări vechi
+                                Închirieri vechi
                             </NavLink>
                         </NavItem>
                     </Nav>
@@ -373,36 +334,26 @@ export default class ServiceAppointmentsForAutoService extends Component {
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
-                            {futureServiceAppointments.length > 0 ? (
+                            {futureRentals.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări viitoare</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Service-uri auto
-                                        </Button>
+                                        <h1 style={{float: "left"}}>Închirieri viitoare</h1>
                                     </div>
 
-                                    <br/>
-
                                     <Pagination
-                                        data={futureServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări viitoare"
+                                        data={futureRentals}
+                                        RenderComponent={RentalRepresentation}
+                                        title="Închirieri viitoare"
                                         pageLimit={5}
                                         dataLimit={5}
-                                        tabName={"future appointments"}
+                                        tabName={"future rentals"}
                                     />
                                     <br/>
                                     <br/>
                                     <br/>
                                 </>) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu există nicio programare viitoare!</h2>
-
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Service-uri auto
-                                    </Button>
+                                    <h2 style={{float: "left"}}>Nu există nicio cerere de închiriere viitoare!</h2>
                                 </div>
                             )}
                         </TabPane>
@@ -410,25 +361,19 @@ export default class ServiceAppointmentsForAutoService extends Component {
 
                         <TabPane tabId="2">
 
-                            {oldServiceAppointments.length > 0 ? (
+                            {oldRentals.length > 0 ? (
                                 <>
                                     <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Programări vechi</h1>
-
-                                        <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                            Service-uri auto
-                                        </Button>
+                                        <h1 style={{float: "left"}}>Închirieri vechi</h1>
                                     </div>
 
-                                    <br/>
-
                                     <Pagination
-                                        data={oldServiceAppointments}
-                                        RenderComponent={ServiceAppointmentRepresentation}
-                                        title="Programări vechi"
+                                        data={oldRentals}
+                                        RenderComponent={RentalRepresentation}
+                                        title="Închirieri vechi"
                                         pageLimit={5}
                                         dataLimit={5}
-                                        tabName={"old appointments"}
+                                        tabName={"old rentals"}
                                     />
                                     <br/>
                                     <br/>
@@ -436,11 +381,7 @@ export default class ServiceAppointmentsForAutoService extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu există nicio programare din trecut!</h2>
-
-                                    <Button color={"success"} tag={Link} to={"/autoServices"} style={{float: "right"}}>
-                                        Service-uri auto
-                                    </Button>
+                                    <h2 style={{float: "left"}}>Nu există nicio cerere de închiriere din trecut!</h2>
                                 </div>
                             )}
                         </TabPane>

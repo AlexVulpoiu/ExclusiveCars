@@ -4,6 +4,7 @@ import com.fmi.exclusiveCars.dto.ServiceAppointmentDto;
 import com.fmi.exclusiveCars.services.ServiceAppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -32,13 +33,19 @@ public class ServiceAppointmentController {
         return serviceAppointmentService.getAppointmentsForAutoService(autoServiceId);
     }
 
+    @GetMapping("/forMyOrganisation")
+    @PreAuthorize("hasRole('ORGANISATION')")
+    public ResponseEntity<?> getAppointmentsForMyOrganisation() {
+        return serviceAppointmentService.getAppointmentsForMyOrganisation();
+    }
+
     @PostMapping("/makeAppointment/{autoServiceId}")
     public ResponseEntity<?> makeAppointmentForAutoService(@PathVariable Long autoServiceId, @Valid @RequestBody ServiceAppointmentDto serviceAppointmentDto) throws MessagingException, UnsupportedEncodingException {
         return serviceAppointmentService.makeAppointmentForAutoService(autoServiceId, serviceAppointmentDto);
     }
 
     @DeleteMapping("/deleteAppointment/{serviceAppointmentId}")
-    public ResponseEntity<?> deleteAppointment(@PathVariable String serviceAppointmentId) {
+    public ResponseEntity<?> deleteAppointment(@PathVariable String serviceAppointmentId) throws MessagingException, UnsupportedEncodingException {
         return serviceAppointmentService.deleteAppointment(serviceAppointmentId);
     }
 }

@@ -152,29 +152,7 @@ const vPrice = value => {
     }
 }
 
-const vLocation = value => {
-    const re = new RegExp("^[A-Z][A-Za-z-\\s]{2,29}$");
-
-    if(!re.test(value)) {
-        return (
-            <div className="alert alert-warning" role="alert">
-                Localitatea trebuie să aibă între 3 și 30 de caractere și să înceapă cu majusculă.
-            </div>
-        );
-    }
-}
-
-const vDescription = value => {
-    if(value !== null && value.trim().length > 1000) {
-        return (
-            <div className="alert alert-warning" role="alert">
-                Descrierea nu poate avea mai mult de 1000 de caractere.
-            </div>
-        );
-    }
-}
-
-export default class AddSellingAnnouncement extends Component {
+export default class EditRentalAnnouncement extends Component {
 
     constructor(props) {
         super(props);
@@ -199,9 +177,6 @@ export default class AddSellingAnnouncement extends Component {
         this.onChangeAc = this.onChangeAc.bind(this);
         this.onChangeAirbags = this.onChangeAirbags.bind(this);
         this.onChangePrice = this.onChangePrice.bind(this);
-        this.onChangeNegotiable = this.onChangeNegotiable.bind(this);
-        this.onChangeLocation = this.onChangeLocation.bind(this);
-        this.onChangeDescription = this.onChangeDescription.bind(this);
 
         // upload
         this.selectFiles = this.selectFiles.bind(this);
@@ -211,6 +186,9 @@ export default class AddSellingAnnouncement extends Component {
         this.currentUser = AuthService.getCurrentUser();
 
         this.state = {
+            rentalAnnouncement: null,
+            images: [],
+            deletedImages: [],
             carBrands: [],
             currentBrand: "",
             carModels: {},
@@ -218,28 +196,25 @@ export default class AddSellingAnnouncement extends Component {
             currentModels: [],
             carCategories: {},
             currentCategories: [],
-            brand: sessionStorage.getItem("carBrand"),
-            model: sessionStorage.getItem("carModel"),
-            category: sessionStorage.getItem("carCategory"),
-            color: sessionStorage.getItem("carColor"),
-            year: sessionStorage.getItem("carYear"),
-            country: sessionStorage.getItem("carCountry"),
-            engine: Number(sessionStorage.getItem("carEngine")),
-            power: Number(sessionStorage.getItem("carPower")),
-            kilometers: Number(sessionStorage.getItem("carKilometers")),
-            transmission: sessionStorage.getItem("carTransmission"),
-            gearbox: sessionStorage.getItem("carGearbox"),
-            gears: Number(sessionStorage.getItem("carGears")),
-            fuelType: sessionStorage.getItem("carFuelType"),
-            consumption: Number(sessionStorage.getItem("carConsumption")),
-            emissionStandard: sessionStorage.getItem("carEmissionStandard"),
-            seats: Number(sessionStorage.getItem("carSeats")),
-            ac: sessionStorage.getItem("carAc"),
-            airbags: Number(sessionStorage.getItem("carAirbags")),
-            price: Number(sessionStorage.getItem("carPrice")),
-            negotiable: sessionStorage.getItem("carNegotiable"),
-            location: sessionStorage.getItem("carLocation"),
-            description: sessionStorage.getItem("carDescription"),
+            brand: sessionStorage.getItem("carBrandEdit"),
+            model: sessionStorage.getItem("carModelEdit"),
+            category: sessionStorage.getItem("carCategoryEdit"),
+            color: sessionStorage.getItem("carColorEdit"),
+            year: sessionStorage.getItem("carYearEdit"),
+            country: sessionStorage.getItem("carCountryEdit"),
+            engine: Number(sessionStorage.getItem("carEngineEdit")),
+            power: Number(sessionStorage.getItem("carPowerEdit")),
+            kilometers: Number(sessionStorage.getItem("carKilometersEdit")),
+            transmission: sessionStorage.getItem("carTransmissionEdit"),
+            gearbox: sessionStorage.getItem("carGearboxEdit"),
+            gears: Number(sessionStorage.getItem("carGearsEdit")),
+            fuelType: sessionStorage.getItem("carFuelTypeEdit"),
+            consumption: Number(sessionStorage.getItem("carConsumptionEdit")),
+            emissionStandard: sessionStorage.getItem("carEmissionStandardEdit"),
+            seats: Number(sessionStorage.getItem("carSeatsEdit")),
+            ac: sessionStorage.getItem("carAcEdit"),
+            airbags: Number(sessionStorage.getItem("carAirbagsEdit")),
+            price: Number(sessionStorage.getItem("carPriceEdit")),
             loading: true,
             // upload
             selectedFiles: undefined,
@@ -248,34 +223,101 @@ export default class AddSellingAnnouncement extends Component {
             fileInfos: []
         }
 
-        sessionStorage.setItem("carBrand", "");
-        sessionStorage.setItem("carModel", "");
-        sessionStorage.setItem("carCategory", "");
-        sessionStorage.setItem("carColor", "");
-        sessionStorage.setItem("carYear", "");
-        sessionStorage.setItem("carCountry", "");
-        sessionStorage.setItem("carEngine", "0");
-        sessionStorage.setItem("carPower", "0");
-        sessionStorage.setItem("carKilometers", "0");
-        sessionStorage.setItem("carTransmission", "");
-        sessionStorage.setItem("carGearbox", "");
-        sessionStorage.setItem("carGears", "0");
-        sessionStorage.setItem("carFuelType", "");
-        sessionStorage.setItem("carConsumption", "0.0");
-        sessionStorage.setItem("carEmissionStandard", "");
-        sessionStorage.setItem("carSeats", "0");
-        sessionStorage.setItem("carAc", "");
-        sessionStorage.setItem("carAirbags", "0");
-        sessionStorage.setItem("carPrice", "0");
-        sessionStorage.setItem("carNegotiable", "");
-        sessionStorage.setItem("carLocation", "");
-        sessionStorage.setItem("carDescription", "");
+        sessionStorage.setItem("carBrandEdit", "");
+        sessionStorage.setItem("carModelEdit", "");
+        sessionStorage.setItem("carCategoryEdit", "");
+        sessionStorage.setItem("carColorEdit", "");
+        sessionStorage.setItem("carYearEdit", "");
+        sessionStorage.setItem("carCountryEdit", "");
+        sessionStorage.setItem("carEngineEdit", "0");
+        sessionStorage.setItem("carPowerEdit", "0");
+        sessionStorage.setItem("carKilometersEdit", "0");
+        sessionStorage.setItem("carTransmissionEdit", "");
+        sessionStorage.setItem("carGearboxEdit", "");
+        sessionStorage.setItem("carGearsEdit", "0");
+        sessionStorage.setItem("carFuelTypeEdit", "");
+        sessionStorage.setItem("carConsumptionEdit", "0.0");
+        sessionStorage.setItem("carEmissionStandardEdit", "");
+        sessionStorage.setItem("carSeatsEdit", "0");
+        sessionStorage.setItem("carAcEdit", "");
+        sessionStorage.setItem("carAirbagsEdit", "0");
+        sessionStorage.setItem("carPriceEdit", "0");
     }
 
     componentDidMount() {
-        document.title = "Adaugă anunț de vânzare"
+        document.title = "Editează anunțul de închiriere"
 
         this.setState({loading: true});
+
+        fetch(`http://localhost:8090/api/rentalAnnouncements/${this.props.match.params.id}`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                this.setState({rentalAnnouncement: data, images: data["car"]["images"]});
+
+                if(this.state.brand === null || this.state.brand === "") {
+                    this.setState({brand: data["car"]["model"]["manufacturer"]});
+                }
+                if(this.state.model === null || this.state.model === "") {
+                    this.setState({model: data["car"]["model"]["model"]});
+                }
+                if(this.state.category === null || this.state.category === "") {
+                    this.setState({category: data["car"]["model"]["category"]});
+                }
+                if(this.state.color === null || this.state.color === "") {
+                    this.setState({color: data["car"]["color"]});
+                }
+                if(this.state.year === null || this.state.year === "" || this.state.year === 0) {
+                    this.setState({year: data["car"]["year"]});
+                }
+                if(this.state.country === null || this.state.country === "") {
+                    this.setState({country: data["car"]["country"]});
+                }
+                if(this.state.engine === null || this.state.engine === "" || this.state.engine === 0) {
+                    this.setState({engine: data["car"]["engine"]});
+                }
+                if(this.state.power === null || this.state.power === "" || this.state.power === 0) {
+                    this.setState({power: data["car"]["power"]});
+                }
+                if(this.state.kilometers === null || this.state.kilometers === "" || this.state.kilometers === 0) {
+                    this.setState({kilometers: data["car"]["kilometers"]});
+                }
+                if(this.state.transmission === null || this.state.transmission === "") {
+                    this.setState({transmission: data["car"]["transmission"]});
+                }
+                if(this.state.gearbox === null || this.state.gearbox === "" ) {
+                    this.setState({gearbox: data["car"]["gearbox"]});
+                }
+                if(this.state.gears === null || this.state.gears === "" || this.state.gears === 0) {
+                    this.setState({gears: data["car"]["gears"]});
+                }
+                if(this.state.fuelType === null || this.state.fuelType === "") {
+                    this.setState({fuelType: data["car"]["fuelType"]});
+                }
+                if(this.state.consumption === null || this.state.consumption === "" || this.state.consumption === 0) {
+                    this.setState({consumption: data["car"]["consumption"]});
+                }
+                if(this.state.emissionStandard === null || this.state.emissionStandard === "") {
+                    this.setState({emissionStandard: data["car"]["emissionStandard"]});
+                }
+                if(this.state.seats === null || this.state.seats === "" || this.state.seats === 0) {
+                    this.setState({seats: data["car"]["seats"]});
+                }
+                if(this.state.ac === null || this.state.ac === "") {
+                    this.setState({ac: data["car"]["ac"] ? "DA" : "NU"});
+                }
+                if(this.state.airbags === null || this.state.airbags === "" || this.state.airbags === 0) {
+                    this.setState({airbags: data["car"]["airbags"]});
+                }
+                if(this.state.price === null || this.state.price === "" || this.state.price === 0) {
+                    this.setState({price: data["car"]["price"]});
+                }
+            })
 
         fetch("http://localhost:8090/api/carModels/brands", {
             headers: {
@@ -325,11 +367,11 @@ export default class AddSellingAnnouncement extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
-                this.setState({carModelsInfo: data});
+                this.setState({carModelsInfo: data, loading: false});
             })
             .catch((error) => console.log(error));
 
-        this.setState({loading: false});
+        // this.setState({loading: false});
     }
 
     onChangeBrand(e) {
@@ -430,20 +472,8 @@ export default class AddSellingAnnouncement extends Component {
         this.setState({price: e.target.value});
     }
 
-    onChangeNegotiable(e) {
-        this.setState({negotiable: e.value});
-    }
-
-    onChangeLocation(e) {
-        this.setState({location: e.target.value});
-    }
-
-    onChangeDescription(e) {
-        this.setState({description: e.target.value});
-    }
-
-    userHasAccess(user) {
-        return user !== null && user.roles.length === 1;
+    isOwner(user, announcement) {
+        return user !== null && user["id"] === announcement["rentalCenter"]["organisation"]["owner"]["id"];
     }
 
     async handleSubmit(e) {
@@ -489,14 +519,8 @@ export default class AddSellingAnnouncement extends Component {
             carDto["emission_standard"] = this.state.emissionStandard;
             carDto["seats"] = Number(this.state.seats);
 
-            const newSellingAnnouncement = {};
-            newSellingAnnouncement["car_dto"] = carDto;
-            newSellingAnnouncement["description"] = this.state.description;
-            newSellingAnnouncement["negotiable"] = this.state.negotiable === "DA";
-            newSellingAnnouncement["location"] = this.state.location;
-
             let carId = 0;
-            await axios.post("http://localhost:8090/api/sellingAnnouncements/add", newSellingAnnouncement, {
+            await axios.put(`http://localhost:8090/api/rentalAnnouncements/edit/${this.props.match.params.id}`, carDto, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -505,10 +529,10 @@ export default class AddSellingAnnouncement extends Component {
             })
                 .then((response) => carId = response["data"])
                 .catch((error) => {
-                    this.props.history.push("/sellingAnnouncements/add");
+                    this.props.history.push(`/rentalAnnouncements/edit/${this.props.match.params.id}`);
                     window.location.reload();
 
-                    sessionStorage.setItem("sellingAnnouncementAddMessage", error.response.data);
+                    sessionStorage.setItem("rentalAnnouncementEditMessage", error.response.data);
 
                     sessionStorage.setItem("carBrand", this.state.brand);
                     sessionStorage.setItem("carModel", this.state.model);
@@ -529,16 +553,20 @@ export default class AddSellingAnnouncement extends Component {
                     sessionStorage.setItem("carAc", this.state.ac);
                     sessionStorage.setItem("carAirbags", this.state.airbags);
                     sessionStorage.setItem("carPrice", this.state.price);
-                    sessionStorage.setItem("carNegotiable", this.state.negotiable);
-                    sessionStorage.setItem("carLocation", this.state.location);
                 });
 
             try {
-                this.uploadFiles(carId);
-                localStorage.setItem("infoMessage", "Anunțul a fost adăugat cu succes! Acesta a fost trims spre aprobare!");
-                this.props.history.push("/mySellingAnnouncements");
+                if(this.state.selectedFiles !== undefined && this.state.selectedFiles.length > 0) {
+                    this.uploadFiles(carId);
+                }
+                for(let i in this.state.deletedImages) {
+                    await this.removeImage(this.state.deletedImages[i], this.state.rentalAnnouncement["car"]["id"]);
+                }
+
+                localStorage.setItem("infoMessage", "Anunțul a fost editat cu succes! Acesta a fost trims spre aprobare!");
+                this.props.history.push("/myRentalAnnouncements");
             } catch(error) {
-                sessionStorage.setItem("sellingAnnouncementAddMessage", error);
+                sessionStorage.setItem("rentalAnnouncementEditMessage", error);
 
                 sessionStorage.setItem("carBrand", this.state.brand);
                 sessionStorage.setItem("carModel", this.state.model);
@@ -559,10 +587,8 @@ export default class AddSellingAnnouncement extends Component {
                 sessionStorage.setItem("carAc", this.state.ac);
                 sessionStorage.setItem("carAirbags", this.state.airbags);
                 sessionStorage.setItem("carPrice", this.state.price);
-                sessionStorage.setItem("carNegotiable", this.state.negotiable);
-                sessionStorage.setItem("carLocation", this.state.location);
 
-                this.props.history.push("/sellingAnnouncements/add");
+                this.props.history.push(`/rentalAnnouncements/edit/${this.props.match.params.id}`);
                 window.location.reload();
             }
         } else {
@@ -572,10 +598,23 @@ export default class AddSellingAnnouncement extends Component {
         }
     }
 
+    async removeImage(imageId, carId) {
+
+        const id = imageId + "_" + carId;
+
+        await axios.delete(`http://localhost:8090/api/images/delete/${id}`, {
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: authHeader().Authorization
+            },
+        }).then(() => console.log("Imaginea " + imageId + " a fost ștearsă cu succes!"));
+    }
+
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        sessionStorage.setItem("sellingAnnouncementAddMessage", "");
+        sessionStorage.setItem("rentalAnnouncementEditMessage", "");
     }
 
     selectFiles(event) {
@@ -643,9 +682,23 @@ export default class AddSellingAnnouncement extends Component {
         );
     }
 
+    deleteImage(imageId) {
+        this.setState({loading: true});
+        this.state.deletedImages.push(imageId);
+        this.setState({loading: false});
+    }
+
     render() {
 
-        if (!this.userHasAccess(this.currentUser)) {
+        const loading = this.state.loading;
+        if(loading) {
+            return (
+                <h1>Se încarcă...</h1>
+            );
+        }
+
+        const rentalAnnouncement = this.state.rentalAnnouncement;
+        if (!this.isOwner(this.currentUser, rentalAnnouncement)) {
             setTimeout(() => {
                 this.props.history.push("/news");
                 window.location.reload();
@@ -655,13 +708,6 @@ export default class AddSellingAnnouncement extends Component {
                     <h1>Nu aveți dreptul de a accesa această pagină!</h1>
                     <h1>Veți fi redirecționat...</h1>
                 </div>
-            );
-        }
-
-        const loading = this.state.loading;
-        if(loading) {
-            return (
-                <h1>Se încarcă...</h1>
             );
         }
 
@@ -708,7 +754,7 @@ export default class AddSellingAnnouncement extends Component {
         return (
             <div className={"col-md-12"}>
                 <div>
-                    {sessionStorage.getItem("sellingAnnouncementAddMessage") !== null && sessionStorage.getItem("sellingAnnouncementAddMessage") !== "" && (
+                    {sessionStorage.getItem("rentalAnnouncementEditMessage") !== null && sessionStorage.getItem("rentalAnnouncementEditMessage") !== "" && (
                         <div
                             id={"notification"}
                             role="alert"
@@ -723,11 +769,11 @@ export default class AddSellingAnnouncement extends Component {
                             >
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            {sessionStorage.getItem("sellingAnnouncementAddMessage")}
+                            {sessionStorage.getItem("rentalAnnouncementEditMessage")}
                         </div>
                     )}
 
-                    <h2 style={{alignSelf: "center"}}>Adăugare anunț de vânzare</h2>
+                    <h2 style={{alignSelf: "center"}}>Adăugare anunț de închiriere</h2>
 
                     <Form
                         onSubmit={this.handleSubmit}
@@ -1013,45 +1059,33 @@ export default class AddSellingAnnouncement extends Component {
                                 />
                             </div>
 
-                            <div className={"column"} style={{width: "5%"}} />
-
-                            <div className={"column"} style={{width: "30%"}}>
-                                <label htmlFor={"negotiable"}>Preț negociabil</label>
-                                <Select
-                                    name={"negotiable"}
-                                    value={this.state.negotiable !== null && this.state.negotiable !== "" ? {label: this.state.negotiable} : ""}
-                                    placeholder={"Alege o variantă..."}
-                                    options={[{"label": "DA", "value": "DA"}, {"label": "NU", "value": "NU"}]}
-                                    onChange={this.onChangeNegotiable} />
-                            </div>
-
-                            <div className={"column"} style={{width: "5%"}} />
-
-                            <div className={"column"} style={{width: "30%"}}>
-                                <label htmlFor={"location"}>Localitate</label>
-                                <Input
-                                    type={"text"}
-                                    className={"form-control"}
-                                    name={"location"}
-                                    value={this.state.location}
-                                    onChange={this.onChangeLocation}
-                                    validations={[required, vLocation]}
-                                />
-                            </div>
+                            <div className={"column"} style={{width: "70%"}} />
                         </div>
 
                         <br/>
 
-                        <div className={"form-group"}>
-                            <label htmlFor={"description"}>Descriere</label>
-                            <Input
-                                type={"text"}
-                                className={"form-control"}
-                                name={"description"}
-                                value={this.state.description}
-                                onChange={this.onChangeDescription}
-                                validations={[vDescription]}
-                            />
+                        <h3>Imaginile încărcate:</h3>
+
+                        <div className={"row"}>
+                            {this.state.images
+                                .filter((pic) => !this.state.deletedImages.includes(pic["id"]))
+                                .map((pic) => {
+                                    return (
+                                        <div className={"column"} style={{marginRight: "10px", marginBottom: "10px"}}>
+                                            <img
+                                                src={`${process.env.PUBLIC_URL}/assets/images/${pic["name"]}`}
+                                                width="200px"
+                                                height="120px"
+                                                alt=":(("
+                                            />
+                                            <Button onClick={() => this.deleteImage(pic["id"])}
+                                                    style={{color: "black", backgroundColor: "#cccccc", borderColor: "#cccccc", height: "30px", paddingTop: "0px", borderRadius: "50%", marginTop: "0px", marginBottom: "90px"}} >
+                                                X
+                                            </Button>
+                                        </div>
+                                    );
+                                })
+                            }
                         </div>
 
                         <br/>
@@ -1108,7 +1142,7 @@ export default class AddSellingAnnouncement extends Component {
                                 {this.state.loading && (
                                     <span className="spinner-border spinner-border-sm"/>
                                 )}
-                                <span>Adaugă anunțul</span>
+                                <span>Editează anunțul</span>
                             </Button>
                         </div>
 

@@ -101,23 +101,42 @@ public class ServiceAppointmentService {
             }
 
             List<ServiceAppointment> serviceAppointments = autoService.get().getUsers();
-            if (serviceAppointments.isEmpty()) {
-                return new ResponseEntity<>("Nu au fost făcute programări la acest service!", HttpStatus.OK);
+            List<ServiceAppointmentResponseDto> serviceAppointmentResponseDtos = new ArrayList<>();
+            for(ServiceAppointment serviceAppointment: serviceAppointments) {
+                ServiceAppointmentResponseDto serviceAppointmentResponseDto = mapServiceAppointmentToServiceAppointmentDto(serviceAppointment);
+                serviceAppointmentResponseDtos.add(serviceAppointmentResponseDto);
+            }
+
+            return new ResponseEntity<>(serviceAppointmentResponseDtos, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> getAppointmentsForMyOrganisation() {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
+            }
+
+            User currentUser = user.get();
+            Organisation organisation = currentUser.getOrganisation();
+            Set<AutoService> autoServices = organisation.getAutoServices();
+            List<ServiceAppointment> serviceAppointments = new ArrayList<>();
+
+            for(AutoService autoService: autoServices) {
+                serviceAppointments.addAll(autoService.getUsers());
             }
 
             List<ServiceAppointmentResponseDto> serviceAppointmentResponseDtos = new ArrayList<>();
             for(ServiceAppointment serviceAppointment: serviceAppointments) {
-                ServiceAppointmentResponseDto serviceAppointmentResponseDto = ServiceAppointmentResponseDto.builder()
-                        .user(serviceAppointment.getUser().getFirstName() + " " + serviceAppointment.getUser().getLastName())
-                        .userId(serviceAppointment.getUser().getId())
-                        .phone(serviceAppointment.getUser().getPhone())
-                        .autoServiceId(serviceAppointment.getAutoService().getId())
-                        .autoService(serviceAppointment.getAutoService().getName())
-                        .problemDescription(serviceAppointment.getProblemDescription())
-                        .date(serviceAppointment.getId().getDate())
-                        .hour(serviceAppointment.getHour())
-                        .stationNumber(serviceAppointment.getStationNumber())
-                        .build();
+                ServiceAppointmentResponseDto serviceAppointmentResponseDto = mapServiceAppointmentToServiceAppointmentDto(serviceAppointment);
                 serviceAppointmentResponseDtos.add(serviceAppointmentResponseDto);
             }
 
@@ -183,7 +202,7 @@ public class ServiceAppointmentService {
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<?> deleteAppointment(String serviceAppointmentId) {
+    public ResponseEntity<?> deleteAppointment(String serviceAppointmentId) throws MessagingException, UnsupportedEncodingException {
 
         String[] ids = serviceAppointmentId.split("_");
         Long userId = Long.parseLong(ids[0]);
@@ -234,6 +253,8 @@ public class ServiceAppointmentService {
                 User customer = client.get();
                 customer.removeServiceAppointment(serviceAppointment);
                 serviceAppointmentRepository.delete(serviceAppointment);
+                sendCancelMail(customer, serviceAppointment);
+
                 return new ResponseEntity<>("Programarea a fost ștearsă cu succes!", HttpStatus.OK);
             }
 
@@ -252,6 +273,49 @@ public class ServiceAppointmentService {
         }
 
         return false;
+    }
+
+    private void sendCancelMail(User user, ServiceAppointment serviceAppointment)
+            throws MessagingException, UnsupportedEncodingException {
+
+        String toAddress = user.getEmail();
+        String fromAddress = "exclusivecars22@outlook.com";
+        String senderName = "Exclusive Cars";
+        String subject = "Anulare programare la service";
+        String content = "Salut [[name]],<br><br>"
+                + "Prin acest mail dorim să te informăm că programarea ta a fost anulată.<br>"
+                + "Aici sunt detaliile programării:"
+                + "<ul>"
+                + "<li>Nume client: [[clientName]]</li>"
+                + "<li>Nume service: [[serviceName]]</li>"
+                + "<li>Adresă service: [[serviceAddress]]</li>"
+                + "<li>Data și ora: [[dateTime]]</li>"
+                + "<li>Motivul vizitei: [[reason]]</li>"
+                + "</ul>"
+                + "<br>Te rugăm să te prezinți la stația [[stationNumber]].<br>"
+                + "<br>Îți mulțumim,<br>"
+                + "ExclusiveCars";
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom(fromAddress, senderName);
+        helper.setTo(toAddress);
+        helper.setSubject(subject);
+
+        content = content.replace("[[name]]", user.getFirstName() + " " + user.getLastName());
+        content = content.replace("[[clientName]]", user.getFirstName() + " " + user.getLastName());
+        content = content.replace("[[serviceName]]", serviceAppointment.getAutoService().getName());
+        content = content.replace("[[serviceAddress]]", serviceAppointment.getAutoService().getCity()
+                + ", " + serviceAppointment.getAutoService().getAddress());
+        content = content.replace("[[dateTime]]", serviceAppointment.getId().getDate().format(DateTimeFormatter.ofPattern("dd MMMM yy"))
+                + ", ora " + serviceAppointment.getHour().format(DateTimeFormatter.ofPattern("HH:mm")));
+        content = content.replace("[[reason]]", serviceAppointment.getProblemDescription());
+        content = content.replace("[[stationNumber]]", serviceAppointment.getStationNumber().toString());
+
+        helper.setText(content, true);
+
+        mailSender.send(message);
     }
 
     private void sendInformationEmail(User user, ServiceAppointment serviceAppointment)
@@ -316,5 +380,19 @@ public class ServiceAppointmentService {
         }
 
         return stations.size() + 1;
+    }
+
+    private ServiceAppointmentResponseDto mapServiceAppointmentToServiceAppointmentDto(ServiceAppointment serviceAppointment) {
+        return ServiceAppointmentResponseDto.builder()
+                .user(serviceAppointment.getUser().getFirstName() + " " + serviceAppointment.getUser().getLastName())
+                .userId(serviceAppointment.getUser().getId())
+                .phone(serviceAppointment.getUser().getPhone())
+                .autoServiceId(serviceAppointment.getAutoService().getId())
+                .autoService(serviceAppointment.getAutoService().getName())
+                .problemDescription(serviceAppointment.getProblemDescription())
+                .date(serviceAppointment.getId().getDate())
+                .hour(serviceAppointment.getHour())
+                .stationNumber(serviceAppointment.getStationNumber())
+                .build();
     }
 }

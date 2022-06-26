@@ -219,21 +219,6 @@ export default class MyOrganisation extends Component {
             });
     }
 
-    async deleteOrganisation(id) {
-        await fetch(`/api/organisations/delete/${id}`, {
-            method: 'DELETE',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            },
-        }).then(() => {
-            localStorage.setItem("infoMessage", "Organizația a fost ștearsă cu succes!");
-            // todo schimbă redirecționarea
-            this.props.history.push("/news");
-        });
-    }
-
     hasAccess(user) {
         return user !== null && user.roles.includes('ROLE_ORGANISATION');
     }
@@ -306,6 +291,12 @@ export default class MyOrganisation extends Component {
         }
     }
 
+    hideAlert() {
+        const notification = document.getElementById("notification");
+        notification.style.display = "none";
+        localStorage.setItem("infoMessage", "");
+    }
+
     render() {
 
         const loading = this.state.loading;
@@ -334,6 +325,24 @@ export default class MyOrganisation extends Component {
 
         return (
             <>
+                {localStorage.getItem("infoMessage") !== "" && localStorage.getItem("infoMessage") !== null && (
+                    <div
+                        id={"notification"}
+                        role="alert"
+                        className={"alert alert-info alert-dismissible"}
+                    >
+                        <button
+                            type="button"
+                            className="close"
+                            data-dismiss="alert"
+                            aria-label="Close"
+                            onClick={() => this.hideAlert()}
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {localStorage.getItem("infoMessage")}
+                    </div>
+                )}
                 <div style={{height: "50px"}}>
                     <h1 style={{float: "left"}}>{organisation["name"]}</h1>
                     <div style={{float: "right"}}>
@@ -341,7 +350,7 @@ export default class MyOrganisation extends Component {
                             (<Button color={"warning"} tag={Link} to={`/organisations/edit`}>Editează organizația</Button>)}
                         &nbsp;&nbsp;&nbsp;&nbsp;
                         {((organisation["owner_id"] === this.currentUser["id"] || user.roles.includes('ROLE_ADMIN')) &&
-                            (<Button color={"danger"} onClick={() => this.deleteOrganisation(organisation["id"])}>
+                            (<Button color={"danger"} tag={Link} to={`/organisations/delete/${organisation["id"]}`}>
                                 Șterge organizația
                             </Button>))}
                     </div>
@@ -376,37 +385,37 @@ export default class MyOrganisation extends Component {
                     <TabContent activeTab={this.state.activeTab}>
                         <TabPane tabId="1">
 
+                            <div style={{height: "40px"}}>
+                                <h1 style={{float: "left"}}>Service-uri auto</h1>
+
+                                <Button color={"success"} tag={Link} to={`/autoServices/add`} style={{float: "right"}}>
+                                    Adaugă un service auto
+                                </Button>
+                            </div>
+
+                            <br/>
+
+                            <div className="input-group mb-3">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Caută după nume"
+                                    value={this.state.serviceName}
+                                    onChange={this.onChangeServiceName}
+                                />
+                                <div className="input-group-append">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        type="button"
+                                        onClick={this.filterAutoServices}
+                                    >
+                                        Căutare &nbsp;<BsIcons.BsSearch/>
+                                    </button>
+                                </div>
+                            </div>
+
                             {this.state.autoServices.length > 0 ? (
                                 <>
-                                    <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Service-uri auto</h1>
-
-                                        <Button color={"success"} tag={Link} to={`/autoServices/add`} style={{float: "right"}}>
-                                            Adaugă un service auto
-                                        </Button>
-                                    </div>
-
-                                    <br/>
-
-                                    <div className="input-group mb-3">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Caută după nume"
-                                            value={this.state.serviceName}
-                                            onChange={this.onChangeServiceName}
-                                        />
-                                        <div className="input-group-append">
-                                            <button
-                                                className="btn btn-outline-secondary"
-                                                type="button"
-                                                onClick={this.filterAutoServices}
-                                            >
-                                                Căutare &nbsp;<BsIcons.BsSearch/>
-                                            </button>
-                                        </div>
-                                    </div>
-
                                     <Pagination
                                         data={this.state.autoServices.sort(compare)}
                                         RenderComponent={AutoServiceRepresentation}
@@ -421,11 +430,13 @@ export default class MyOrganisation extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai adăugat niciun service auto!</h2>
-
-                                    <Button color={"success"} tag={Link} to={`/autoServices/add`} style={{float: "right"}}>
-                                        Adaugă un service auto
-                                    </Button>
+                                    {this.state.rentalCenterName !== null && this.state.rentalCenterName !== "" ?
+                                        (<h2 style={{float: "left"}}>Nu există niciun service auto cu aceste
+                                                informații!</h2>
+                                        ) : (
+                                            <h2 style={{float: "left"}}>Nu ai adăugat niciun service auto!</h2>
+                                        )
+                                    }
                                 </div>
                             )}
                         </TabPane>
@@ -433,37 +444,37 @@ export default class MyOrganisation extends Component {
 
                         <TabPane tabId="2">
 
+                            <div style={{height: "40px"}}>
+                                <h1 style={{float: "left"}}>Centre de închirieri auto</h1>
+
+                                <Button color={"success"} tag={Link} to={`/rentalCenters/add`} style={{float: "right"}}>
+                                    Adaugă un centru de închiriere
+                                </Button>
+                            </div>
+
+                            <br/>
+
+                            <div className="input-group mb-3">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Caută după nume"
+                                    value={this.state.rentalCenterName}
+                                    onChange={this.onChangeRentalCenterName}
+                                />
+                                <div className="input-group-append">
+                                    <button
+                                        className="btn btn-outline-secondary"
+                                        type="button"
+                                        onClick={this.filterRentalCenters}
+                                    >
+                                        Căutare &nbsp;<BsIcons.BsSearch/>
+                                    </button>
+                                </div>
+                            </div>
+
                             {this.state.rentalCenters.length > 0 ? (
                                 <>
-                                    <div style={{height: "40px"}}>
-                                        <h1 style={{float: "left"}}>Centre de închirieri auto</h1>
-
-                                        <Button color={"success"} tag={Link} to={`/rentalCenters/add`} style={{float: "right"}}>
-                                            Adaugă un centru de închiriere
-                                        </Button>
-                                    </div>
-
-                                    <br/>
-
-                                    <div className="input-group mb-3">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Caută după nume"
-                                            value={this.state.rentalCenterName}
-                                            onChange={this.onChangeRentalCenterName}
-                                        />
-                                        <div className="input-group-append">
-                                            <button
-                                                className="btn btn-outline-secondary"
-                                                type="button"
-                                                onClick={this.filterRentalCenters}
-                                            >
-                                                Căutare &nbsp;<BsIcons.BsSearch/>
-                                            </button>
-                                        </div>
-                                    </div>
-
                                     <Pagination
                                         data={this.state.rentalCenters.sort(compare)}
                                         RenderComponent={RentalCenterRepresentation}
@@ -478,11 +489,13 @@ export default class MyOrganisation extends Component {
                                 </>
                             ) : (
                                 <div>
-                                    <h2 style={{float: "left"}}>Nu ai adăugat niciun centru de închirieri!</h2>
-
-                                    <Button color={"success"} tag={Link} to={`/rentalCenters/add`} style={{float: "right"}}>
-                                        Adaugă un centru de închiriere
-                                    </Button>
+                                    {this.state.rentalCenterName !== null && this.state.rentalCenterName !== "" ?
+                                        (<h2 style={{float: "left"}}>Nu există niciun centru de închirieri cu aceste
+                                            informații!</h2>
+                                        ) : (
+                                            <h2 style={{float: "left"}}>Nu ai adăugat niciun centru de închirieri!</h2>
+                                        )
+                                    }
                                 </div>
                             )}
                         </TabPane>

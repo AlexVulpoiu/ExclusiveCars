@@ -23,6 +23,7 @@ import EditOrganisation from "./components/organisations/edit_organisation.compo
 import Organisation from "./components/organisations/organisation.component";
 import MyOrganisation from "./components/organisations/my_organisation.component";
 import OrganisationStats from "./components/organisations/organisation_stats.component";
+import DeleteOrganisation from "./components/organisations/delete_organisation.component";
 
 import Navbar from "./components/side_menu/Navbar";
 
@@ -30,19 +31,29 @@ import AutoService from "./components/auto_services/autoService.component";
 import AddAutoService from "./components/auto_services/add_autoService.component";
 import EditAutoService from "./components/auto_services/edit_autoService.component";
 import AllAutoServices from "./components/auto_services/autoServices.component";
+import MyAutoServices from "./components/auto_services/my_auto_services.component";
 
 import RentalCenter from "./components/rental_centers/rentalCenter.component";
 import AllRentalCenters from "./components/rental_centers/rental_centers.component";
+import AddRentalCenter from "./components/rental_centers/add_rental_center.component";
+import EditRentalCenter from "./components/rental_centers/edit_rental_center.component";
+import MyRentalCenters from "./components/rental_centers/my_rental_centers.component";
 
 import MakeServiceAppointment from "./components/service_appointments/make_service_appointment.component";
 import MyServiceAppointments from "./components/service_appointments/my_service_appointments.component";
 import ServiceAppointmentsForAutoService from "./components/service_appointments/service_appointments_for_autoService.component";
+import ServiceAppointmentsForMyOrganisation
+    from "./components/service_appointments/service_appointments_for_my_organisation";
 
 import MyRentals from "./components/rental_announcements/my_rentals.component";
 import AddRentalAnnouncement from "./components/rental_announcements/add_rental_announcement.component";
 import RentalAnnouncement from "./components/rental_announcements/rental_announcement.component";
 import RentalAnnouncementsFromRentalCenter
     from "./components/rental_announcements/rental_announcements_from_rental_center";
+import MyRentalAnnouncements from "./components/rental_announcements/my_rental_announcements.component";
+import EditRentalAnnouncement from "./components/rental_announcements/edit_rental_announcement.component";
+import MyRentalRequests from "./components/rental_announcements/my_rental_requests.component";
+import RentalsForCar from "./components/rental_announcements/rentals_for_car.component";
 
 import SellingAnnouncement from "./components/selling_announcements/selling_announcement.component";
 import PendingAnnouncements from "./components/selling_announcements/pending_announcements";
@@ -50,6 +61,7 @@ import AddSellingAnnouncement from "./components/selling_announcements/add_selli
 import SellingAnnouncements from "./components/selling_announcements/selling_announcements.component";
 import MySellingAnnouncements from "./components/selling_announcements/my_selling_announcements.component";
 import EditSellingAnnouncement from "./components/selling_announcements/edit_selling_announcement.component";
+
 import FavoriteAnnouncements from "./components/favorite_announcements/favorite_announcements.component";
 
 import UserReport from "./components/users/user_report.component";
@@ -152,22 +164,31 @@ class App extends Component {
                         <Route exact path={"/organisations"} component={AllOrganisations} />
                         <Route exact path={"/organisations/add"} component={AddOrganisation} />
                         <Route exact path={"/organisations/edit"} component={EditOrganisation} />
+                        <Route exact path={"/organisations/delete/:id"} component={DeleteOrganisation} />
                         <Route exact path={"/organisations/myOrganisation"} component={MyOrganisation} />
                         <Route exact path={"/organisations/myStats"} component={OrganisationStats} />
                         <Route exact path={"/organisations/:id"} component={Organisation} />
 
+                        <Route exact path={"/myAutoServices"} component={MyAutoServices} />
                         <Route exact path={"/autoServices"} component={AllAutoServices} />
                         <Route exact path={"/autoServices/add"} component={AddAutoService} />
                         <Route exact path={"/autoServices/edit/:id"} component={EditAutoService} />
                         <Route exact path={"/autoServices/:id"} component={AutoService} />
 
+                        <Route exact path={"/myRentalCenters"} component={MyRentalCenters} />
                         <Route exact path={"/rentalCenters"} component={AllRentalCenters} />
+                        <Route exact path={"/rentalCenters/add"} component={AddRentalCenter} />
+                        <Route exact path={"/rentalCenters/edit/:id"} component={EditRentalCenter} />
                         <Route exact path={"/rentalCenters/:id"} component={RentalCenter} />
 
                         <Route exact path={"/myRentals"} component={MyRentals} />
+                        <Route exact path={"/rentCars/rentals/:rentalAnnouncementId"} component={RentalsForCar} />
+                        <Route exact path={"/myRentalRequests"} component={MyRentalRequests} />
 
+                        <Route exact path={"/myRentalAnnouncements"} component={MyRentalAnnouncements} />
                         <Route exact path={"/rentalAnnouncements/fromRentalCenter/:id"} component={RentalAnnouncementsFromRentalCenter} />
                         <Route exact path={"/rentalAnnouncements/add/:rentalCenterId"} component={AddRentalAnnouncement} />
+                        <Route exact path={"/rentalAnnouncements/edit/:id"} component={EditRentalAnnouncement} />
                         <Route exact path={"/rentalAnnouncements/:id"} component={RentalAnnouncement} />
 
                         <Route exact path={"/announcements/pending"} component={PendingAnnouncements} />
@@ -180,6 +201,7 @@ class App extends Component {
 
                         <Route exact path={"/favoriteAnnouncements"} component={FavoriteAnnouncements} />
 
+                        <Route exact path={"/myServiceAppointments"} component={ServiceAppointmentsForMyOrganisation} />
                         <Route exact path={"/serviceAppointments"} component={MyServiceAppointments} />
                         <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />
                         <Route exact path={"/serviceAppointments/:serviceId"} component={ServiceAppointmentsForAutoService} />

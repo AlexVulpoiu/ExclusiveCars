@@ -39,6 +39,12 @@ public class OrganisationController {
         return organisationService.getMyOrganisation();
     }
 
+    @GetMapping("/myStats")
+    @PreAuthorize("hasRole('ORGANISATION')")
+    public ResponseEntity<?> getMyStats() {
+        return organisationService.getMyStats();
+    }
+
     @PostMapping("/add")
     public ResponseEntity<?> addOrganisation(@Valid @RequestBody OrganisationDto organisationDto) {
         return organisationService.addOrganisation(organisationDto);

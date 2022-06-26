@@ -20,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RentCarService {
@@ -73,6 +73,46 @@ public class RentCarService {
             }
 
             return new ResponseEntity<>(currentUser.getCars(), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+    }
+
+    public ResponseEntity<?> getMyRentalRequests() {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+            }
+
+            User currentUser = user.get();
+            if (currentUser.getOrganisation() == null) {
+                return new ResponseEntity<>("Nu poți efectua această acțiune!", HttpStatus.METHOD_NOT_ALLOWED);
+            }
+            Organisation organisation = currentUser.getOrganisation();
+            Set<RentalCenter> rentalCenters = organisation.getRentalCenters();
+
+            List<RentalAnnouncement> rentalAnnouncements = new ArrayList<>();
+            for(RentalCenter rentalCenter: rentalCenters) {
+                rentalAnnouncements.addAll(rentalCenter.getRentalAnnouncements());
+            }
+
+            Set<Car> cars = new HashSet<>();
+            for(RentalAnnouncement rentalAnnouncement: rentalAnnouncements) {
+                cars.add(rentalAnnouncement.getCar());
+            }
+
+            List<RentCar> rentalRequests = new ArrayList<>();
+            for(Car car: cars) {
+                rentalRequests.addAll(car.getRentalClients());
+            }
+
+            return new ResponseEntity<>(rentalRequests, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);

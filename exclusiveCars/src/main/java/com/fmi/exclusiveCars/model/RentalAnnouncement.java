@@ -26,7 +26,7 @@ public class RentalAnnouncement {
     private EState state;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"rentalAnnouncements", "organisation"})
+    @JsonIgnoreProperties({"rentalAnnouncements"})
     private RentalCenter rentalCenter;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

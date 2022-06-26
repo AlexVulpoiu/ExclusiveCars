@@ -103,21 +103,30 @@ export default class Profile extends Component {
                 <br/>
 
                 <div className={"column"}>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link> </h4>
-                    {currentUser.roles.includes("ROLE_ORGANISATION") ?
-                        (<h4>
-                            <FaIcons.FaArrowRight/> <Link to={"/organisations/myOrganisation"}>Organizația mea</Link>
-                        </h4>)
-                        : (<h4>
-                            <FaIcons.FaArrowRight/> <Link to={"/organisations/add"}>Creează o organizație</Link>
-                        </h4>)
+                    {this.state.currentUser.roles.length === 1 &&
+                        (<div>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/organisations/add"}>Creează organizație</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/serviceAppointments"}>Programările mele</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/mySellingAnnouncements"}>Anunțurile mele</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements/add"}>Postează un anunț</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/favoriteAnnouncements"}>Anunțuri favorite</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/rentalCenters"}>Închiriază o mașină</Link> </h4>
+                        </div>)
                     }
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/serviceAppointments"}>Programările mele</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/mySellingAnnouncements"}>Anunțurile mele</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements/add"}>Postează un anunț</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/favoriteAnnouncements"}>Anunțuri favorite</Link> </h4>
-                    <h4><FaIcons.FaArrowRight/> <Link to={"/rentalCenters"}>Închiriază o mașină</Link> </h4>
+                    {this.state.currentUser.roles.includes("ROLE_ORGANISATION") &&
+                        (<div>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/organisations/myOrganisation"}>Organizația mea</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/myAutoServices"}>Service-urile mele</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/myServiceAppointments"}>Programări la service</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/myRentalCenters"}>Centre de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/myRentalAnnouncements"}>Anunțuri de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/myRentalRequests"}>Cereri de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/organisations/myStats"}>Statistici</Link> </h4>
+                        </div>)
+                    }
                 </div>
 
             </div>

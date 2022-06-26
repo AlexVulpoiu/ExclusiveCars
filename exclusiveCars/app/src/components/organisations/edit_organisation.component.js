@@ -19,11 +19,11 @@ const required = value => {
 };
 
 const vName = value => {
-    const re = new RegExp("^[A-Z].{2,29}$");
+    const re = new RegExp("^[A-Z][A-Za-z0-9\\s-]{2,29}$");
     if(!re.test(value)) {
         return (
             <div className="alert alert-danger" role="alert">
-                Numele trebuie să înceapă cu literă mare și să aibă între 3 și 30 de caractere!
+                Numele trebuie să înceapă cu literă mare și să aibă între 3 și 30 de caractere (litere, cifre sau spații)!
             </div>
         );
     }
@@ -113,16 +113,11 @@ export default class EditOrganisation extends Component {
             })
                 .then(() => {
                     localStorage.setItem("infoMessage", "Organizația a fost editată cu succes!");
-                    // TODO: schimbă news cu altceva
-                    this.props.history.push("/news");
+                    this.props.history.push("/organisations/myOrganisation");
                 })
                 .catch((error) => {
                     console.log(error);
-                    // localStorage.setItem("organisationsEditMessage", error.response.data);
                     localStorage.setItem("organisationNameEdit", newOrganisation["name"]);
-
-                    // this.props.history.push(`/organisation/edit`);
-                    // window.location.reload();
                 });
         } else {
             this.setState({
@@ -152,7 +147,7 @@ export default class EditOrganisation extends Component {
         }
 
         return (
-            <div className={"col-md-12"}>
+            <div className={"col-md-4"}>
                 <div>
                     {localStorage.getItem("organisationsEditMessage") !== null && localStorage.getItem("organisationsEditMessage") !== "" && (
                         <div

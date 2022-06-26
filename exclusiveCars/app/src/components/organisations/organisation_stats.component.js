@@ -11,7 +11,7 @@ export default class OrganisationStats extends Component {
         super(props);
 
         this.state = {
-            organisation: null,
+            organisationStats: null,
             loading: true
         };
 
@@ -20,7 +20,8 @@ export default class OrganisationStats extends Component {
 
     componentDidMount() {
         this.setState({loading: true});
-        axios.get(`http://localhost:8090/api/organisations/myOrganisation`, {
+
+        axios.get(`http://localhost:8090/api/organisations/myStats`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -28,13 +29,11 @@ export default class OrganisationStats extends Component {
             }
         })
             .then((data) => {
-                this.setState({organisation: data["data"], loading: false});
-                console.log(data);
-                console.log(data["data"]);
+                this.setState({organisationStats: data["data"], loading: false});
             })
             .catch((error) => {
                 console.log(error);
-            })
+            });
     }
 
     hasAccess(user) {
@@ -43,7 +42,6 @@ export default class OrganisationStats extends Component {
 
     render() {
         const loading = this.state.loading;
-        const organisation = this.state.organisation;
 
         if(loading) {
             return (
@@ -64,51 +62,7 @@ export default class OrganisationStats extends Component {
             );
         }
 
-        const serviceOptions = {
-            chart: {
-                height: 350,
-                type: 'bar',
-                events: {
-                    click: function(chart, w, e) {
-                        // console.log(chart, w, e)
-                    }
-                }
-            },
-            plotOptions: {
-                bar: {
-                    columnWidth: '45%',
-                    distributed: true,
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            legend: {
-                show: false
-            },
-            title: {
-                text: "Distribuția service-urilor auto pe orașe",
-                align: "center"
-            },
-            xaxis: {
-                categories: [
-                    'Bucuresti', 'Iasi', 'Craiova', 'Campulung'
-                ],
-                labels: {
-                    style: {
-                        fontSize: '12px'
-                    }
-                }
-            },
-            yaxis: {
-                tickAmount: 3,
-                labels: {
-                    formatter: function(val) {
-                        return val.toFixed(0)
-                    }
-                },
-            }
-        };
+        const organisationStats = this.state.organisationStats;
 
         const rentalCenterOptions = {
             chart: {
@@ -137,9 +91,7 @@ export default class OrganisationStats extends Component {
                 align: "center"
             },
             xaxis: {
-                categories: [
-                    'Timisoara', 'Bucuresti', 'Constanta', 'Brasov'
-                ],
+                categories: Object.keys(organisationStats["rentalCentersByCity"]),
                 labels: {
                     style: {
                         fontSize: '12px'
@@ -147,7 +99,7 @@ export default class OrganisationStats extends Component {
                 }
             },
             yaxis: {
-                tickAmount: 3,
+                tickAmount: Math.max(...Object.values(organisationStats["rentalCentersByCity"])),
                 labels: {
                     formatter: function(val) {
                         return val.toFixed(0)
@@ -161,7 +113,7 @@ export default class OrganisationStats extends Component {
                 width: 380,
                 type: 'pie',
             },
-            labels: ['Volkswagen', 'Ford', 'Hyundai', 'Audi', 'Kia'],
+            labels: Object.keys(organisationStats["carRentalsByBrand"]),
             responsive: [{
                 breakpoint: 480,
                 options: {
@@ -179,9 +131,53 @@ export default class OrganisationStats extends Component {
             }
         };
 
+        const serviceOptions = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                events: {
+                    click: function(chart, w, e) {
+                        // console.log(chart, w, e)
+                    }
+                }
+            },
+            plotOptions: {
+                bar: {
+                    columnWidth: '45%',
+                    distributed: true,
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            },
+            title: {
+                text: "Distribuția service-urilor auto pe orașe",
+                align: "center"
+            },
+            xaxis: {
+                categories: Object.keys(organisationStats["autoServicesByCity"]),
+                labels: {
+                    style: {
+                        fontSize: '12px'
+                    }
+                }
+            },
+            yaxis: {
+                tickAmount: Math.max(...Object.values(organisationStats["autoServicesByCity"])),
+                labels: {
+                    formatter: function(val) {
+                        return val.toFixed(0)
+                    }
+                },
+            }
+        };
+
         return (
             <div className={"col-md-12"}>
-                <h1>{organisation["name"]} - Statistici</h1>
+                <h1 align={"center"}>{organisationStats["organisationName"]} - Statistici</h1>
 
                 <br/>
                 <br/>
@@ -194,16 +190,16 @@ export default class OrganisationStats extends Component {
                         <br/>
                         <br/>
 
-                        <p><FiIcons.FiArrowRight/> Număr total programări: 21, dintre care 14 în ultima lună</p>
-                        <p><FiIcons.FiArrowRight/> Cel mai vizitat service: <a href={"/"} target={"_blank"}>CarFix AutoService SRL</a></p>
-                        <p><FiIcons.FiArrowRight/> Număr programări: 6, dintre care 5 în ultima lună</p>
+                        <p><FiIcons.FiArrowRight/> Număr total programări: {organisationStats["totalServiceAppointments"]}, dintre care {organisationStats["lastMonthServiceAppointments"]} în ultima lună</p>
+                        <p><FiIcons.FiArrowRight/> Cel mai vizitat service: <a href={`/autoServices/${organisationStats["mostVisitedAutoServiceId"]}`} target={"_blank"}>{organisationStats["mostVisitedAutoService"]}</a></p>
+                        <p><FiIcons.FiArrowRight/> Număr programări: {organisationStats["mostVisitedAutoServiceTotalAppointments"]}, dintre care {organisationStats["mostVisitedAutoServiceLastMonthAppointments"]} în ultima lună</p>
 
                     </div>
 
                     <div className={"column"} style={{width: "50%"}}>
                         <br/>
 
-                        <ReactApexChart options={serviceOptions} series={[{data: [4, 2, 2, 1]}]} type="bar" width={"80%"} />
+                        <ReactApexChart options={serviceOptions} series={[{data: Object.values(organisationStats["autoServicesByCity"])}]} type="bar" width={"80%"} />
                     </div>
                 </div>
 
@@ -214,13 +210,13 @@ export default class OrganisationStats extends Component {
                 <div className={"row"} style={{margin: "auto"}}>
 
                     <div className={"column"} style={{width: "50%"}}>
-                        <p><FiIcons.FiArrowRight/> Număr total închirieri: 12, dintre care 8 în ultima lună</p>
-                        <p><FiIcons.FiArrowRight/> Cea mai profitabilă mașină: <a href={"/"} target={"_blank"}>Ford Focus HATCHBACK, 2011</a>. Profit: 1200 lei</p>
+                        <p><FiIcons.FiArrowRight/> Număr total închirieri: {organisationStats["totalCarRentals"]}, dintre care {organisationStats["lastMonthCarRentals"]} în ultima lună</p>
+                        <p><FiIcons.FiArrowRight/> Cea mai profitabilă mașină: <a href={`/rentalAnnouncements/${organisationStats["mostProfitableCarAnnouncementId"]}`} target={"_blank"}>{organisationStats["mostProfitableCar"]}</a>. Profit: {organisationStats["mostProfitableCarProfit"]} €</p>
                     </div>
 
                     <div className={"column"} style={{width: "50%"}}>
-                        <p><FiIcons.FiArrowRight/> Cea mai închiriată mașină: <a href={"/"} target={"_blank"}>Volkswagen Golf HATCHBACK, 2018</a></p>
-                        <p><FiIcons.FiArrowRight/> Număr închirieri: 5, dintre care 3 în ultima lună. Profit: 900 lei</p>
+                        <p><FiIcons.FiArrowRight/> Cea mai închiriată mașină: <a href={`/rentalAnnouncements/${organisationStats["mostRentedCarAnnouncementId"]}`} target={"_blank"}>{organisationStats["mostRentedCar"]}</a></p>
+                        <p><FiIcons.FiArrowRight/> Număr închirieri: {organisationStats["mostRentedCarTotalRentals"]}, dintre care {organisationStats["mostRentedCarLastMonthRentals"]} în ultima lună. Profit: {organisationStats["mostRentedCarProfit"]} €</p>
                     </div>
 
                 </div>
@@ -229,11 +225,11 @@ export default class OrganisationStats extends Component {
 
                 <div className={"row"}>
                     <div className={"column"} style={{width: "50%"}}>
-                        <ReactApexChart options={carOptions} series={[5, 3, 2, 1, 1]} type="pie" width={"80%"} />
+                        <ReactApexChart options={carOptions} series={Object.values(organisationStats["carRentalsByBrand"])} type="pie" width={"80%"} />
                     </div>
 
                     <div className={"column"} style={{width: "50%"}}>
-                        <ReactApexChart options={rentalCenterOptions} series={[{data: [2, 3, 1, 1]}]} type="bar" width={"80%"} />
+                        <ReactApexChart options={rentalCenterOptions} series={[{data: Object.values(organisationStats["rentalCentersByCity"])}]} type="bar" width={"80%"} />
                     </div>
                 </div>
             </div>

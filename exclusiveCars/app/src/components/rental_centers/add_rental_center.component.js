@@ -6,11 +6,7 @@ import {Button} from "reactstrap";
 import CheckButton from "react-validation/build/button";
 import * as BiIcons from "react-icons/bi";
 import * as BsIcons from "react-icons/bs";
-import * as GiIcons from "react-icons/gi";
 import * as MdIcons from "react-icons/md";
-import DatePicker from "react-datepicker";
-import ro from "date-fns/locale/ro";
-import {setHours, setMinutes} from "date-fns";
 import {isEmail} from "validator";
 import axios from "axios";
 import authHeader from "../../services/auth-header";
@@ -79,25 +75,12 @@ const vPhone = value => {
     }
 };
 
-const vNumberOfStations = value => {
-    if(value === null || Number(value) <= 0) {
-        return (
-            <div className="alert alert-danger" role="alert">
-                Numărul de stații de lucru trebuie să fie un număr pozitiv!
-            </div>
-        );
-    }
-}
+export default class AddRentalCenter extends Component {
 
-export default class AddAutoService extends Component {
-
-    emptyAutoService = {
+    emptyRentalCenter = {
         name: "",
         city: "",
         address: "",
-        number_of_stations: 1,
-        start_hour: "",
-        end_hour: "",
         email: "",
         phone: ""
     };
@@ -106,14 +89,11 @@ export default class AddAutoService extends Component {
         super(props);
 
         this.state = {
-            name: sessionStorage.getItem("autoServiceName"),
-            city: sessionStorage.getItem("autoServiceCity"),
-            address: sessionStorage.getItem("autoServiceAddress"),
-            number_of_stations: sessionStorage.getItem("autoServiceNumberOfStations"),
-            start_hour: sessionStorage.getItem("autoServiceStartHour") ? new Date(sessionStorage.getItem("autoServiceStartHour")) : sessionStorage.getItem("autoServiceStartHour"),
-            end_hour: sessionStorage.getItem("autoServiceEndHour") ? new Date(sessionStorage.getItem("autoServiceEndHour")) : sessionStorage.getItem("autoServiceEndHour"),
-            email: sessionStorage.getItem("autoServiceEmail"),
-            phone: sessionStorage.getItem("autoServicePhone"),
+            name: sessionStorage.getItem("rentalCenterName"),
+            city: sessionStorage.getItem("rentalCenterCity"),
+            address: sessionStorage.getItem("rentalCenterAddress"),
+            email: sessionStorage.getItem("rentalCenterEmail"),
+            phone: sessionStorage.getItem("rentalCenterPhone"),
             loading: false,
             message: ""
         };
@@ -123,25 +103,19 @@ export default class AddAutoService extends Component {
         this.onChangeName = this.onChangeName.bind(this);
         this.onChangeCity = this.onChangeCity.bind(this);
         this.onChangeAddress = this.onChangeAddress.bind(this);
-        this.onChangeNumberOfStations = this.onChangeNumberOfStations.bind(this);
-        this.onChangeStartHour = this.onChangeStartHour.bind(this);
-        this.onChangeEndHour = this.onChangeEndHour.bind(this);
         this.onChangeEmail = this.onChangeEmail.bind(this);
         this.onChangePhone = this.onChangePhone.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
-        sessionStorage.setItem("autoServiceName", "");
-        sessionStorage.setItem("autoServiceCity", "");
-        sessionStorage.setItem("autoServiceAddress", "");
-        sessionStorage.setItem("autoServiceNumberOfStations", 1);
-        sessionStorage.setItem("autoServiceStartHour", "");
-        sessionStorage.setItem("autoServiceEndHour", "");
-        sessionStorage.setItem("autoServiceEmail", "");
-        sessionStorage.setItem("autoServicePhone", "");
+        sessionStorage.setItem("rentalCenterName", "");
+        sessionStorage.setItem("rentalCenterCity", "");
+        sessionStorage.setItem("rentalCenterAddress", "");
+        sessionStorage.setItem("rentalCenterEmail", "");
+        sessionStorage.setItem("rentalCenterPhone", "");
     }
 
     componentDidMount() {
-        document.title = "Adăugare service auto";
+        document.title = "Adăugare centru de închiriere";
     }
 
     async handleSubmit(e) {
@@ -157,24 +131,14 @@ export default class AddAutoService extends Component {
 
         if(this.checkBtn.context._errors.length === 0) {
 
-            const newAutoService = this.emptyAutoService;
-            newAutoService["name"] = this.state.name.trim();
-            newAutoService["city"] = this.state.city.trim();
-            newAutoService["address"] = this.state.address.trim();
-            newAutoService["number_of_stations"] = this.state.number_of_stations.trim();
+            const newRentalCenter = this.emptyRentalCenter;
+            newRentalCenter["name"] = this.state.name.trim();
+            newRentalCenter["city"] = this.state.city.trim();
+            newRentalCenter["address"] = this.state.address.trim();
+            newRentalCenter["email"] = this.state.email.trim();
+            newRentalCenter["phone"] = this.state.phone.trim();
 
-            let hour = this.state.start_hour.getHours() < 10 ? "0" + this.state.start_hour.getHours() : this.state.start_hour.getHours();
-            let minutes = this.state.start_hour.getMinutes() < 10 ? "0" + this.state.start_hour.getMinutes() : this.state.start_hour.getMinutes();
-            newAutoService["start_hour"] = hour + ":" + minutes;
-
-            hour = this.state.end_hour.getHours() < 10 ? "0" + this.state.end_hour.getHours() : this.state.end_hour.getHours();
-            minutes = this.state.end_hour.getMinutes() < 10 ? "0" + this.state.end_hour.getMinutes() : this.state.end_hour.getMinutes();
-            newAutoService["end_hour"] = hour + ":" + minutes;
-
-            newAutoService["email"] = this.state.email.trim();
-            newAutoService["phone"] = this.state.phone.trim();
-
-            await axios.post("http://localhost:8090/api/autoServices/add", newAutoService, {
+            await axios.post("http://localhost:8090/api/rentalCenters/add", newRentalCenter, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -182,22 +146,19 @@ export default class AddAutoService extends Component {
                 }
             })
                 .then(() => {
-                    localStorage.setItem("infoMessage", "Service-ul auto a fost adăugat cu succes!");
+                    localStorage.setItem("infoMessage", "Centrul de închirieri a fost adăugat cu succes!");
                     this.props.history.push("/organisations/myOrganisation");
                 })
                 .catch((error) => {
-                    this.props.history.push("/autoServices/add");
+                    this.props.history.push("/rentalCenters/add");
                     window.location.reload();
 
-                    sessionStorage.setItem("autoServiceAddMessage", error.response.data);
-                    sessionStorage.setItem("autoServiceName", this.state.name);
-                    sessionStorage.setItem("autoServiceCity", this.state.city);
-                    sessionStorage.setItem("autoServiceAddress", this.state.address);
-                    sessionStorage.setItem("autoServiceNumberOfStations", this.state.number_of_stations);
-                    sessionStorage.setItem("autoServiceStartHour", this.state.start_hour.toString());
-                    sessionStorage.setItem("autoServiceEndHour", this.state.end_hour.toString());
-                    sessionStorage.setItem("autoServiceEmail", this.state.email);
-                    sessionStorage.setItem("autoServicePhone", this.state.phone);
+                    sessionStorage.setItem("rentalCenterAddMessage", error.response.data);
+                    sessionStorage.setItem("rentalCenterName", this.state.name);
+                    sessionStorage.setItem("rentalCenterCity", this.state.city);
+                    sessionStorage.setItem("rentalCenterAddress", this.state.address);
+                    sessionStorage.setItem("rentalCenterEmail", this.state.email);
+                    sessionStorage.setItem("rentalCenterPhone", this.state.phone);
                 });
         } else {
             this.setState({
@@ -209,7 +170,7 @@ export default class AddAutoService extends Component {
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        sessionStorage.setItem("autoServiceAddMessage", "");
+        sessionStorage.setItem("rentalCenterAddMessage", "");
     }
 
     hasAccess(user) {
@@ -234,24 +195,6 @@ export default class AddAutoService extends Component {
         });
     }
 
-    onChangeNumberOfStations(e) {
-        this.setState({
-            number_of_stations: e.target.value
-        });
-    }
-
-    onChangeStartHour(date) {
-        this.setState({
-            start_hour: date
-        });
-    }
-
-    onChangeEndHour(date) {
-        this.setState({
-            end_hour: date
-        });
-    }
-
     onChangeEmail(e) {
         this.setState({
             email: e.target.value
@@ -262,31 +205,6 @@ export default class AddAutoService extends Component {
         this.setState({
             phone: e.target.value
         });
-    }
-
-    filterStartDate = (time) => {
-
-        const selectedDate = new Date(time);
-        const minDateTime = setHours(setMinutes(new Date(selectedDate), 0), 7);
-        const maxDateTime = setHours(setMinutes(new Date(selectedDate), 0), 12);
-
-        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() <= maxDateTime.getTime();
-    }
-
-    filterEndDate = (time) => {
-
-        const selectedDate = new Date(time);
-        let hour = 7;
-        if(this.state.start_hour !== null && this.state.start_hour !== "") {
-            hour = this.state.start_hour.getHours();
-        } else {
-            return false;
-        }
-
-        const minDateTime = setHours(setMinutes(new Date(selectedDate), 0), hour + 8);
-        const maxDateTime = setHours(setMinutes(new Date(selectedDate), 0), 23);
-
-        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() <= maxDateTime.getTime();
     }
 
     render() {
@@ -313,27 +231,27 @@ export default class AddAutoService extends Component {
         return (
             <div className={"col-md-12"}>
                 <div>
-                    {sessionStorage.getItem("autoServiceAddMessage") !== null
-                        && sessionStorage.getItem("autoServiceAddMessage") !== "" && (
-                        <div
-                            id={"notification"}
-                            role="alert"
-                            className={"alert alert-warning alert-dismissible"}
-                        >
-                            <button
-                                type="button"
-                                className="close"
-                                data-dismiss="alert"
-                                aria-label="Close"
-                                onClick={() => this.hideAlert()}
+                    {sessionStorage.getItem("rentalCenterAddMessage") !== null
+                        && sessionStorage.getItem("rentalCenterAddMessage") !== "" && (
+                            <div
+                                id={"notification"}
+                                role="alert"
+                                className={"alert alert-warning alert-dismissible"}
                             >
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            {sessionStorage.getItem("autoServiceAddMessage")}
-                        </div>
-                    )}
+                                <button
+                                    type="button"
+                                    className="close"
+                                    data-dismiss="alert"
+                                    aria-label="Close"
+                                    onClick={() => this.hideAlert()}
+                                >
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                {sessionStorage.getItem("rentalCenterAddMessage")}
+                            </div>
+                        )}
 
-                    <h2 style={{alignSelf: "center"}}>Adăugare service auto</h2>
+                    <h2 style={{alignSelf: "center"}}>Adăugare centru de închiriere </h2>
 
                     <Form
                         onSubmit={this.handleSubmit}
@@ -356,8 +274,10 @@ export default class AddAutoService extends Component {
                                 </div>
                             </div>
 
-                            <div className={"column"} style={{width: "10%"}}/>
+                            <div className={"column"} style={{width: "55%"}}/>
+                        </div>
 
+                        <div className={"row"}>
                             <div className={"column"} style={{width: "45%"}}>
                                 <div className={"form-group"}>
                                     <label htmlFor={"city"}><MdIcons.MdLocationCity/> Oraș</label>
@@ -371,9 +291,9 @@ export default class AddAutoService extends Component {
                                     />
                                 </div>
                             </div>
-                        </div>
 
-                        <div className={"row"}>
+                            <div className={"column"} style={{width: "10%"}} />
+
                             <div className={"column"} style={{width: "45%"}}>
                                 <div className={"form-group"}>
                                     <label htmlFor={"address"}><MdIcons.MdLocationOn/> Adresa</label>
@@ -384,67 +304,6 @@ export default class AddAutoService extends Component {
                                         value={this.state.address}
                                         onChange={this.onChangeAddress}
                                         validations={[required, vAddress]}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={"column"} style={{width: "10%"}} />
-
-                            <div className={"column"} style={{width: "45%"}}>
-                                <div className={"form-group"}>
-                                    <label htmlFor={"number_of_stations"}><GiIcons.GiMechanicGarage/> Numărul de stații de lucru</label>
-                                    <Input
-                                        type={"number"}
-                                        min={1}
-                                        className={"form-control"}
-                                        name={"number_of_stations"}
-                                        value={this.state.number_of_stations}
-                                        onChange={this.onChangeNumberOfStations}
-                                        validations={[required, vNumberOfStations]}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={"row"}>
-                            <div className={"column"} style={{width: "45%"}}>
-                                <div className={"form-group"}>
-                                    <label htmlFor={"start_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de început a programului</label>
-                                    <DatePicker
-                                        name={"start_hour"}
-                                        selected={this.state.start_hour}
-                                        onChange={this.onChangeStartHour}
-                                        placeholderText={"Alegeți ora de început..."}
-                                        locale={ro}
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeIntervals={60}
-                                        timeCaption="Ora"
-                                        dateFormat="HH:mm"
-                                        validations={[required]}
-                                        filterTime={this.filterStartDate}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={"column"} style={{width: "10%"}} />
-
-                            <div className={"column"} style={{width: "45%"}}>
-                                <div className={"form-group"}>
-                                    <label htmlFor={"end_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de sfârșit a programului</label>
-                                    <DatePicker
-                                        name={"end_hour"}
-                                        selected={this.state.end_hour}
-                                        onChange={this.onChangeEndHour}
-                                        placeholderText={"Alegeți ora de sfârșit..."}
-                                        locale={ro}
-                                        showTimeSelect
-                                        showTimeSelectOnly
-                                        timeIntervals={60}
-                                        timeCaption="Ora"
-                                        dateFormat="HH:mm"
-                                        validations={[required]}
-                                        filterTime={this.filterEndDate}
                                     />
                                 </div>
                             </div>
@@ -493,7 +352,7 @@ export default class AddAutoService extends Component {
                                 {this.state.loading && (
                                     <span className="spinner-border spinner-border-sm"/>
                                 )}
-                                <span>Adaugă service-ul auto</span>
+                                <span>Adaugă centrul de închiriere</span>
                             </Button>
                         </div>
 

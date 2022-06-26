@@ -49,8 +49,8 @@ export default class Organisation extends Component {
                 Authorization: authHeader().Authorization
             },
         }).then(() => {
-            localStorage.setItem("infoMessage", "Organizația a fost ștearsă cu succes!");
-            // todo schimbă redirecționarea
+            localStorage.setItem("infoMessage", "Organizația a fost ștearsă cu succes! Te rugăm să te loghezi din nou!");
+            AuthService.logout();
             this.props.history.push("/news");
         });
     }

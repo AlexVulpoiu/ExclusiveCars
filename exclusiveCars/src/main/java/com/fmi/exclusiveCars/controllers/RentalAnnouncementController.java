@@ -47,6 +47,11 @@ public class RentalAnnouncementController {
         return rentalAnnouncementService.getRentalAnnouncementsFromRentalCenter(rentalCenterId);
     }
 
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMyRentalAnnouncements() {
+        return rentalAnnouncementService.getMyRentalAnnouncements();
+    }
+
     @PostMapping("/add/{rentalCenterId}")
     @PreAuthorize("hasRole('ORGANISATION')")
     public ResponseEntity<?> addRentalAnnouncement(@PathVariable Long rentalCenterId, @Valid @RequestBody CarDto carDto) {

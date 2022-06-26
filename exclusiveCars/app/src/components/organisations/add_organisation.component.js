@@ -84,9 +84,10 @@ export default class AddOrganisation extends Component {
                 }
             })
                 .then(() => {
-                    localStorage.setItem("infoMessage", "Organizația a fost adăugată cu succes!");
-                    // TODO change news to somenthing else
+                    localStorage.setItem("infoMessage", "Organizația a fost adăugată cu succes! Vă rugăm să vă logați din nou în aplicație!");
+                    AuthService.logout();
                     this.props.history.push("/news");
+                    window.location.reload();
                 })
                 .catch((error) => {
                     this.props.history.push("/organisations/add");

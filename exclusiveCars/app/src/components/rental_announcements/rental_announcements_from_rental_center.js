@@ -240,7 +240,8 @@ export default class RentalAnnouncementsFromRentalCenter extends Component {
         return (
             <>
                 <div style={{height: "50px"}}>
-                    <h1 style={{float: "left"}}>Anunțuri de vânzare</h1>
+                    <h1 style={{float: "left"}}>Anunțuri de închiriere</h1>
+                    <Button color={"success"} style={{float: "right"}} tag={Link} to={`/rentalAnnouncements/add/${this.props.match.params.id}`}>Adaugă un anunț de închiriere</Button>
                 </div>
                 <br/>
                 <br/>
@@ -283,7 +284,12 @@ export default class RentalAnnouncementsFromRentalCenter extends Component {
                         </>
                     ) : (
                         <div>
-                            <h2 style={{float: "left"}}>Nu a fost postat niciun anunț cu acest conținut!</h2>
+                            {(this.state.searchQuery === null || this.state.searchQuery === "") ? (
+                                    <h2 style={{float: "left"}}>Nu există niciun anunț de închiriere!</h2>
+                                ) : (
+                                    <h2 style={{float: "left"}}>Nu a fost postat niciun anunț cu acest conținut!</h2>
+                                )
+                            }
                         </div>
                     )}
                 </div>

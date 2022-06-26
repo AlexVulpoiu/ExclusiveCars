@@ -25,7 +25,7 @@ public class RentalCenterDto {
     private String city;
 
     @NotBlank(message = "The address must not be blank!")
-    @Size(min = 20, max = 200, message = "The address should contain between 20 and 200 characters!")
+    @Size(min = 10, max = 200, message = "The address should contain between 20 and 200 characters!")
     private String address;
 
     @NotBlank(message = "Email must not be blank!")

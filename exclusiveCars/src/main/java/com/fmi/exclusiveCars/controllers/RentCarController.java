@@ -30,6 +30,11 @@ public class RentCarController {
         return rentCarService.getMyRentals();
     }
 
+    @GetMapping("/myRentalRequests")
+    public ResponseEntity<?> getMyRentalRequests() {
+        return rentCarService.getMyRentalRequests();
+    }
+
     @PostMapping("/rent/{carId}")
     public ResponseEntity<?> rentCar(@PathVariable Long carId, @RequestParam("startDate") String startDate,
                                      @RequestParam("endDate") String endDate, @RequestParam("announcement") Long announcementId) throws MessagingException, UnsupportedEncodingException {

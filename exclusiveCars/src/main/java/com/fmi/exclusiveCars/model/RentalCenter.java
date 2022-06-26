@@ -36,7 +36,7 @@ public class RentalCenter {
     private String city;
 
     @NotBlank
-    @Size(min = 20, max = 200)
+    @Size(min = 10, max = 200)
     @Column(length = 200)
     private String address;
 
@@ -55,6 +55,7 @@ public class RentalCenter {
     private List<RentalAnnouncement> rentalAnnouncements = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"autoServices", "rentalCenters"})
     private Organisation organisation;
 
     public void addRentalAnnouncement(RentalAnnouncement announcement) {

@@ -12,6 +12,7 @@ import ro from 'date-fns/locale/ro';
 import addDays from "date-fns/addDays";
 import Form from "react-validation/build/form";
 import axios from "axios";
+import {Link} from "react-router-dom";
 
 export default class RentalAnnouncement extends Component {
 
@@ -31,6 +32,8 @@ export default class RentalAnnouncement extends Component {
             loading: true
         };
 
+        this.currentUser = AuthService.getCurrentUser();
+
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -38,21 +41,23 @@ export default class RentalAnnouncement extends Component {
     async componentDidMount() {
         this.setState({loading: true});
 
-        fetch(`http://localhost:8090/api/favoriteRentalAnnouncements`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                const fav = [];
-                for(let i in data) {
-                    fav.push(data[i]["id"]);
+        if(this.currentUser.roles.length === 1) {
+            fetch(`http://localhost:8090/api/favoriteRentalAnnouncements`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: authHeader().Authorization
                 }
-                this.setState({favorites: fav});
             })
+                .then((response) => response.json())
+                .then((data) => {
+                    const fav = [];
+                    for (let i in data) {
+                        fav.push(data[i]["id"]);
+                    }
+                    this.setState({favorites: fav});
+                })
+        }
 
         await fetch(`http://localhost:8090/api/rentalAnnouncements/${this.props.match.params.id}`, {
             headers: {
@@ -63,6 +68,7 @@ export default class RentalAnnouncement extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log(data);
                 this.setState({rentalAnnouncement: data})
             });
 
@@ -76,15 +82,17 @@ export default class RentalAnnouncement extends Component {
             .then((response) => response.json())
             .then((data) => this.setState({carRentals: data}));
 
-        await fetch(`http://localhost:8090/api/rentCars/myRentals`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => this.setState({userRentals: data}));
+        if(this.currentUser.roles.length === 1) {
+            await fetch(`http://localhost:8090/api/rentCars/myRentals`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    Authorization: authHeader().Authorization
+                }
+            })
+                .then((response) => response.json())
+                .then((data) => this.setState({userRentals: data}));
+        }
 
         this.setState({excludedDates: this.getUnavailableDates()});
 
@@ -141,8 +149,7 @@ export default class RentalAnnouncement extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Anunțul de închiriere a fost șters cu succes!");
-            // todo schimbă redirect-ul
-            this.props.history.push("/news");
+            this.props.history.push("/myRentalAnnouncements");
         });
     }
 
@@ -273,8 +280,20 @@ export default class RentalAnnouncement extends Component {
         sessionStorage.setItem("favoriteRentalStatus", "");
     }
 
+    isOwner(user, announcement) {
+        return user !== null && user["id"] === announcement["rentalCenter"]["organisation"]["owner"]["id"];
+    }
+
     render() {
+        const loading = this.state.loading;
+        if(loading) {
+            return (
+                <h1>Se încarcă...</h1>
+            );
+        }
+
         const rentalAnnouncement = this.state.rentalAnnouncement;
+        console.log(rentalAnnouncement);
         let car = {};
         let rentalCenter = {};
         if(rentalAnnouncement) {
@@ -282,7 +301,6 @@ export default class RentalAnnouncement extends Component {
             rentalCenter = rentalAnnouncement["rentalCenter"]
         }
         console.log(rentalAnnouncement);
-        const loading = this.state.loading;
         const user = AuthService.getCurrentUser();
 
         if(user === null) {
@@ -295,12 +313,6 @@ export default class RentalAnnouncement extends Component {
                     <h1>Nu aveți dreptul de a accesa această pagină!</h1>
                     <h1>Veți fi redirecționat...</h1>
                 </div>
-            );
-        }
-
-        if(loading) {
-            return (
-                <h1>Se încarcă...</h1>
             );
         }
 
@@ -364,21 +376,21 @@ export default class RentalAnnouncement extends Component {
                             </div>
 
                             {
-                                // this.isOwner(user, sellingAnnouncement) ?
-                                // (
-                                //     <div>
-                                //         <Button color={"warning"} tag={Link}
-                                //                 to={`/sellingAnnouncements/edit/${sellingAnnouncement["id"]}`}>
-                                //             Editează anunțul <AiIcons.AiFillEdit/>
-                                //         </Button>
-                                //         &nbsp;&nbsp;&nbsp;
-                                //         <Button color={"danger"}
-                                //                 onClick={() => this.deleteSellingAnnouncement(sellingAnnouncement["id"])}>
-                                //             Șterge anunțul <MdIcons.MdDeleteForever/>
-                                //         </Button>
-                                //     </div>
-                                // )
-                                // :
+                                this.isOwner(user, rentalAnnouncement) ?
+                                (
+                                    <div>
+                                        <Button color={"warning"} tag={Link}
+                                                to={`/rentalAnnouncements/edit/${rentalAnnouncement["id"]}`}>
+                                            Editează anunțul <AiIcons.AiFillEdit/>
+                                        </Button>
+                                        &nbsp;&nbsp;&nbsp;
+                                        <Button color={"danger"}
+                                                onClick={() => this.deleteRentalAnnouncement(rentalAnnouncement["id"])}>
+                                            Șterge anunțul <MdIcons.MdDeleteForever/>
+                                        </Button>
+                                    </div>
+                                )
+                                :
                                     (!this.state.favorites.includes(rentalAnnouncement["id"]) ?
                                         (
                                             <div>
@@ -428,11 +440,20 @@ export default class RentalAnnouncement extends Component {
                                 <h3>Preț: {car["price"]} € / zi</h3>
                             </div>
 
-                            <div  style={{float: "right"}}>
-                                <Button color={this.state.button === 0 ? "info" : "danger"} onClick={() => this.setState({button: 1 - this.state.button, dateRange: ""})}>
-                                    <MdIcons.MdCarRental/> {this.state.button === 0 ? "Închiriază mașina" : "Anulează acțiunea"}
-                                </Button>
-                            </div>
+                            {!this.isOwner(user, rentalAnnouncement) ?
+                                (<div style={{float: "right"}}>
+                                    <Button color={this.state.button === 0 ? "info" : "danger"}
+                                            onClick={() => this.setState({button: 1 - this.state.button, dateRange: ""})}>
+                                        <MdIcons.MdCarRental/> {this.state.button === 0 ? "Închiriază mașina" : "Anulează acțiunea"}
+                                    </Button>
+                                </div>) : (
+                                    <div style={{float: "right"}}>
+                                        <Button color={"info"} tag={Link} to={`/rentCars/rentals/${rentalAnnouncement["id"]}`}>
+                                            <MdIcons.MdCarRental/> Vizualizează cererile de închiriere
+                                        </Button>
+                                    </div>
+                                )
+                            }
                         </div>
 
                         <br/>

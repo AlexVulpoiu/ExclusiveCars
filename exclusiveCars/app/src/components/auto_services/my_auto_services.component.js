@@ -123,7 +123,7 @@ function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
     );
 }
 
-export default class AllAutoServices extends Component {
+export default class MyAutoServices extends Component {
 
     constructor(props) {
         super(props);
@@ -142,9 +142,9 @@ export default class AllAutoServices extends Component {
     }
 
     componentDidMount() {
-        document.title = "Service-uri auto";
+        document.title = "Service-urile mele";
         this.setState({loading: true});
-        fetch("http://localhost:8090/api/autoServices", {
+        fetch("http://localhost:8090/api/organisations/myOrganisation", {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -153,9 +153,8 @@ export default class AllAutoServices extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
-
                 const filter = sessionStorage.getItem("filterAutoServices");
-                let filteredAutoServices = data;
+                let filteredAutoServices = data["auto_services"];
 
                 if(filter === "services") {
                     filteredAutoServices = JSON.parse(sessionStorage.getItem("filteredAutoServices"));
@@ -169,7 +168,7 @@ export default class AllAutoServices extends Component {
     }
 
     hasAccess(user) {
-        return user !== null;
+        return user !== null && user.roles.includes("ROLE_ORGANISATION");
     }
 
     onChangeServiceName = (e) => {
@@ -234,7 +233,8 @@ export default class AllAutoServices extends Component {
         return (
             <div className={"col-md-12"}>
                 <div style={{height: "50px"}}>
-                    <h1 style={{float: "left"}}>Service-uri auto</h1>
+                    <h1 style={{float: "left"}}>Service-urile mele</h1>
+                    <Button color={"success"} style={{float: "right"}} tag={Link} to={"/autoServices/add"}>Adaugă un service auto</Button>
                 </div>
                 <br/>
                 <br/>
@@ -275,7 +275,12 @@ export default class AllAutoServices extends Component {
                         </>
                     ) : (
                         <div>
-                            <h2 style={{float: "left"}}>Nu există niciun service cu aceste informații!</h2>
+                            {this.state.serviceName === null || this.state.serviceName === "" ? (
+                                    <h2 style={{float: "left"}}>Nu ai adăugat niciun service auto!</h2>
+                                ) : (
+                                    <h2 style={{float: "left"}}>Nu există niciun service cu aceste informații!</h2>
+                                )
+                            }
                         </div>
                     )}
                 </div>

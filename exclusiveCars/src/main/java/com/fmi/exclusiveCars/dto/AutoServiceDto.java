@@ -24,7 +24,7 @@ public class AutoServiceDto {
     private String city;
 
     @NotBlank(message = "Adresa nu poate fi un string gol!")
-    @Size(min = 10, max = 100, message = "Orașul trebuie să aibă între 10 și 100 de caractere!")
+    @Size(min = 10, max = 100, message = "Adresa trebuie să aibă între 10 și 100 de caractere!")
     private String address;
 
     @NotNull(message = "Numărul de stații trebuie să fie mai mare decât 0!")

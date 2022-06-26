@@ -75,8 +75,7 @@ export default class AutoService extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Service-ul auto a fost șters cu succes!");
-            // todo: schimba redirectul
-            this.props.history.push("/news");
+            this.props.history.push("/organisations/myOrganisation");
         });
     }
 

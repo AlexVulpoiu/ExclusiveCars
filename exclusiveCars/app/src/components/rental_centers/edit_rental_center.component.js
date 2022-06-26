@@ -4,15 +4,11 @@ import AuthService from "../../services/auth.service";
 import authHeader from "../../services/auth-header";
 import Input from "react-validation/build/input";
 import * as BiIcons from "react-icons/bi";
-import DatePicker from "react-datepicker";
-import ro from "date-fns/locale/ro";
 import {Button} from "reactstrap";
 import CheckButton from "react-validation/build/button";
 import {isEmail} from "validator";
-import {setHours, setMinutes} from "date-fns";
 import axios from "axios";
 import * as MdIcons from "react-icons/md";
-import * as GiIcons from "react-icons/gi";
 import * as BsIcons from "react-icons/bs";
 
 const required = value => {
@@ -79,25 +75,12 @@ const vPhone = value => {
     }
 };
 
-const vNumberOfStations = value => {
-    if(value === null || Number(value) <= 0) {
-        return (
-            <div className="alert alert-danger" role="alert">
-                Numărul de stații de lucru trebuie să fie un număr pozitiv!
-            </div>
-        );
-    }
-}
+export default class EditRentalCenter extends Component {
 
-export default class EditAutoService extends Component {
-
-    emptyAutoService = {
+    emptyRentalCenter = {
         name: "",
         city: "",
         address: "",
-        number_of_stations: 1,
-        start_hour: "",
-        end_hour: "",
         email: "",
         phone: ""
     };
@@ -106,14 +89,11 @@ export default class EditAutoService extends Component {
         super(props);
 
         this.state = {
-            autoService: null,
+            rentalCenter: null,
             organisation: null,
             name: "",
             city: "",
             address: "",
-            number_of_stations: 1,
-            start_hour: "",
-            end_hour: "",
             email: "",
             phone: "",
             loading: true,
@@ -125,16 +105,13 @@ export default class EditAutoService extends Component {
         this.onChangeName = this.onChangeName.bind(this);
         this.onChangeCity = this.onChangeCity.bind(this);
         this.onChangeAddress = this.onChangeAddress.bind(this);
-        this.onChangeNumberOfStations = this.onChangeNumberOfStations.bind(this);
-        this.onChangeStartHour = this.onChangeStartHour.bind(this);
-        this.onChangeEndHour = this.onChangeEndHour.bind(this);
         this.onChangeEmail = this.onChangeEmail.bind(this);
         this.onChangePhone = this.onChangePhone.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     componentDidMount() {
-        document.title = "Editare service auto";
+        document.title = "Editare centru de închirieri";
         this.setState({loading: true});
 
         fetch("http://localhost:8090/api/organisations/myOrganisation", {
@@ -146,10 +123,10 @@ export default class EditAutoService extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
-                this.setState({organisation: data, loading: true});
+                this.setState({organisation: data});
             });
 
-        fetch(`http://localhost:8090/api/autoServices/${this.props.match.params.id}`, {
+        fetch(`http://localhost:8090/api/rentalCenters/${this.props.match.params.id}`, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -158,62 +135,37 @@ export default class EditAutoService extends Component {
         })
             .then((response) => response.json())
             .then((data) => {
-                this.setState({autoService: data, loading: true});
+                this.setState({rentalCenter: data, loading: true});
 
-                let editName = sessionStorage.getItem("autoServiceNameEdit");
+                let editName = sessionStorage.getItem("rentalCenterNameEdit");
                 if(editName !== null && editName !== "") {
                     this.setState({name: editName});
                 } else {
                     this.setState({name: data["name"]});
                 }
 
-                let editCity = sessionStorage.getItem("autoServiceCityEdit");
+                let editCity = sessionStorage.getItem("rentalCenterCityEdit");
                 if(editCity !== null && editCity !== "") {
                     this.setState({city: editCity});
                 } else {
                     this.setState({city: data["city"]});
                 }
 
-                let editAddress = sessionStorage.getItem("autoServiceAddressEdit");
+                let editAddress = sessionStorage.getItem("rentalCenterAddressEdit");
                 if(editAddress !== null && editAddress !== "") {
                     this.setState({address: editAddress});
                 } else {
                     this.setState({address: data["address"]});
                 }
 
-                let editNumberOfStations = sessionStorage.getItem("autoServiceNumberOfStationsEdit");
-                if(editNumberOfStations !== null && editNumberOfStations !== "") {
-                    this.setState({number_of_stations: Number(editNumberOfStations)});
-                } else {
-                    this.setState({number_of_stations: data["numberOfStations"]});
-                }
-
-                let editStartHour = sessionStorage.getItem("autoServiceStartHourEdit");
-                if(editStartHour !== null && editStartHour !== "") {
-                    this.setState({start_hour: new Date(editStartHour)});
-                } else {
-                    const hour = data["startHour"].toString().substring(0, 2);
-                    const minutes = data["startHour"].toString().substring(3, 5);
-                    this.setState({start_hour: setHours(setMinutes(new Date(), minutes), hour)});
-                }
-
-                let editEndHour = sessionStorage.getItem("autoServiceEndHourEdit");
-                if(editEndHour !== null && editEndHour !== "") {
-                    this.setState({end_hour: new Date(editEndHour)});
-                } else {
-                    const hour = data["endHour"].toString().substring(0, 2);
-                    const minutes = data["endHour"].toString().substring(3, 5);
-                    this.setState({end_hour: setHours(setMinutes(new Date(), minutes), hour)});
-                }
-
-                let editEmail = sessionStorage.getItem("autoServiceEmailEdit");
+                let editEmail = sessionStorage.getItem("rentalCenterEmailEdit");
                 if(editEmail !== null && editEmail !== "") {
                     this.setState({email: editEmail});
                 } else {
                     this.setState({email: data["email"]});
                 }
 
-                let editPhone = sessionStorage.getItem("autoServicePhoneEdit");
+                let editPhone = sessionStorage.getItem("rentalCenterPhoneEdit");
                 if(editPhone !== null && editPhone !== "") {
                     this.setState({phone: editPhone});
                 } else {
@@ -222,14 +174,11 @@ export default class EditAutoService extends Component {
 
                 this.setState({loading: false});
 
-                sessionStorage.setItem("autoServiceNameEdit", "");
-                sessionStorage.setItem("autoServiceCityEdit", "");
-                sessionStorage.setItem("autoServiceAddressEdit", "");
-                sessionStorage.setItem("autoServiceNumberOfStationsEdit", "");
-                sessionStorage.setItem("autoServiceStartHourEdit", "");
-                sessionStorage.setItem("autoServiceEndHourEdit", "");
-                sessionStorage.setItem("autoServiceEmailEdit", "");
-                sessionStorage.setItem("autoServicePhoneEdit", "");
+                sessionStorage.setItem("rentalCenterNameEdit", "");
+                sessionStorage.setItem("rentalCenterCityEdit", "");
+                sessionStorage.setItem("rentalCenterAddressEdit", "");
+                sessionStorage.setItem("rentalCenterEmailEdit", "");
+                sessionStorage.setItem("rentalCenterPhoneEdit", "");
             })
     }
 
@@ -245,24 +194,14 @@ export default class EditAutoService extends Component {
 
         if(this.checkBtn.context._errors.length === 0) {
 
-            const newAutoService = this.emptyAutoService;
-            newAutoService["name"] = this.state.name.trim();
-            newAutoService["city"] = this.state.city.trim();
-            newAutoService["address"] = this.state.address.trim();
-            newAutoService["number_of_stations"] = this.state.number_of_stations;
+            const newRentalCenter = this.emptyRentalCenter;
+            newRentalCenter["name"] = this.state.name.trim();
+            newRentalCenter["city"] = this.state.city.trim();
+            newRentalCenter["address"] = this.state.address.trim();
+            newRentalCenter["email"] = this.state.email.trim();
+            newRentalCenter["phone"] = this.state.phone.trim();
 
-            let hour = this.state.start_hour.getHours() < 10 ? "0" + this.state.start_hour.getHours() : this.state.start_hour.getHours();
-            let minutes = this.state.start_hour.getMinutes() < 10 ? "0" + this.state.start_hour.getMinutes() : this.state.start_hour.getMinutes();
-            newAutoService["start_hour"] = hour + ":" + minutes;
-
-            hour = this.state.end_hour.getHours() < 10 ? "0" + this.state.end_hour.getHours() : this.state.end_hour.getHours();
-            minutes = this.state.end_hour.getMinutes() < 10 ? "0" + this.state.end_hour.getMinutes() : this.state.end_hour.getMinutes();
-            newAutoService["end_hour"] = hour + ":" + minutes;
-
-            newAutoService["email"] = this.state.email.trim();
-            newAutoService["phone"] = this.state.phone.trim();
-
-            await axios.put(`http://localhost:8090/api/autoServices/edit/${this.props.match.params.id}`, newAutoService, {
+            await axios.put(`http://localhost:8090/api/rentalCenters/edit/${this.props.match.params.id}`, newRentalCenter, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -270,22 +209,19 @@ export default class EditAutoService extends Component {
                 }
             })
                 .then(() => {
-                    localStorage.setItem("infoMessage", "Service-ul auto a fost editat cu succes!");
-                    this.props.history.push(`/autoServices/${this.props.match.params.id}`);
+                    localStorage.setItem("infoMessage", "Centrul de închirieri a fost editat cu succes!");
+                    this.props.history.push(`/rentalCenters/${this.props.match.params.id}`);
                 })
                 .catch((error) => {
-                    this.props.history.push(`/autoServices/edit/${this.props.match.params.id}`);
+                    this.props.history.push(`/rentalCenters/edit/${this.props.match.params.id}`);
                     window.location.reload();
 
-                    sessionStorage.setItem("autoServiceEditMessage", error.response.data);
-                    sessionStorage.setItem("autoServiceNameEdit", this.state.name);
-                    sessionStorage.setItem("autoServiceCityEdit", this.state.city);
-                    sessionStorage.setItem("autoServiceAddressEdit", this.state.address);
-                    sessionStorage.setItem("autoServiceNumberOfStationsEdit", this.state.number_of_stations);
-                    sessionStorage.setItem("autoServiceStartHourEdit", this.state.start_hour.toString());
-                    sessionStorage.setItem("autoServiceEndHourEdit", this.state.end_hour.toString());
-                    sessionStorage.setItem("autoServiceEmailEdit", this.state.email);
-                    sessionStorage.setItem("autoServicePhoneEdit", this.state.phone);
+                    sessionStorage.setItem("rentalCenterEditMessage", error.response.data);
+                    sessionStorage.setItem("rentalCenterNameEdit", this.state.name);
+                    sessionStorage.setItem("rentalCenterCityEdit", this.state.city);
+                    sessionStorage.setItem("rentalCenterAddressEdit", this.state.address);
+                    sessionStorage.setItem("rentalCenterEmailEdit", this.state.email);
+                    sessionStorage.setItem("rentalCenterPhoneEdit", this.state.phone);
                 });
         } else {
             this.setState({
@@ -297,12 +233,12 @@ export default class EditAutoService extends Component {
     hideAlert() {
         const notification = document.getElementById("notification");
         notification.style.display = "none";
-        sessionStorage.setItem("autoServiceEditMessage", "");
+        sessionStorage.setItem("rentalCenterEditMessage", "");
     }
 
     hasAccess(user) {
         return user !== null && user.roles.includes("ROLE_ORGANISATION")
-            && this.state.autoService.organisation === this.state.organisation.name;
+            && this.state.rentalCenter.organisation === this.state.organisation.name;
     }
 
     onChangeName(e) {
@@ -323,24 +259,6 @@ export default class EditAutoService extends Component {
         });
     }
 
-    onChangeNumberOfStations(e) {
-        this.setState({
-            number_of_stations: e.target.value
-        });
-    }
-
-    onChangeStartHour(date) {
-        this.setState({
-            start_hour: date
-        });
-    }
-
-    onChangeEndHour(date) {
-        this.setState({
-            end_hour: date
-        });
-    }
-
     onChangeEmail(e) {
         this.setState({
             email: e.target.value
@@ -351,31 +269,6 @@ export default class EditAutoService extends Component {
         this.setState({
             phone: e.target.value
         });
-    }
-
-    filterStartDate = (time) => {
-
-        const selectedDate = new Date(time);
-        const minDateTime = setHours(setMinutes(new Date(selectedDate), 0), 7);
-        const maxDateTime = setHours(setMinutes(new Date(selectedDate), 0), 12);
-
-        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() <= maxDateTime.getTime();
-    }
-
-    filterEndDate = (time) => {
-
-        const selectedDate = new Date(time);
-        let hour = 7;
-        if(this.state.start_hour !== null && this.state.start_hour !== "") {
-            hour = this.state.start_hour.getHours();
-        } else {
-            return false;
-        }
-
-        const minDateTime = setHours(setMinutes(new Date(selectedDate), 0), hour + 8);
-        const maxDateTime = setHours(setMinutes(new Date(selectedDate), 0), 23);
-
-        return minDateTime <= selectedDate.getTime() && selectedDate.getTime() <= maxDateTime.getTime();
     }
 
     render() {
@@ -402,8 +295,8 @@ export default class EditAutoService extends Component {
         return (
             <div className={"col-md-12"}>
                 <div>
-                    {sessionStorage.getItem("autoServiceEditMessage") !== null
-                        && sessionStorage.getItem("autoServiceEditMessage") !== "" && (
+                    {sessionStorage.getItem("rentalCenterEditMessage") !== null
+                        && sessionStorage.getItem("rentalCenterEditMessage") !== "" && (
                             <div
                                 id={"notification"}
                                 role="alert"
@@ -418,13 +311,13 @@ export default class EditAutoService extends Component {
                                 >
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                {sessionStorage.getItem("autoServiceEditMessage")}
+                                {sessionStorage.getItem("rentalCenterEditMessage")}
                             </div>
                         )
                     }
                 </div>
 
-                <h2 style={{alignSelf: "center"}}>Editare service auto</h2>
+                <h2 style={{alignSelf: "center"}}>Editare centru de închirieri</h2>
 
                 <Form
                     onSubmit={this.handleSubmit}
@@ -447,7 +340,10 @@ export default class EditAutoService extends Component {
                             </div>
                         </div>
 
-                        <div className={"column"} style={{width: "10%"}}/>
+                        <div className={"column"} style={{width: "55%"}}/>
+                    </div>
+
+                    <div className={"row"}>
 
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
@@ -462,9 +358,9 @@ export default class EditAutoService extends Component {
                                 />
                             </div>
                         </div>
-                    </div>
 
-                    <div className={"row"}>
+                        <div className={"column"} style={{width: "10%"}} />
+
                         <div className={"column"} style={{width: "45%"}}>
                             <div className={"form-group"}>
                                 <label htmlFor={"address"}><MdIcons.MdLocationOn/> Adresa</label>
@@ -475,67 +371,6 @@ export default class EditAutoService extends Component {
                                     value={this.state.address}
                                     onChange={this.onChangeAddress}
                                     validations={[required, vAddress]}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={"column"} style={{width: "10%"}} />
-
-                        <div className={"column"} style={{width: "45%"}}>
-                            <div className={"form-group"}>
-                                <label htmlFor={"number_of_stations"}><GiIcons.GiMechanicGarage/> Numărul de stații de lucru</label>
-                                <Input
-                                    type={"number"}
-                                    min={1}
-                                    className={"form-control"}
-                                    name={"number_of_stations"}
-                                    value={this.state.number_of_stations}
-                                    onChange={this.onChangeNumberOfStations}
-                                    validations={[required, vNumberOfStations]}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={"row"}>
-                        <div className={"column"} style={{width: "45%"}}>
-                            <div className={"form-group"}>
-                                <label htmlFor={"start_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de început a programului</label>
-                                <DatePicker
-                                    name={"start_hour"}
-                                    selected={this.state.start_hour}
-                                    onChange={this.onChangeStartHour}
-                                    placeholderText={"Alegeți ora de început..."}
-                                    locale={ro}
-                                    showTimeSelect
-                                    showTimeSelectOnly
-                                    timeIntervals={60}
-                                    timeCaption="Ora"
-                                    dateFormat="HH:mm"
-                                    validations={[required]}
-                                    filterTime={this.filterStartDate}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={"column"} style={{width: "10%"}} />
-
-                        <div className={"column"} style={{width: "45%"}}>
-                            <div className={"form-group"}>
-                                <label htmlFor={"end_hour"}><MdIcons.MdOutlineAccessTimeFilled/> Ora de sfârșit a programului</label>
-                                <DatePicker
-                                    name={"end_hour"}
-                                    selected={this.state.end_hour}
-                                    onChange={this.onChangeEndHour}
-                                    placeholderText={"Alegeți ora de sfârșit..."}
-                                    locale={ro}
-                                    showTimeSelect
-                                    showTimeSelectOnly
-                                    timeIntervals={60}
-                                    timeCaption="Ora"
-                                    dateFormat="HH:mm"
-                                    validations={[required]}
-                                    filterTime={this.filterEndDate}
                                 />
                             </div>
                         </div>
@@ -584,7 +419,7 @@ export default class EditAutoService extends Component {
                             {this.state.loading && (
                                 <span className="spinner-border spinner-border-sm"/>
                             )}
-                            <span>Editează service-ul auto</span>
+                            <span>Editează centrul de închirieri</span>
                         </Button>
                     </div>
 

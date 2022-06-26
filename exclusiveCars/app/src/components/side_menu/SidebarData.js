@@ -138,37 +138,37 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
         },
         {
             title: 'Service-urile mele',
-            path: '/organisations/add',
+            path: '/myAutoServices',
             icon: <GiIcons.GiAutoRepair/>,
             cName: 'nav-text'
         },
         {
             title: 'Programări la service',
-            path: '/serviceAppointments',
+            path: '/myServiceAppointments',
             icon: <ImIcons.ImCalendar/>,
             cName: 'nav-text'
         },
         {
             title: 'Centre de închiriere',
-            path: '/organisations/add',
+            path: '/myRentalCenters',
             icon: <GiIcons.GiHomeGarage/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de închiriere',
-            path: '/serviceAppointments',
+            path: '/myRentalAnnouncements',
             icon: <IoIcons.IoIosDocument/>,
             cName: 'nav-text'
         },
         {
             title: 'Cereri de închiriere',
-            path: '/organisations/add',
+            path: '/myRentalRequests',
             icon: <MdIcons.MdCarRental/>,
             cName: 'nav-text'
         },
         {
             title: 'Statistici',
-            path: '/organisations/add',
+            path: '/organisations/myStats',
             icon: <IoIcons.IoIosStats/>,
             cName: 'nav-text'
         }

@@ -1,7 +1,6 @@
 package com.fmi.exclusiveCars.services;
 
 import com.fmi.exclusiveCars.dto.CarDto;
-import com.fmi.exclusiveCars.dto.RentalAnnouncementDto;
 import com.fmi.exclusiveCars.model.*;
 import com.fmi.exclusiveCars.repository.RentalAnnouncementRepository;
 import com.fmi.exclusiveCars.repository.RentalCenterRepository;
@@ -13,9 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -93,6 +90,41 @@ public class RentalAnnouncementService {
         return new ResponseEntity<>(rentalAnnouncements, HttpStatus.OK);
     }
 
+    public ResponseEntity<?> getMyRentalAnnouncements() {
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetailsImpl) {
+            String username = ((UserDetailsImpl) principal).getUsername();
+            Optional<User> user = userRepository.findByUsername(username);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+            }
+
+            User currentUser = user.get();
+            if (currentUser.getOrganisation() == null) {
+                return new ResponseEntity<>("Nu poți efectua această acțiune!", HttpStatus.METHOD_NOT_ALLOWED);
+            }
+
+            List<RentalAnnouncement> myRentalAnnouncements = new ArrayList<>();
+            Set<RentalCenter> rentalCenters = currentUser.getOrganisation().getRentalCenters();
+            for(RentalCenter rentalCenter: rentalCenters) {
+                myRentalAnnouncements.addAll(rentalCenter.getRentalAnnouncements());
+            }
+            myRentalAnnouncements.sort((o1, o2) -> {
+                String name1 = o1.getCar().getModel().getManufacturer() + " " + o1.getCar().getModel().getModel();
+                String name2 = o2.getCar().getModel().getManufacturer() + " " + o2.getCar().getModel().getModel();
+
+                return name1.compareTo(name2);
+            });
+
+            return new ResponseEntity<>(myRentalAnnouncements, HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
+    }
+
     public ResponseEntity<?> addRentalAnnouncement(Long rentalCenterId, CarDto carDto) {
 
         Optional<RentalCenter> rentalCenter = rentalCenterRepository.findById(rentalCenterId);
@@ -161,8 +193,10 @@ public class RentalAnnouncementService {
 
             Long carId = currentRentalAnnouncement.getCar().getId();
             carService.editCar(carId, carDto);
+            currentRentalAnnouncement.setState(EState.PENDING);
+            rentalAnnouncementRepository.save(currentRentalAnnouncement);
 
-            return new ResponseEntity<>("Anunțul de închiriere a fost editat cu succes!", HttpStatus.OK);
+            return new ResponseEntity<>(carId, HttpStatus.OK);
         }
 
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);

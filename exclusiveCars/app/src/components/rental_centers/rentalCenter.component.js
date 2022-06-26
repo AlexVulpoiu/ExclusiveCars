@@ -74,8 +74,7 @@ export default class RentalCenter extends Component {
             },
         }).then(() => {
             localStorage.setItem("infoMessage", "Centrul de închirieri auto a fost șters cu succes!");
-            // todo: schimba redirectul
-            this.props.history.push("/news");
+            this.props.history.push("/organisations/myOrganisation");
         });
     }
 
