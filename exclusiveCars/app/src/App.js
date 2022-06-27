@@ -70,6 +70,8 @@ import EditProfile from "./components/users/edit_profile.component";
 import UsersManagement from "./components/users/users_management.component";
 import DeleteUser from "./components/users/delete_user.component";
 
+import HomeComponent from "./components/home.component";
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -159,7 +161,9 @@ class App extends Component {
                         <Route exact path={"/profile/edit"} component={EditProfile} />
                         <Route exact path="/profile/delete" component={DeleteProfile} />
 
-                        <Route exact path={["/", "/news"]} component={News} />
+                        <Route exact path={"/"} component={HomeComponent} />
+
+                        <Route exact path={"/news"} component={News} />
                         <Route exact path={"/news/add"} component={AddNews} />
                         <Route exact path={"/news/edit/:id"} component={EditNews} />
                         <Route exact path={"/news/:id"} component={NewsArticle} />

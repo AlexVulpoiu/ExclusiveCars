@@ -14,7 +14,22 @@ const user = AuthService.getCurrentUser();
 
 let SidebarData = [];
 
-if(user !== null && user.roles.includes("ROLE_ADMIN")) {
+if(user === null) {
+    SidebarData = [
+        {
+            title: 'Acasă',
+            path: '/',
+            icon: <AiIcons.AiFillHome/>,
+            cName: 'nav-text'
+        },
+        {
+            title: 'Știri',
+            path: '/news',
+            icon: <IoIcons.IoIosPaper/>,
+            cName: 'nav-text'
+        }
+    ];
+} else if(user.roles.includes("ROLE_ADMIN")) {
     SidebarData = [
         {
             title: 'Acasă',
@@ -77,7 +92,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
             cName: 'nav-text'
         }
     ];
-} else if(user !== null && user.roles.includes("ROLE_MODERATOR")) {
+} else if(user.roles.includes("ROLE_MODERATOR")) {
     SidebarData = [
         {
             title: 'Acasă',
@@ -116,7 +131,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
             cName: 'nav-text'
         }
     ];
-} else if(user !== null && user.roles.includes("ROLE_ORGANISATION")) {
+} else if(user.roles.includes("ROLE_ORGANISATION")) {
     SidebarData = [
         {
             title: 'Acasă',
@@ -173,7 +188,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
             cName: 'nav-text'
         }
     ];
-} else if(user !== null && user.roles.length === 1) {
+} else if(user.roles.length === 1) {
     SidebarData = [
         {
             title: 'Acasă',
