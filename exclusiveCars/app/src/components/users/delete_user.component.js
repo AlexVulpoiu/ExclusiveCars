@@ -17,16 +17,14 @@ const required = value => {
     }
 };
 
-export default class DeleteOrganisation extends Component {
+export default class DeleteUser extends Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
             password: "",
-            organisation: {},
-            captcha: false,
-            loading: true
+            captcha: false
         }
 
         this.user = AuthService.getCurrentUser();
@@ -34,29 +32,9 @@ export default class DeleteOrganisation extends Component {
         this.onChange = this.onChange.bind(this);
         this.onChangePassword = this.onChangePassword.bind(this);
         this.onRefresh = this.onRefresh.bind(this);
-
-        document.title = "Ștergere organizație";
     }
 
-    componentDidMount() {
-        this.setState({loading: true});
-        fetch(`/api/organisations/${this.props.match.params.id}`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: authHeader().Authorization
-            }
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                this.setState({organisation: data, loading: false});
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-    }
-
-    async deleteOrganisation() {
+    async deleteUser() {
 
         if(!this.state.captcha) {
             alert("Pentru a efectua acțiunea, este necesar să completezi corect captcha-ul");
@@ -74,22 +52,16 @@ export default class DeleteOrganisation extends Component {
                         alert("Parola este incorectă!");
                         window.location.reload();
                     } else {
-                        axios.delete(`http://localhost:8090/api/organisations/delete/${this.state.organisation["id"]}`, {
+                        axios.delete(`http://localhost:8090/api/users/delete/${this.props.match.params.id}`, {
                             headers: {
                                 Authorization: authHeader().Authorization
                             }
                         })
                             .then(() => {
-                                const user = AuthService.getCurrentUser();
-                                if(user.roles.includes("ROLE_ADMIN")) {
-                                    localStorage.setItem("organisationsMessage", "Organizația a fost ștearsă cu succes!");
-                                    this.props.history.push("/organisations");
-                                } else {
-                                    localStorage.setItem("infoMessage", "Organizația a fost ștearsă cu succes! Te rugăm să te loghezi din nou!");
-                                    AuthService.logout();
-                                    this.props.history.push("/news");
-                                    window.location.reload();
-                                }
+                                localStorage.setItem("infoMessage", "Ați șters contul cu succes!");
+                                AuthService.logout();
+                                this.props.history.push("/news");
+                                window.location.reload();
                             })
                             .catch((error) => {
                                 alert("A apărut o eroare la procesarea cererii!");
@@ -115,19 +87,12 @@ export default class DeleteOrganisation extends Component {
     }
 
     hasAccess(user) {
-        return user !== null && (user.roles.includes("ROLE_ADMIN") || this.state.organisation["owner_id"] === user["id"]);
+        return user !== null && user.roles.includes("ROLE_ADMIN");
     }
 
     render() {
-
-        const loading = this.state.loading;
-        if(loading) {
-            return (
-                <h1>Se încarcă...</h1>
-            );
-        }
-
-        if(!this.hasAccess(this.user)) {
+        const user = AuthService.getCurrentUser();
+        if(!this.hasAccess(user)) {
             setTimeout(() => {
                 this.props.history.push("/news");
                 window.location.reload();
@@ -142,8 +107,8 @@ export default class DeleteOrganisation extends Component {
 
         return (
             <div className={"col-md-12"}>
-                <h2 style={{color: "red", textAlign: "center"}}>ATENȚIE, ești pe cale de a șterge organizația!</h2>
-                <p style={{fontSize: "19px", textAlign: "center"}}>Odată efectuată această acțiune, se vor pierde toate datele de până acum: programările, anunțurile postate, service-urile auto și centrele de închiriere!</p>
+                <h2 style={{color: "red", textAlign: "center"}}>ATENȚIE, ești pe cale de a șterge contul unui utilizator!</h2>
+                <p style={{fontSize: "19px", textAlign: "center"}}>Odată efectuată această acțiune, se vor pierde toate datele de până acum: programările, anunțurile postate sau organizația!</p>
                 <br/>
                 <p style={{textAlign: "center"}}>Pentru a continua, te rugăm să introduci parola în următorul câmp, după care să apeși pe butonul de confirmare:</p>
 
@@ -168,8 +133,8 @@ export default class DeleteOrganisation extends Component {
 
                         <div className={"form-group"}>
                             <Button color={"danger"} onClick={() => {
-                                this.deleteOrganisation();
-                            }}>Confirmă ștergerea organizației</Button>
+                                this.deleteUser();
+                            }}>Confirmă ștergerea contului</Button>
                         </div>
                     </Form>
                 </div>

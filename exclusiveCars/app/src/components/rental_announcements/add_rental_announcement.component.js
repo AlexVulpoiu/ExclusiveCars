@@ -508,6 +508,7 @@ export default class AddRentalAnnouncement extends Component {
                 this.uploadFiles(carId);
                 localStorage.setItem("infoMessage", "Anunțul a fost adăugat cu succes! Acesta a fost trims spre aprobare!");
                 this.props.history.push("/myRentalAnnouncements");
+                window.location.reload();
             } catch(error) {
                 sessionStorage.setItem("rentalAnnouncementAddMessage", error);
 

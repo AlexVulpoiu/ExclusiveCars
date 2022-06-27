@@ -14,9 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -29,6 +28,14 @@ public class UserService {
     public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
+    }
+
+    public List<UserDto> getUsers() {
+
+        List<User> users = userRepository.findAll();
+        users = users.stream().filter(user -> !isAdmin(user)).collect(Collectors.toList());
+
+        return users.stream().map(this::mapUserToUserDto).sorted(Comparator.comparing(UserDto::getEmail)).collect(Collectors.toList());
     }
 
     public ResponseEntity<?> getUser(Long id) {
@@ -178,6 +185,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .build();
     }
 }

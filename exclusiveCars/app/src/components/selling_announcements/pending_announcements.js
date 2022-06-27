@@ -96,38 +96,38 @@ function Pagination({ data, RenderComponent, pageLimit, dataLimit}) {
 }
 
 function RentalAnnouncementRepresentation(props) {
-    const {id, car, rentalCenter} = props.data;
+    const {id, state, rentalCenter, car} = props.data;
     return (
         <div className="jumbotron" style={{paddingTop: "20px", paddingBottom: "20px"}}>
             <div className={"row"}>
-                <div className={"column"} style={{width: "35%"}}>
-                    <img height={"220px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
+                <div className={"column"} style={{width: "320px"}}>
+                    <img height={"220px"} width={"280px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
                 </div>
 
-                <div className={"row"}>
-                    <div className={"column"} style={{width: "50%"}}>
-                        <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
-                        <ul>
-                            <li>Categoria: {car["model"]["category"]}</li>
-                            <li>Kilometraj: {car["kilometers"]}</li>
-                            <li>Preț: {car["price"]} €</li>
-                            <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
-                            <li>Putere motor: {car["power"]} CP</li>
-                        </ul>
-                    </div>
+                <div className={"column"}>
+                    <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
+                    <div className={"row"}>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Categoria: {car["model"]["category"]}</li>
+                                <li>Kilometraj: {car["kilometers"]}</li>
+                                <li>Preț: {car["price"]} €</li>
+                                <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
+                                <li>Putere motor: {car["power"]} CP</li>
+                            </ul>
+                        </div>
 
-                    <div className={"column"} style={{width: "50%"}}>
-                        <br/>
-                        <br/>
-                        <ul>
-                            <li>Centru: {rentalCenter["name"]}</li>
-                            <li>Locație: {rentalCenter["city"] + ", " + rentalCenter["address"]}</li>
-                            <li>Telefon: {rentalCenter["phone"]}</li>
-                            <li>Email: {rentalCenter["email"]}</li>
-                        </ul>
-                    </div>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Centrul: {rentalCenter["name"]}</li>
+                                <li>Localitate: {rentalCenter["city"] + ", " + rentalCenter["address"]}</li>
+                                <li>Telefon: {rentalCenter["phone"]}</li>
+                                <li>Email: {rentalCenter["email"]}</li>
+                            </ul>
+                        </div>
 
-                    <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/rentalAnnouncements/${id}`}>Deschide anunțul</Button>
+                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/rentalAnnouncements/${id}`}>Deschide anunțul</Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@ function RentalAnnouncementRepresentation(props) {
 }
 
 function SellingAnnouncementRepresentation(props) {
-    const {id, car, user} = props.data;
+    const {id, car, user, location} = props.data;
     return (
         <div className="jumbotron" style={{paddingTop: "20px", paddingBottom: "20px"}}>
             <div className={"row"}>
@@ -143,30 +143,30 @@ function SellingAnnouncementRepresentation(props) {
                     <img height={"220px"} width={"300px"} src={`${process.env.PUBLIC_URL}/assets/images/${car["images"][0]["name"]}`} alt={":("} />
                 </div>
 
-                <div className={"row"}>
-                    <div className={"column"} style={{width: "50%"}}>
-                        <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
-                        <ul>
-                            <li>Categoria: {car["model"]["category"]}</li>
-                            <li>Kilometraj: {car["kilometers"]}</li>
-                            <li>Preț: {car["price"]} €</li>
-                            <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
-                            <li>Putere motor: {car["power"]} CP</li>
-                        </ul>
-                    </div>
+                <div className={"column"}>
+                    <h2>{car["model"]["manufacturer"] + " " + car["model"]["model"] + " " + car["year"]}</h2>
+                    <div className={"row"}>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Categoria: {car["model"]["category"]}</li>
+                                <li>Kilometraj: {car["kilometers"]}</li>
+                                <li>Preț: {car["price"]} €</li>
+                                <li>Capacitate motor: {car["engine"]} cm<sup>3</sup></li>
+                                <li>Putere motor: {car["power"]} CP</li>
+                            </ul>
+                        </div>
 
-                    <div className={"column"} style={{width: "50%"}}>
-                        <br/>
-                        <br/>
-                        <ul>
-                            <li>Nume: {user["firstName"] + " " + user["lastName"]}</li>
-                            <li>Localitate: {car["location"]}</li>
-                            <li>Telefon: {user["phone"]}</li>
-                            <li>Email: {user["email"]}</li>
-                        </ul>
-                    </div>
+                        <div className={"column"} style={{width: "50%"}}>
+                            <ul>
+                                <li>Nume: {user["firstName"] + " " + user["lastName"]}</li>
+                                <li>Localitate: {location}</li>
+                                <li>Telefon: {user["phone"]}</li>
+                                <li>Email: {user["email"]}</li>
+                            </ul>
+                        </div>
 
-                    <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/sellingAnnouncements/${id}`}>Deschide anunțul</Button>
+                        <Button style={{width: "100%"}} color={"info"} tag={Link} to={`/sellingAnnouncements/${id}`}>Deschide anunțul</Button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -151,7 +151,7 @@ export default class RentalAnnouncement extends Component {
         }).then(() => {
             localStorage.setItem("infoMessage", "Anunțul de închiriere a fost șters cu succes!");
             const user = AuthService.getCurrentUser();
-            if(user.roles.length === 1) {
+            if(user.roles.includes("ROLE_ORGANISATION")) {
                 this.props.history.push("/myRentalAnnouncements");
             } else {
                 this.props.history.push("/rentalAnnouncements");
@@ -306,6 +306,16 @@ export default class RentalAnnouncement extends Component {
         return user !== null && user["id"] === announcement["rentalCenter"]["organisation"]["owner"]["id"];
     }
 
+    mapStateToString(state) {
+        if(state === "ACCEPTED") {
+            return "ACCEPTAT";
+        }
+        if(state === "PENDING") {
+            return "ÎN AȘTEPTARE";
+        }
+        return "RESPINS";
+    }
+
     render() {
         const loading = this.state.loading;
         if(loading) {
@@ -343,6 +353,11 @@ export default class RentalAnnouncement extends Component {
                 <img width={"100%"} src={`${process.env.PUBLIC_URL}/assets/images/${image["name"]}`} alt={":("} />
             </Carousel.Item>)
         );
+
+        let titleWidth = "60%";
+        if(user.roles.length !== 1) {
+            titleWidth = "100%";
+        }
 
         return (
             <div className={"rs-col-md-12"}>
@@ -391,7 +406,7 @@ export default class RentalAnnouncement extends Component {
 
                     <div className={"column"} style={{width: "45%"}}>
                         <div className={"row"}>
-                            <div style={{width: "60%"}}>
+                            <div style={{width: titleWidth}}>
                                 <h1>
                                     <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
                                 </h1>
@@ -410,6 +425,9 @@ export default class RentalAnnouncement extends Component {
                                                 onClick={() => this.deleteRentalAnnouncement(rentalAnnouncement["id"])}>
                                             Șterge anunțul <MdIcons.MdDeleteForever/>
                                         </Button>
+                                        <br/>
+                                        <br/>
+                                        <h4>Stare anunț: {this.mapStateToString(rentalAnnouncement["state"])}</h4>
                                     </div>
                                 )
                                 : (user.roles.length === 1 ? (!this.state.favorites.includes(rentalAnnouncement["id"]) ?
@@ -483,7 +501,8 @@ export default class RentalAnnouncement extends Component {
                         </div>
 
                         <div className={"row"} style={{float: "right"}}>
-                            {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN")) && (
+                            {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN"))
+                                && rentalAnnouncement["state"] === "PENDING" && (
                                 <div>
                                     <Button color={"success"}
                                             onClick={() => this.changeAnnouncementState(rentalAnnouncement["id"], "ACCEPTED")}>

@@ -62,7 +62,7 @@ function RentalCenterRepresentation(props) {
                 <CardText><IoIcons.IoMdMail/>&nbsp;{email}</CardText>
                 <CardText><ImIcons.ImPhone/>&nbsp;{phone}</CardText>
                 <br/>
-                <Button color={"primary"} tag={Link} to={`/rentalCenters/${id}`}>Accesează pagina service-ului</Button>
+                <Button color={"primary"} tag={Link} to={`/rentalCenters/${id}`}>Accesează pagina centrului de închirieri</Button>
             </CardBody>
         </Card>
     );

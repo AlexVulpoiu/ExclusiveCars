@@ -86,8 +86,13 @@ export default class DeleteProfile extends Component {
         this.setState({captcha: false});
     }
 
+    hasAccess(user) {
+        return user !== null && !user.roles.includes("ROLE_MODERATOR") && !user.roles.includes("ROLE_ADMIN");
+    }
+
     render() {
-        if(AuthService.getCurrentUser() === null) {
+        const user = AuthService.getCurrentUser();
+        if(!this.hasAccess(user)) {
             setTimeout(() => {
                 this.props.history.push("/news");
                 window.location.reload();

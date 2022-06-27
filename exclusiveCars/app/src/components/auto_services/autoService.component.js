@@ -185,9 +185,7 @@ export default class AutoService extends Component {
                             Efectuează o programare &nbsp; <BsIcons.BsFillCalendarCheckFill />
                         </Button>)}
 
-                        {(this.currentUserIsOwner()
-                                || this.currentUser.roles.includes("ROLE_ADMIN")
-                                || this.currentUser.roles.includes("ROLE_MODERATOR")) &&
+                        {this.currentUserIsOwner() &&
                             (<Button color={"success"} tag={Link} to={`/serviceAppointments/${autoService["id"]}`}>
                                 Vezi programările &nbsp; <BsIcons.BsCalendar3 />
                             </Button>)}

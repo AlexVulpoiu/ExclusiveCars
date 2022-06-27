@@ -81,10 +81,17 @@ function MyMap() {
 
     async function calculateRouteFromMyLocation() {
         let locationPosition = {lat: 0, lng: 0};
-        navigator.geolocation.getCurrentPosition( function(position) {
-            locationPosition.lat = position.coords.latitude;
-            locationPosition.lng = position.coords.longitude;
-        })
+        if(localStorage.getItem("myLocationLat") !== null && localStorage.getItem("myLocationLat") !== "") {
+            locationPosition.lat = Number(localStorage.getItem("myLocationLat"));
+            locationPosition.lng = Number(localStorage.getItem("myLocationLng"));
+        } else {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                locationPosition.lat = position.coords.latitude;
+                locationPosition.lng = position.coords.longitude;
+                localStorage.setItem("myLocationLat", locationPosition.lat);
+                localStorage.setItem("myLocationLng", locationPosition.lng);
+            })
+        }
 
         if(locationPosition === {}) {
             return

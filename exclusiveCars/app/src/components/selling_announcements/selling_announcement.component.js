@@ -171,6 +171,16 @@ export default class SellingAnnouncement extends Component {
         sessionStorage.setItem("favoriteSellingStatus", "");
     }
 
+    mapStateToString(state) {
+        if(state === "ACCEPTED") {
+            return "ACCEPTAT";
+        }
+        if(state === "PENDING") {
+            return "ÎN AȘTEPTARE";
+        }
+        return "RESPINS";
+    }
+
     render() {
         const sellingAnnouncement = this.state.sellingAnnouncement;
         let car = {};
@@ -208,6 +218,11 @@ export default class SellingAnnouncement extends Component {
             </Carousel.Item>)
         );
 
+        let titleWidth = "60%";
+        if(user.roles.length !== 1) {
+            titleWidth = "100%";
+        }
+
         return (
             <div className={"rs-col-md-12"}>
                 {sessionStorage.getItem("favoriteSellingStatus") !== null && sessionStorage.getItem("favoriteSellingStatus") !== "" && (
@@ -240,7 +255,7 @@ export default class SellingAnnouncement extends Component {
 
                     <div className={"column"} style={{width: "45%"}}>
                         <div className={"row"}>
-                            <div style={{width: "60%"}}>
+                            <div style={{width: titleWidth}}>
                                 <h1>
                                     <AiIcons.AiFillCar/> {car["model"]["manufacturer"] + " " + car["model"]["model"]}
                                 </h1>
@@ -258,6 +273,9 @@ export default class SellingAnnouncement extends Component {
                                                 onClick={() => this.deleteSellingAnnouncement(sellingAnnouncement["id"])}>
                                             Șterge anunțul <MdIcons.MdDeleteForever/>
                                         </Button>
+                                        <br/>
+                                        <br/>
+                                        <h4>Stare anunț: {this.mapStateToString(sellingAnnouncement["state"])}</h4>
                                     </div>
                                 )
                                 : (user.roles.length === 1 ? (!this.state.favorites.includes(sellingAnnouncement["id"]) ?
@@ -336,7 +354,8 @@ export default class SellingAnnouncement extends Component {
                         <br/>
 
                         <div className={"row"} style={{float: "right"}}>
-                        {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN")) && (
+                        {(user.roles.includes("ROLE_MODERATOR") || user.roles.includes("ROLE_ADMIN"))
+                            && sellingAnnouncement["state"] === "PENDING" && (
                             <div>
                                 <Button color={"success"}
                                         onClick={() => this.changeAnnouncementState(sellingAnnouncement["id"], "ACCEPTED")}>

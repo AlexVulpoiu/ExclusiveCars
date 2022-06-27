@@ -46,7 +46,7 @@ export default class EditOrganisation extends Component {
         this.state = {
             organisation: null,
             name: "",
-            loading: false,
+            loading: true,
             message: ""
         }
     }

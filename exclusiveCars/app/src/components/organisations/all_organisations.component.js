@@ -1,19 +1,23 @@
 import React, {useState, Component, useEffect} from "react";
+import * as BsIcons from "react-icons/bs";
+import * as MdIcons from "react-icons/md";
 
 import "../../styles/pagination.css";
 import authHeader from '../../services/auth-header';
 import AuthService from "../../services/auth.service";
 import axios from "axios";
+import {Card, CardBody, CardHeader, CardText} from "reactstrap";
 
 function OrganisationRepresentation(props) {
-    const {id, name, owner} = props.data
+    const {id, name, owner, email} = props.data
     return (
-        <div style={{padding: "10px", margin: "20px", borderColor: "black", borderWidth: "2px"}} className={"organisationName"}>
-            <a href={`/organisations/${id}`}>
-                <h4>{name}</h4>
-                <p>{owner}</p>
-            </a>
-        </div>
+        <Card style={{padding: "0px"}}>
+            <CardHeader style={{backgroundColor: "#e6f3ff"}} component="h5"><a href={`/organisations/${id}`}><h4>{name}</h4></a></CardHeader>
+            <CardBody>
+                <CardText><BsIcons.BsFillPersonFill/> {owner}</CardText>
+                <CardText><MdIcons.MdEmail/> {email}</CardText>
+            </CardBody>
+        </Card>
     );
 }
 
@@ -65,20 +69,13 @@ function Pagination({ data, RenderComponent, title, pageLimit, dataLimit }) {
                 <h1 style={{float: "left"}}>{title}</h1>
 
             </div>
-            <br/>
 
-            {/* show the posts, 10 posts at a time */}
             <div className="dataContainer">
                 {getPaginatedData().map((d, idx) => (
                     <RenderComponent key={idx} data={d} />
                 ))}
             </div>
 
-            {/* show the pagiantion
-                it consists of next and previous buttons
-                along with page numbers, in our case, 5 page
-                numbers at a time
-            */}
             <div className="pagination" style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
                 {/* previous button */}
                 <button
@@ -131,6 +128,7 @@ export default class AllOrganisations extends Component {
     }
 
     componentDidMount() {
+        document.title = "Organizații";
         this.setState({loading: true});
         axios.get("/api/organisations", {
             headers: {

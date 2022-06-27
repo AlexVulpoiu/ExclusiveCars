@@ -20,6 +20,8 @@ public class OrganisationResponseDto {
 
     private String owner;
 
+    private String email;
+
     @JsonProperty("owner_id")
     private Long ownerId;
 

@@ -58,7 +58,7 @@ export default class EditNews extends Component {
             newsArticle: null,
             title: "",
             content: "",
-            loading: false,
+            loading: true,
             message: ""
         }
     }

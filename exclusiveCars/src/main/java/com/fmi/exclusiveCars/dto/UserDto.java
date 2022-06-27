@@ -1,9 +1,12 @@
 package com.fmi.exclusiveCars.dto;
 
+import com.fmi.exclusiveCars.model.ERole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -22,4 +25,6 @@ public class UserDto {
     private String email;
 
     private String phone;
+
+    private Set<ERole> roles;
 }

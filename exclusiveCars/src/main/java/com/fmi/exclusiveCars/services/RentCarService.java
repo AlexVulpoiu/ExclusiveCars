@@ -190,7 +190,7 @@ public class RentCarService {
         return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou.", HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<?> cancelRentCar(String id) {
+    public ResponseEntity<?> cancelRentCar(String id) throws MessagingException, UnsupportedEncodingException {
 
         String[] ids = id.split("_");
         Long userId = Long.parseLong(ids[0]);
@@ -241,9 +241,32 @@ public class RentCarService {
                 return new ResponseEntity<>("A apărut o eroare la procesarea cererii. Te rugăm să încerci din nou!", HttpStatus.BAD_REQUEST);
             }
 
+            Car car = rentalAnnouncement.getCar();
+            RentalCenter rentalCenter = rentalAnnouncement.getRentalCenter();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+            LocalDate start = rental.getId().getStartDate();
+            LocalDate end = rental.getEndDate();
+            long days = start.until(end, ChronoUnit.DAYS) + 1;
+            String toAddress = currentUser.getEmail();
+            String subject = "Confirmare cerere de închiriere";
+            String message = "Acesta este un mesaj de confirmare a cererii tale de închiriere.<br><br>"
+                    + "Detalii: <br>"
+                    + "- perioadă: " + start.format(dtf) + " -> " + end.format(dtf) + "<br>"
+                    + "- preț total: " + car.getPrice() + " * " + days + " = " + car.getPrice() * days + " €<br>"
+                    + "- locație: " + rentalCenter.getName() + ", " + rentalCenter.getCity() + ", " + rentalCenter.getAddress() + "<br>"
+                    + "- link locație: <a href=\"http://localhost:8082/rentalCenters/" + rentalCenter.getId() +  "\">" + rentalCenter.getName() + "</a><br>"
+                    + "- link anunț: <a href=\"http://localhost:8082/rentalAnnouncements/" + rentalAnnouncement.getId() +  "\">anunț</a><br>"
+                    + "- email: " + rentalCenter.getEmail() + "<br>"
+                    + "- telefon: " + rentalCenter.getPhone() + "<br><br>"
+                    + "Te așteptăm în data de " + start.format(dtf) + ", la sediul nostru, pentru a intra în posesia autovehiculului!<br><br><br>"
+                    + "Îți mulțumim și îți urăm o zi bună!<br>Echipa ExclusiveCars";
+            sendMail(toAddress, subject, message);
+
             User customer = client.get();
             customer.removeRentCar(rental);
             rentCarRepository.delete(rental);
+
             return new ResponseEntity<>("Cererea de închiriere a fost anulată cu succes!", HttpStatus.OK);
         }
 

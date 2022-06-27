@@ -44,7 +44,7 @@ export default class MakeServiceAppointment extends Component  {
             autoService: {},
             description: sessionStorage.getItem("appointmentDescription"),
             appointments: [],
-            loading: false,
+            loading: true,
             message: "",
             appointmentsByHour: {}
         };

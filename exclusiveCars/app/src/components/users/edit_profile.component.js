@@ -334,7 +334,7 @@ export default class EditProfile extends Component {
                         </div>
 
                         <div className={"form-group"}>
-                            <label htmlFor={"password"}>Te rugăm să introduci parola curentă pentru a putea efectua modificările</label>
+                            <label htmlFor={"password"}><b>Te rugăm să introduci parola curentă pentru a salva modificările</b></label>
                             <Input
                                 type="password"
                                 className="form-control"

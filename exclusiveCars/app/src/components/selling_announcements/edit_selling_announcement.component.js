@@ -625,6 +625,7 @@ export default class EditSellingAnnouncement extends Component {
 
                 localStorage.setItem("infoMessage", "Anunțul a fost editat cu succes! Acesta a fost trims spre aprobare!");
                 this.props.history.push("/mySellingAnnouncements");
+                window.location.reload();
             } catch(error) {
                 sessionStorage.setItem("sellingAnnouncementEditMessage", error);
 

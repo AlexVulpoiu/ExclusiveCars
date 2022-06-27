@@ -18,6 +18,7 @@ export default class Profile extends Component {
     }
 
     componentDidMount() {
+        document.title = "Profilul meu";
         this.setState({loading: true});
         fetch("http://localhost:8090/api/users/myProfile", {
             headers: {
@@ -94,7 +95,10 @@ export default class Profile extends Component {
                     <div style={{float: "right"}}>
                         <Button color={"warning"} tag={Link} to={"/profile/edit"}>Editează detaliile contului <FaIcons.FaUserEdit/></Button>
                         &nbsp;&nbsp;&nbsp;
-                        <Button color={"danger"} tag={Link} to={"/profile/delete"}>Șterge contul <BsIcons.BsFillTrashFill/></Button>
+                        {!currentUser.roles.includes("ROLE_MODERATOR") && !currentUser.roles.includes("ROLE_ADMIN") && (<Button color={"danger"} tag={Link} to={"/profile/delete"}>
+                            Șterge contul <BsIcons.BsFillTrashFill/>
+                        </Button>)
+                        }
                     </div>
                 </div>
 
@@ -134,6 +138,19 @@ export default class Profile extends Component {
                             <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
                             <h4><FaIcons.FaArrowRight/> <Link to={"/rentalAnnouncements"}>Anunțuri de închiriere</Link> </h4>
                             <h4><FaIcons.FaArrowRight/> <Link to={"/pendingAnnouncements"}>Anunțuri de aprobat</Link> </h4>
+                        </div>)
+                    }
+                    {this.state.currentUser.roles.includes("ROLE_ADMIN") &&
+                        (<div>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news"}>Citește cele mai noi știri</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/news/add"}>Adaugă o știre</Link></h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/sellingAnnouncements"}>Anunțuri de vânzare</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/rentalAnnouncements"}>Anunțuri de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/pendingAnnouncements"}>Anunțuri de aprobat</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/organisations"}>Organizații</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/autoServices"}>Service-uri auto</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/rentalCenters"}>Centre de închiriere</Link> </h4>
+                            <h4><FaIcons.FaArrowRight/> <Link to={"/users/management"}>Managementul utilizatorilor</Link> </h4>
                         </div>)
                     }
                 </div>

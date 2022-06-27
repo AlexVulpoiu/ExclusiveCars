@@ -292,7 +292,6 @@ public class ServiceAppointmentService {
                 + "<li>Data și ora: [[dateTime]]</li>"
                 + "<li>Motivul vizitei: [[reason]]</li>"
                 + "</ul>"
-                + "<br>Te rugăm să te prezinți la stația [[stationNumber]].<br>"
                 + "<br>Îți mulțumim,<br>"
                 + "ExclusiveCars";
 

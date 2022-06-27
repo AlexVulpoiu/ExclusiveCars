@@ -18,7 +18,7 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
     SidebarData = [
         {
             title: 'Acasă',
-            path: '/',
+            path: '/profile',
             icon: <AiIcons.AiFillHome/>,
             cName: 'nav-text'
         },
@@ -30,49 +30,49 @@ if(user !== null && user.roles.includes("ROLE_ADMIN")) {
         },
         {
             title: 'Adaugă o știre',
-            path: '/organisations/add',
+            path: '/news/add',
             icon: <AiIcons.AiFillFileAdd/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de vânzare',
-            path: '/organisations/add',
+            path: '/sellingAnnouncements',
             icon: <MdIcons.MdSell/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de închiriere',
-            path: '/serviceAppointments',
+            path: '/rentalAnnouncements',
             icon: <MdIcons.MdCarRental/>,
             cName: 'nav-text'
         },
         {
             title: 'Anunțuri de aprobat',
-            path: '/organisations/add',
+            path: '/pendingAnnouncements',
             icon: <MdIcons.MdPendingActions/>,
             cName: 'nav-text'
         },
         {
             title: 'Organizații',
-            path: '/organisations/add',
+            path: '/organisations',
             icon: <CgIcons.CgOrganisation/>,
             cName: 'nav-text'
         },
         {
             title: 'Service-uri auto',
-            path: '/organisations/add',
+            path: '/autoServices',
             icon: <GiIcons.GiAutoRepair/>,
             cName: 'nav-text'
         },
         {
             title: 'Centre de închiriere',
-            path: '/organisations/add',
+            path: '/rentalCenters',
             icon: <GiIcons.GiHomeGarage/>,
             cName: 'nav-text'
         },
         {
             title: 'Managementul utilizatorilor',
-            path: '/organisations/add',
+            path: '/users/management',
             icon: <FaIcons.FaUsers/>,
             cName: 'nav-text'
         }

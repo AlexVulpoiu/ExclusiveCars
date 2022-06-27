@@ -537,6 +537,7 @@ export default class AddSellingAnnouncement extends Component {
                 this.uploadFiles(carId);
                 localStorage.setItem("infoMessage", "Anunțul a fost adăugat cu succes! Acesta a fost trims spre aprobare!");
                 this.props.history.push("/mySellingAnnouncements");
+                window.location.reload();
             } catch(error) {
                 sessionStorage.setItem("sellingAnnouncementAddMessage", error);
 

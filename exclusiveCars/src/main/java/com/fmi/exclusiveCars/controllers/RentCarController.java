@@ -42,7 +42,7 @@ public class RentCarController {
     }
 
     @DeleteMapping("/cancel/{id}")
-    public ResponseEntity<?> cancelRentCar(@PathVariable String id) {
+    public ResponseEntity<?> cancelRentCar(@PathVariable String id) throws MessagingException, UnsupportedEncodingException {
         return rentCarService.cancelRentCar(id);
     }
 }

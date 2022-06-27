@@ -67,6 +67,8 @@ import FavoriteAnnouncements from "./components/favorite_announcements/favorite_
 
 import UserReport from "./components/users/user_report.component";
 import EditProfile from "./components/users/edit_profile.component";
+import UsersManagement from "./components/users/users_management.component";
+import DeleteUser from "./components/users/delete_user.component";
 
 class App extends Component {
     constructor(props) {
@@ -208,7 +210,9 @@ class App extends Component {
                         <Route exact path={"/serviceAppointments/makeAppointment/:serviceId"} component={MakeServiceAppointment} />
                         <Route exact path={"/serviceAppointments/:serviceId"} component={ServiceAppointmentsForAutoService} />
 
+                        <Route exact path={"/users/delete/:id"} component={DeleteUser} />
                         <Route exact path={"/users/report/:userId"} component={UserReport} />
+                        <Route exact path={"/users/management"} component={UsersManagement} />
                     </Switch>
                 </div>
             </div>
