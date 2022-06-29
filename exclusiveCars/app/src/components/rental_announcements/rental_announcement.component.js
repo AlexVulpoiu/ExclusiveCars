@@ -131,10 +131,10 @@ export default class RentalAnnouncement extends Component {
             })
                 .then(() => {
                     localStorage.setItem("infoMessage", "Programarea a fost efectuată cu succes!");
-                    this.props.history.push("/news");
+                    this.props.history.push("/myRentals");
                 })
                 .catch((error) => {
-                    alert(error);
+                    localStorage.setItem("infoMessage", "A apărut o eroare la trimiterea mail-ului");
                     window.location.reload();
                 });
         }

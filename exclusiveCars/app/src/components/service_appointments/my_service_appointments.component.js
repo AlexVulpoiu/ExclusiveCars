@@ -278,6 +278,10 @@ export default class MyServiceAppointments extends Component {
 
             for (let i = 0; i < serviceAppointments.length; i++) {
                 const currentDate = new Date(serviceAppointments[i]["date"]);
+                const currentHour = serviceAppointments[i]["hour"].split(":");
+                const hour = Number(currentHour[0]);
+                const minutes = Number(currentHour[1]);
+                currentDate.setHours(hour, minutes);
 
                 if (currentDate.getTime() > today.getTime()) {
                     futureServiceAppointments.push(serviceAppointments[i]);
